@@ -1,0 +1,322 @@
+{
+    "type": "Program",
+    "body": [
+        {
+            "type": "VariableDeclaration",
+            "declarations": [
+                {
+                    "type": "VariableDeclarator",
+                    "id": {
+                        "type": "Identifier",
+                        "name": "Cucumber"
+                    },
+                    "init": {
+                        "type": "CallExpression",
+                        "callee": {
+                            "type": "FunctionExpression",
+                            "id": null,
+                            "params": [],
+                            "defaults": [],
+                            "body": {
+                                "type": "BlockStatement",
+                                "body": [
+                                    {
+                                        "type": "FunctionDeclaration",
+                                        "id": {
+                                            "type": "Identifier",
+                                            "name": "Cucumber"
+                                        },
+                                        "params": [
+                                            {
+                                                "type": "Identifier",
+                                                "name": "color"
+                                            },
+                                            {
+                                                "type": "Identifier",
+                                                "name": "length"
+                                            }
+                                        ],
+                                        "defaults": [],
+                                        "body": {
+                                            "type": "BlockStatement",
+                                            "body": [
+                                                {
+                                                    "type": "ExpressionStatement",
+                                                    "expression": {
+                                                        "type": "AssignmentExpression",
+                                                        "operator": "=",
+                                                        "left": {
+                                                            "type": "MemberExpression",
+                                                            "computed": false,
+                                                            "object": {
+                                                                "type": "ThisExpression"
+                                                            },
+                                                            "property": {
+                                                                "type": "Identifier",
+                                                                "name": "color"
+                                                            }
+                                                        },
+                                                        "right": {
+                                                            "type": "Identifier",
+                                                            "name": "color"
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "type": "ExpressionStatement",
+                                                    "expression": {
+                                                        "type": "AssignmentExpression",
+                                                        "operator": "=",
+                                                        "left": {
+                                                            "type": "MemberExpression",
+                                                            "computed": false,
+                                                            "object": {
+                                                                "type": "ThisExpression"
+                                                            },
+                                                            "property": {
+                                                                "type": "Identifier",
+                                                                "name": "length"
+                                                            }
+                                                        },
+                                                        "right": {
+                                                            "type": "Identifier",
+                                                            "name": "length"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "rest": null,
+                                        "generator": false,
+                                        "expression": false
+                                    },
+                                    {
+                                        "type": "ExpressionStatement",
+                                        "expression": {
+                                            "type": "AssignmentExpression",
+                                            "operator": "=",
+                                            "left": {
+                                                "type": "MemberExpression",
+                                                "computed": false,
+                                                "object": {
+                                                    "type": "MemberExpression",
+                                                    "computed": false,
+                                                    "object": {
+                                                        "type": "Identifier",
+                                                        "name": "Cucumber"
+                                                    },
+                                                    "property": {
+                                                        "type": "Identifier",
+                                                        "name": "prototype"
+                                                    }
+                                                },
+                                                "property": {
+                                                    "type": "Identifier",
+                                                    "name": "toString"
+                                                }
+                                            },
+                                            "right": {
+                                                "type": "FunctionExpression",
+                                                "id": null,
+                                                "params": [],
+                                                "defaults": [],
+                                                "body": {
+                                                    "type": "BlockStatement",
+                                                    "body": [
+                                                        {
+                                                            "type": "ReturnStatement",
+                                                            "argument": {
+                                                                "type": "BinaryExpression",
+                                                                "operator": "+",
+                                                                "left": {
+                                                                    "type": "BinaryExpression",
+                                                                    "operator": "+",
+                                                                    "left": {
+                                                                        "type": "BinaryExpression",
+                                                                        "operator": "+",
+                                                                        "left": {
+                                                                            "type": "BinaryExpression",
+                                                                            "operator": "+",
+                                                                            "left": {
+                                                                                "type": "Literal",
+                                                                                "value": "A "
+                                                                            },
+                                                                            "right": {
+                                                                                "type": "MemberExpression",
+                                                                                "computed": false,
+                                                                                "object": {
+                                                                                    "type": "ThisExpression"
+                                                                                },
+                                                                                "property": {
+                                                                                    "type": "Identifier",
+                                                                                    "name": "length"
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        "right": {
+                                                                            "type": "Literal",
+                                                                            "value": " cm "
+                                                                        }
+                                                                    },
+                                                                    "right": {
+                                                                        "type": "MemberExpression",
+                                                                        "computed": false,
+                                                                        "object": {
+                                                                            "type": "ThisExpression"
+                                                                        },
+                                                                        "property": {
+                                                                            "type": "Identifier",
+                                                                            "name": "color"
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "right": {
+                                                                    "type": "Literal",
+                                                                    "value": " cucumber."
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                "rest": null,
+                                                "generator": false,
+                                                "expression": false
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "rest": null,
+                            "generator": false,
+                            "expression": false
+                        },
+                        "arguments": []
+                    }
+                }
+            ],
+            "kind": "var"
+        },
+        {
+            "type": "VariableDeclaration",
+            "declarations": [
+                {
+                    "type": "VariableDeclarator",
+                    "id": {
+                        "type": "Identifier",
+                        "name": "cutInHalf"
+                    },
+                    "init": {
+                        "type": "FunctionExpression",
+                        "id": null,
+                        "params": [
+                            {
+                                "type": "Identifier",
+                                "name": "cucumber"
+                            }
+                        ],
+                        "defaults": [],
+                        "body": {
+                            "type": "BlockStatement",
+                            "body": [
+                                {
+                                    "type": "ReturnStatement",
+                                    "argument": {
+                                        "type": "ArrayExpression",
+                                        "elements": [
+                                            {
+                                                "type": "NewExpression",
+                                                "callee": {
+                                                    "type": "Identifier",
+                                                    "name": "Cucumber"
+                                                },
+                                                "arguments": [
+                                                    {
+                                                        "type": "MemberExpression",
+                                                        "computed": false,
+                                                        "object": {
+                                                            "type": "Identifier",
+                                                            "name": "cucumber"
+                                                        },
+                                                        "property": {
+                                                            "type": "Identifier",
+                                                            "name": "color"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "BinaryExpression",
+                                                        "operator": "/",
+                                                        "left": {
+                                                            "type": "MemberExpression",
+                                                            "computed": false,
+                                                            "object": {
+                                                                "type": "Identifier",
+                                                                "name": "cucumber"
+                                                            },
+                                                            "property": {
+                                                                "type": "Identifier",
+                                                                "name": "length"
+                                                            }
+                                                        },
+                                                        "right": {
+                                                            "type": "Literal",
+                                                            "value": 2
+                                                        }
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "NewExpression",
+                                                "callee": {
+                                                    "type": "Identifier",
+                                                    "name": "Cucumber"
+                                                },
+                                                "arguments": [
+                                                    {
+                                                        "type": "MemberExpression",
+                                                        "computed": false,
+                                                        "object": {
+                                                            "type": "Identifier",
+                                                            "name": "cucumber"
+                                                        },
+                                                        "property": {
+                                                            "type": "Identifier",
+                                                            "name": "color"
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "BinaryExpression",
+                                                        "operator": "/",
+                                                        "left": {
+                                                            "type": "MemberExpression",
+                                                            "computed": false,
+                                                            "object": {
+                                                                "type": "Identifier",
+                                                                "name": "cucumber"
+                                                            },
+                                                            "property": {
+                                                                "type": "Identifier",
+                                                                "name": "length"
+                                                            }
+                                                        },
+                                                        "right": {
+                                                            "type": "Literal",
+                                                            "value": 2
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "rest": null,
+                        "generator": false,
+                        "expression": false
+                    }
+                }
+            ],
+            "kind": "var"
+        }
+    ]
+}
