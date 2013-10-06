@@ -1,5 +1,5 @@
-var fs = require('fs');
-var esprima = require('esprima');
+var fs      = require('fs')
+  , esprima = require('esprima');
 
 fs.readFile('examples/cucumber.js', 'utf8', function (err, data) {
     if (err) {

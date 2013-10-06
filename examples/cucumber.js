@@ -11,7 +11,7 @@ var Cucumber = (function() {
     }
 
     Cucumber.prototype.toString = function () {
-      return "A " this.length + " cm " + this.color + " cucumber.";
+      return "A " + this.length + " cm " + this.color + " cucumber.";
     };
 })();
 
