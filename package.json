@@ -1,0 +1,12 @@
+{
+  "name": "docjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ceasar/docjs"
+  },
+  "dependencies": {
+    "esprima": "*",
+    "estraverse": "*",
+    "escodegen": "*"
+  }
+}
