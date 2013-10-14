@@ -1,4 +1,3 @@
-
 # doc.js
 
 doc.js is a tool for generating program specifications from Javascript source code.
@@ -43,9 +42,9 @@ doc.js can produce a formal specification:
  * @post
  *   return :: [Cucumber]
  *   return.length == 2
- *   for cuke in return
- *       cuke.color == return.color
- *       cuke.length == return.length / 2
+ *   for x in return
+ *       x.color == cucumber.color
+ *       x.length == cucumber.length / 2
  *   end
  */
 ```
