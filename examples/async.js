@@ -13,9 +13,41 @@ var http = require('http')
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // http://nodejs.org/api/stream.html#stream_api_for_stream_consumers
 
-var server = http.createServer(function (req, res) {
+/*
+ * @param {Object} req
+ * @param {Object} res
+ *
+ * @pre
+ *   req :: {
+ *     setEncoding :: Function (String) -> null
+ *     on :: Function (String, Function) -> null
+ *   }
+ *   res :: {
+ *     statusCode :: Number
+ *     write :: Function (*) -> null
+ *     end :: Function (String) -> res
+ *   }
+ *
+ *
+ * Informal spec:
+ *   body is an empty string
+ *   setEncoding on req with 'utf8'
+ *   on req 'data' event, with (chunk):
+ *     append chunk to body
+ *
+ *   on req 'end' event:
+ *     data <- try to parse body as JSON
+ *       catch error: call res.end with (er.message)
+ *     write data to res
+ *     call res.end
+ */
+var onRequest = (req, res) {
+  // {{ [] == [] }}
   var body = '';
+  // {{ body == '' }}
+  // {{ body == '' /\ 0 == 0 }}
   req.setEncoding('utf8');
+  // {{ body == '' /\ req.encoding == 'utf8' }}
 
   req.on('data', function (chunk) {
     body += chunk;
@@ -32,9 +64,9 @@ var server = http.createServer(function (req, res) {
     res.write(typeof data);
     res.end();
   })
-})
+}
 
-server.listen(1337);
+var server = http.createServer(onRequest).listen(1337);
 
 
 // FILE SYSTEM
