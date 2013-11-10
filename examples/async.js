@@ -73,12 +73,28 @@ var server = http.createServer(onRequest).listen(1337);
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // http://nodejs.org/api/fs.html#fs_file_system
 
+/*
+ * readFile '/etc/passwd' with callback:
+ *   @param {Error} err
+ *   @param {Object} data
+ */
 fs.readFile('/etc/passwd', function (err, data) {
   if (err) throw err;
   console.log(data);
 });
 
-
+/*
+ * rename '/tmp/hello' to '/tmp/world' with callback:
+ *   @param {Error} err
+ *
+ *   handle error
+ *
+ *   get stats for '/tmp/world' with callback:
+ *     @param {Error} err
+ *     @param {fsStat} stats
+ *
+ *     handle error
+ */
 fs.rename('/tmp/hello', '/tmp/world', function (err) {
   if (err) throw err;
   fs.stat('/tmp/world', function (err, stats) {
@@ -93,14 +109,26 @@ fs.rename('/tmp/hello', '/tmp/world', function (err) {
 // http://nodejs.org/api/crypto.html#crypto_crypto_createhash_algorithm
 
 var filename = process.argv[2]
-  , shasum = crypto.createHash('sha1');
+  , shasum = crypto.createHash('sha1')
+  , s = fs.ReadStream(filename);
 
-var s = fs.ReadStream(filename);
+/*
+ * on s 'data' event:
+ *   @param {*} d
+ *
+ *   update shasum with d
+ */
 s.on('data', function(d) {
   shasum.update(d);
 });
 
+/*
+ * on s 'end' event:
+ *   digest shasum as 'hex' to d
+ *   print d, filename
+ */
 s.on('end', function() {
   var d = shasum.digest('hex');
   console.log(d + '  ' + filename);
 });
+
