@@ -6,7 +6,8 @@
 
 var http = require('http')
   , fs = require('fs')
-  , crypto = require('crypto');
+  , crypto = require('crypto')
+  , dgram = require("dgram");
 
 
 // HTTP SERVER
@@ -29,9 +30,10 @@ var http = require('http')
  *   }
  *
  *
- * Informal spec:
- *   body is an empty string
- *   setEncoding on req with 'utf8'
+ **** Informal spec ****
+ *
+ *   body <- empty string
+ *   setEncoding req with 'utf8'
  *   on req 'data' event, with (chunk):
  *     append chunk to body
  *
@@ -40,6 +42,13 @@ var http = require('http')
  *       catch error: call res.end with (er.message)
  *     write data to res
  *     call res.end
+ *
+ **** Optimal spec ****
+ *
+ * Get request data asynchronously, store as `body`.
+ * When request ends, try to parse `body` as JSON (handle errors).
+ * If successful, write back the typeof the parsed data to the HTTP response.
+ *
  */
 var onRequest = (req, res) {
   // {{ [] == [] }}
@@ -74,9 +83,16 @@ var server = http.createServer(onRequest).listen(1337);
 // http://nodejs.org/api/fs.html#fs_file_system
 
 /*
+ **** Informal spec ****
+ *
  * readFile '/etc/passwd' with callback:
  *   @param {Error} err
  *   @param {Object} data
+ *
+ **** Optimal spec ****
+ *
+ * Read file '/etc/passwd' and print its contents (handle errors).
+ *
  */
 fs.readFile('/etc/passwd', function (err, data) {
   if (err) throw err;
@@ -84,6 +100,8 @@ fs.readFile('/etc/passwd', function (err, data) {
 });
 
 /*
+ **** Informal spec ****
+ *
  * rename '/tmp/hello' to '/tmp/world' with callback:
  *   @param {Error} err
  *
@@ -94,6 +112,12 @@ fs.readFile('/etc/passwd', function (err, data) {
  *     @param {fsStat} stats
  *
  *     handle error
+ *
+ **** Optimal spec ****
+ *
+ * Rename file '/tmp/hello' to '/tmp/world' (handle errors).
+ * Print fs stats for the new file (handle errors).
+ *
  */
 fs.rename('/tmp/hello', '/tmp/world', function (err) {
   if (err) throw err;
@@ -113,22 +137,74 @@ var filename = process.argv[2]
   , s = fs.ReadStream(filename);
 
 /*
+ **** Informal spec ****
+ *
  * on s 'data' event:
  *   @param {*} d
  *
  *   update shasum with d
+ *
+ **** Optimal spec ****
+ *
+ * When s gets file data, update shasum.
+ *
  */
 s.on('data', function(d) {
   shasum.update(d);
 });
 
 /*
+ **** Informal spec ****
+ *
  * on s 'end' event:
- *   digest shasum as 'hex' to d
+ *   d <- digest shasum with 'hex'
  *   print d, filename
+ *
+ **** Optimal spec ****
+ *
+ * When s ends file data, digest shasum as 'hex' and print it with filename.
+ *
  */
 s.on('end', function() {
   var d = shasum.digest('hex');
   console.log(d + '  ' + filename);
 });
+
+
+// UDP, Sockets
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// http://nodejs.org/api/dgram.html#dgram_socket_bind_port_address_callback
+
+var server = dgram.createSocket("udp4");
+
+/*
+ **** Informal spec ****
+ *
+ * on server 'error' event, with (err):
+ *   print err.stack
+ *   close server
+ *
+ **** Optimal spec ****
+ *
+ * When there is a server error, print it and close the socket connection.
+ *
+ */
+server.on("error", function (err) {
+  console.log("server error:\n" + err.stack);
+  server.close();
+});
+
+server.on("message", function (msg, rinfo) {
+  console.log("server got: " + msg + " from " +
+    rinfo.address + ":" + rinfo.port);
+});
+
+server.on("listening", function () {
+  var address = server.address();
+  console.log("server listening " +
+      address.address + ":" + address.port);
+});
+
+server.bind(41234);
+// server listening 0.0.0.0:41234
 
