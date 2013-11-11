@@ -194,11 +194,34 @@ server.on("error", function (err) {
   server.close();
 });
 
+/*
+ **** Informal spec ****
+ *
+ * on server 'message' event, with (msg, rinfo):
+ *   print msg, rinfo.address, rinfo.port
+ *
+ **** Optimal spec ****
+ *
+ * When there is a socket message, print out its contents and info.
+ *
+ */
 server.on("message", function (msg, rinfo) {
   console.log("server got: " + msg + " from " +
     rinfo.address + ":" + rinfo.port);
 });
 
+/*
+ **** Informal spec ****
+ *
+ * on server 'listening' event:
+ *   address <- call address on server
+ *   print address.address, address.port
+ *
+ **** Optimal spec ****
+ *
+ * When we know the socket is listening, get its address and print it.
+ *
+ */
 server.on("listening", function () {
   var address = server.address();
   console.log("server listening " +
