@@ -102,3 +102,62 @@ for (var i = 0; i < lines_appArray.length; i++) {
 lines_difference = endTime - startTime;
 
 
+// bad js (module)
+function removeApp(index, k) {
+  index = index.replace(' ', '-');
+  index = index.replace('.', '-');
+  index = index.replace('.', '-');
+  $("." + index).remove();
+  lines_activeArray[k] = false;
+}
+
+function addAppBack(k) {
+  initial loading of lines
+  lines_activeArray[k] = true;
+  calculateRender($("#timeline").rangeSlider("min"), $("#timeline").rangeSlider("max"), 1);
+}
+function myFunction(x) {
+  var date = x.attributes.number.value;
+  var val = new Date(date * 1000);
+  console.log(val.format("dd-m-yy"));
+  printThelines_stats(x.attributes.name.value, "username", $.datepicker.formatDate('MM dd, yy', val), val.toLocaleTimeString());
+  show_stats();
+}
+
+function myFunction2(x) {
+  hide_stats();
+}
+// refactored js
+namespace1 = function(){
+  function removeApp(index, k) {
+    index = index.replace(' ', '-');
+    index = index.replace('.', '-');
+    index = index.replace('.', '-');
+    $("." + index).remove();
+    lines_activeArray[k] = false;
+  }
+
+  function addAppBack(k) {
+    initial loading of lines
+    lines_activeArray[k] = true;
+    calculateRender($("#timeline").rangeSlider("min"), $("#timeline").rangeSlider("max"), 1);
+  }
+  function myFunction(x) {
+    var date = x.attributes.number.value;
+    var val = new Date(date * 1000);
+    console.log(val.format("dd-m-yy"));
+    printThelines_stats(x.attributes.name.value, "username", $.datepicker.formatDate('MM dd, yy', val), val.toLocaleTimeString());
+    show_stats();
+  }
+
+  function myFunction2(x) {
+    hide_stats();
+  }
+  return {
+    removeApp: removeApp,
+    addAppBack: addAppBack,
+    myFunction: myFunction,
+    myFunction2: myFunction2
+  }
+}();
+
