@@ -161,3 +161,46 @@ namespace1 = function(){
   }
 }();
 
+// bad js (comments)
+namespace1 = function(){
+  // function addAppBack(k) {
+  //   initial loading of lines
+  //   lines_activeArray[k] = true;
+  //   calculateRender($("#timeline").rangeSlider("min"), $("#timeline").rangeSlider("max"), 1);
+  // }
+  function myFunction(x) {
+    var date = x.attributes.number.value;
+    var val = new Date(date * 1000);
+    console.log(val.format("dd-m-yy"));
+    printThelines_stats(x.attributes.name.value, "username", $.datepicker.formatDate('MM dd, yy', val), val.toLocaleTimeString());
+    show_stats();
+  }
+
+  function myFunction2(x) {
+    hide_stats();
+  }
+  return {
+    // addAppBack: addAppBack,
+    myFunction: myFunction,
+    myFunction2: myFunction2
+  }
+}();
+
+// refactored js
+namespace1 = function(){
+  function myFunction(x) {
+    var date = x.attributes.number.value;
+    var val = new Date(date * 1000);
+    console.log(val.format("dd-m-yy"));
+    printThelines_stats(x.attributes.name.value, "username", $.datepicker.formatDate('MM dd, yy', val), val.toLocaleTimeString());
+    show_stats();
+  }
+
+  function myFunction2(x) {
+    hide_stats();
+  }
+  return {
+    myFunction: myFunction,
+    myFunction2: myFunction2
+  }
+}
