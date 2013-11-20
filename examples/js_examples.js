@@ -257,4 +257,61 @@ if(x > 100){
 // refactored js
 var direction = (x > 100) ? 1 : -1;
 
+// bad js (another || example)
+if(v){
+  var x = v;
+} else {
+  var x = 10;
+}
 
+// refactored j
+var x = v || 10;
+
+// bad js (nesting)
+function renderProfiles(o){
+  var out = document.getElementById(‘profiles’);
+  for(var i=0;i<o.members.length;i++){
+      var ul = document.createElement(‘ul’);
+      var li = document.createElement(‘li’);
+      li.appendChild(document.createTextNode(o.members[i].name));
+      var nestedul = document.createElement(‘ul’);
+      for(var j=0;j<o.members[i].data.length;j++){
+            var datali = document.createElement(‘li’);
+            datali.appendChild(
+                    document.createTextNode(
+                      o.members[i].data[j].label + ‘ ‘ +
+                      o.members[i].data[j].value
+                    )
+                  );
+            nestedul.appendChild(datali);
+          }
+      li.appendChild(nestedul);
+    }
+  out.appendChild(ul);
+}
+
+// refactored js
+function renderProfiles(o){
+  var out = document.getElementById(‘profiles’);
+  for(var i=0;i<o.members.length;i++){
+      var ul = document.createElement(‘ul’);
+      var li = document.createElement(‘li’);
+      li.appendChild(document.createTextNode(data.members[i].name));
+      li.appendChild(addMemberData(o.members[i]));
+    }
+  out.appendChild(ul);
+}
+function helper(member){
+  var ul = document.createElement(‘ul’);
+  for(var i=0;i<member.data.length;i++){
+      var li = document.createElement(‘li’);
+      li.appendChild(
+            document.createTextNode(
+              member.data[i].label + ‘ ‘ +
+              member.data[i].value
+            )
+          );
+    }
+  ul.appendChild(li);
+  return ul;
+}
