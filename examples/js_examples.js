@@ -315,3 +315,16 @@ function helper(member){
   ul.appendChild(li);
   return ul;
 }
+
+
+// bad js (loop refactoring, comma operator)
+var names = ['George','Ringo','Paul','John'];
+for(var i=0;i<names.length;i++){
+  doSomeThingWith(names[i]);
+}
+
+// refactored js
+var names = ['George','Ringo','Paul','John'];
+for(var i=0,j=names.length;i<j;i++){
+  doSomeThingWith(names[i]);
+}
