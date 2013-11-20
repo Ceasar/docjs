@@ -246,4 +246,15 @@ var cow = {
 
 
 
+// bad js
+var direction;
+if(x > 100){
+  direction = 1;
+} else {
+  direction = -1;
+}
+
+// refactored js
+var direction = (x > 100) ? 1 : -1;
+
 
