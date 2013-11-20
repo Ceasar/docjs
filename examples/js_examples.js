@@ -221,3 +221,29 @@ var aweSomeBands = [
   'Red Hot Chili Peppers',
   'Pornophonique'
 ];
+
+
+// bad js (object construction)
+var cow = new Object();
+cow.colour = 'brown';
+cow.commonQuestion = 'What now?';
+cow.moo = function(){
+  console.log('moo');
+}
+cow.feet = 4;
+cow.accordingToLarson = 'will take over the world';
+
+// refactored js
+var cow = {
+  colour:'brown',
+  commonQuestion:'What now?',
+  moo:function(){
+  console.log('moo');
+  },
+  feet:4,
+  accordingToLarson:'will take over the world'
+};
+
+
+
+
