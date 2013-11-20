@@ -328,3 +328,17 @@ var names = ['George','Ringo','Paul','John'];
 for(var i=0,j=names.length;i<j;i++){
   doSomeThingWith(names[i]);
 }
+
+// bad js (variable declarations)
+for(var i = 0; i < someArray.length; i++) {
+  var container = document.getElementById('container');
+  container.innerHtml += 'my number: ' + i;
+  console.log(i);
+}
+
+// refactored js
+var container = document.getElementById('container');
+for(var i = 0, len = someArray.length; i < len;  i++) {
+  container.innerHtml += 'my number: ' + i;
+  console.log(i);
+}
