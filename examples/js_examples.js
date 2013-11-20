@@ -204,3 +204,20 @@ namespace1 = function(){
     myFunction2: myFunction2
   }
 }
+
+// bad js (array construction)
+var awesomeBands = new Array();
+awesomeBands[0] = 'Bad Religion';
+awesomeBands[1] = 'Dropkick Murphys';
+awesomeBands[2] = 'Flogging Molly';
+awesomeBands[3] = 'Red Hot Chili Peppers';
+awesomeBands[4] = 'Pornophonique';
+
+// refactored js
+var aweSomeBands = [
+  'Bad Religion',
+  'Dropkick Murphys',
+  'Flogging Molly',
+  'Red Hot Chili Peppers',
+  'Pornophonique'
+];
