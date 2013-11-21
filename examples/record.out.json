@@ -1,0 +1,42 @@
+{
+  "functions": [
+    {
+      "name": "User",
+      "params": [{
+        "name": "name",
+        "type": "primitive"
+      }],
+      "return": ":ctor",
+      "sideeffects": false
+    },
+    // ...
+    {
+      "name": "logObj",
+      "params": [
+        {
+          "name": "obj",
+          "type": {
+            "timestamp": "number",
+            "method": "primitive",
+            "path": "primitive",
+            "params": "Object"
+          }
+        }
+      ],
+      "sideeffects": true,
+      "return": "undefined"
+    }
+  ],
+  "warnings": [
+    {
+      "line": 69,
+      "message": "Field `headers` on object `req2` is set but never used"
+    }
+  ],
+  "errors": [
+    {
+      "line": 72,
+      "message": "Function `logObj` is called with argument `obj` missing fields `params` and `method`."
+    }
+  ]
+}
