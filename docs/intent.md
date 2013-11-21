@@ -87,6 +87,7 @@ print json
 
 Similar to the CSS case, if the form of the data changes, the code no longer makes sense. It would be more clear to refer to the object rather than its form as in:
 
+```
 # get a tweet in JSON form
 tweet = twitter.get_tweet()
 print tweet
