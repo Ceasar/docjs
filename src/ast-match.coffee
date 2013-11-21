@@ -1,6 +1,7 @@
 fs    = require 'fs'
 _     = require 'lodash'
 acorn = require 'acorn'
+walk  = require 'acorn/util/walk'
 
 fs.readFile 'examples/cucumber.js', 'utf8', (err, jsFile) ->
   if err then return console.log err
@@ -10,6 +11,30 @@ fs.readFile 'examples/cucumber.js', 'utf8', (err, jsFile) ->
 
   body = ast.body
 
-  for expr in body
-    console.log expr
+  collected =
+    ExpressionStatement: []
+    IfStatement: []
+    WhileStatement: []
+    ForStatement: []
+    VariableDeclaration: []
+    FunctionDeclaration: []
+    ObjectExpression: []
+    FunctionExpression: []
+    NewExpression: []
+
+  registerNode = (type) -> (node, state) -> collected[type].push node
+
+  visitors =
+    Node: (node, state) -> null
+    Program: (node, state) -> null
+    Statement: (node, state) -> null
+    Expression: (node, state) -> null
+
+  for k, v of collected
+    visitors[k] = registerNode(k)
+
+  console.log visitors
+
+  walk.simple(body, visitors)
+  console.log collected
 

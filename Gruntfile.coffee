@@ -22,6 +22,8 @@ module.exports = (grunt) ->
       coffee:
         files: ['src/**/*.coffee']
         tasks: ['buildjs']
+        options:
+          debounceDelay: 1000
 
   grunt.registerTask 'default', ['watch']
   grunt.registerTask 'buildjs', ['coffee']
