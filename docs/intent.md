@@ -255,7 +255,9 @@ class NutritionFacts(object):
 namedtuple (python)
 -------------------
 
-```
+`collections.namedtuple` in Python is implemented by formatting a template string and running `exec` on it.
+
+```python
 ################################################################################
 ### namedtuple
 ################################################################################
