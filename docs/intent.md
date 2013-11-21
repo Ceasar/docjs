@@ -92,3 +92,83 @@ Similar to the CSS case, if the form of the data changes, the code no longer mak
 tweet = twitter.get_tweet()
 print tweet
 ```
+
+Regex
+-----
+
+Few people are so familiar with regexes that they are highly discouraged. It is almost always more readable to encapsulate them in something which expresses their intent clearly.
+
+Bad:
+
+```
+>>> import re
+>>> pattern = re.compile('^red')
+>>> pattern.match("blue")
+False
+>>> pattern.match("reds")
+True
+```
+
+Good:
+
+```
+>>> "reds".startswith("red")
+```
+
+Often, regexes need to be extensively documented:
+
+Bad:
+
+```
+charref = re.compile("&#(0[0-7]+"
+                     "|[0-9]+"
+                     "|x[0-9a-fA-F]+);")
+```
+
+Good:
+
+```
+charref = re.compile(r"""
+ &[#]                # Start of a numeric entity reference
+ (
+     0[0-7]+         # Octal form
+   | [0-9]+          # Decimal form
+   | x[0-9a-fA-F]+   # Hexadecimal form
+ )
+ ;                   # Trailing semicolon
+""", re.VERBOSE)
+```
+
+Recursion vs. Iteration
+-----------------------
+
+If we consider intent alone, many algorithms are far more clearly expressed as recursive algorithms rather than 
+
+For instance:
+
+
+```
+def fib(n):
+    return n if n in (0, 1) else fib(n-1) + fib(n-2)
+```
+
+```
+def _fib_x(call_stack, rv, f):
+    if len(call_stack) == 0:
+        yield rv
+    else:
+        n = call_stack.pop()
+        if n in (0, 1):
+            yield _fib_x(call_stack, f(rv, n), f)
+        else:
+            call_stack.append(n - 1)
+            call_stack.append(n - 2)
+            yield _fib_x(call_stack, rv, f)
+```
+
+Some recursive algorithms are nearly impossible to translate mechanically into an iterative form without serious training:
+
+```
+def ackermann(x, y):
+    return ackermann(x, ackermann(x, y - 1))
+```
