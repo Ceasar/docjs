@@ -13,6 +13,8 @@ Occasionally, programming languages cannot express a programmer's intent in a cl
 >
 > This practice is not only common, but institutionalized. For example, in the OO world you hear a good deal about “patterns.” I wonder if these patterns are not sometimes evidence of case (c), the human compiler, at work. 8 When I see patterns in my programs, I consider it a sign of trouble. The shape of a program should reflect only the problem it needs to solve. Any other regularity in the code is a sign, to me at least, that I’m using abstractions that aren’t powerful enough — often that I’m generating by hand the expansions of some macro that I need to write.
 
+Note the last part about design patterns.
+
 Catalog
 =======
 
@@ -182,4 +184,70 @@ Some recursive algorithms are nearly impossible to translate mechanically into a
 ```
 def ackermann(x, y):
     return ackermann(x, ackermann(x, y - 1))
+```
+
+Builder Pattern
+---------------
+
+```
+public static class Builder {
+    // required parameters
+    private final int servingSize;
+    private final int servings;
+
+    // optional parameters
+    private int calories = 0;
+    private int fat = 0;
+    private int carbohydrate = 0;
+    private int sodium = 0;
+
+    private Builder (int servingSize, int servings) {
+        this.servingSize = servingSize;
+        this.servings = servings;
+    }
+
+    public Builder calories(int val) {
+        calories = val;
+        return this;
+    }
+
+    public Builder fat(int val) {
+        fat = val;
+        return this;
+    }
+
+    public Builder carbohydrate(int val) {
+        carbohydrate = val;
+        return this;
+    }
+
+    public Builder sodium(int val) {
+        sodium = val;
+        return this;
+    }
+
+    public  NutritionFacts build() {
+        return new NutritionFacts(this);
+    }
+
+    private NutritionFacts(Builder builder) {
+        servingSize = builder.servingSize;
+        servings = builder.servings;
+        calories = builder.calories;
+        fat = builder.fat;
+        sodium = builder.sodium;
+        carbohydrate = builder.carbohydrate;
+    }
+}
+```
+
+```
+class NutritionFacts(object):
+    def __init__(self, serving_size, servings, calories=0, fat=0, sodium=0, carbohydrate=0):
+        self.serving_size = serving_size
+        self.servings = servings
+        self.calories = calories
+        self.fat = fat
+        self.sodium = sodium
+        self.carbohydrate = carbohydrate
 ```
