@@ -1,11 +1,22 @@
 
 
-Intention
-==========
+Intention & Programming Languages
+=================================
 
-An intention is an agent's specific purpose in performing an action or series of action; the end or goal that is aimed at.
+An intention is an agent's specific purpose in performing an action or series of action; the end or goal that is aimed at. Intention differs from or unanticipated outcomes, unintended consequences.
 
-Intention differs from unintended consequences, or unanticipated outcomes.
+Occasionally, programming languages cannot express a programmer's intent in a clear and concise manner. This problem is so notorious in certain languages that it has a name: Greenspun's Tenth Rule.
+
+> Any sufficiently complicated C or Fortran program contains an ad hoc informally-specified bug-ridden slow implementation of half of Common Lisp.
+>
+> If you try to solve a hard problem, the question is not whether you will use a powerful enough language, but whether you will (a) use a powerful language, (b) write a de facto interpreter for one, or (c) yourself become a human compiler for one. We see this already beginning to happen in the Python example, where we are in effect simulating the code that a compiler would generate to implement a lexical variable.
+>
+> This practice is not only common, but institutionalized. For example, in the OO world you hear a good deal about “patterns.” I wonder if these patterns are not sometimes evidence of case (c), the human compiler, at work. 8 When I see patterns in my programs, I consider it a sign of trouble. The shape of a program should reflect only the problem it needs to solve. Any other regularity in the code is a sign, to me at least, that I’m using abstractions that aren’t powerful enough — often that I’m generating by hand the expansions of some macro that I need to write.
+
+Catalog
+=======
+
+The following is a catalog of code that fails to express clearly and concisely express intent.
 
 Magic number
 ------------
