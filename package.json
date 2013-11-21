@@ -6,14 +6,18 @@
     "url": "https://github.com/Ceasar/docjs"
   },
 
+  "dependencies": {
+
+  },
+
   "devDependencies": {
-    "esprima":                  "*",
-    "acorn":                    "*",
-    "estraverse":               "*",
-    "escodegen":                "*",
-    "grunt":                    "*",
-    "grunt-contrib-coffee":     "*",
-    "grunt-contrib-watch":      "*",
-    "matchdep":                 "*"
+    "esprima":                "*",
+    "acorn":                  "*",
+    "estraverse":             "*",
+    "escodegen":              "*",
+    "grunt":                  "*",
+    "grunt-contrib-coffee":   "*",
+    "grunt-contrib-watch":    "*",
+    "matchdep":               "*"
   }
 }
