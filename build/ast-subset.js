@@ -7,32 +7,31 @@
 # - Function
 #
 # - Statements
-# -- Empty
-# -- Block
-# -- Expression
-# -- If
-# -- Labeled
-# -- Break
-# -- Continue
-# -- With
-# -- Switch
-# -- Return
-# -- Throw
-# -- Try
-# -- While
-# -- do/while
-# -- for
-# -- for/in
-# -- for/of
-# -- let
-# -- debugger
+# -- Empty - keep
+# -- Block - keep
+# -- Expression - keep
+# -- If - keep
+# -- Labeled - not entirely sure what this is
+# -- Break - keep
+# -- Continue - keep
+# -- With - how to REPLACE?
+# -- Switch - REPLACE with if/else
+# -- Return - keep
+# -- Throw - keep
+# -- Try - keep
+# -- While - REPLACE with for
+# -- do/while - REPLACE with for
+# -- for- keep
+# -- for/in - REPLACE with for?
+# -- for/of - ignore? what is this..
+# -- debugger - ignore
 #
 # - Declarations
-# -- Function
-# -- Variable
+# -- Function - keep
+# -- Variable - keep
 #
 # - Expressions
-# -- This
+# -- This - keep
 # -- Array
 # -- Object
 # -- Function
