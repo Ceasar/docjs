@@ -26,6 +26,16 @@
 # -- for/of - ignore? what is this..
 # -- debugger - ignore
 #
+
+
+LOOK INTO:
+function declaration -
+var function vs function
+hoisting
+
+named function
+
+
 # - Declarations
 # -- Function - keep
 # -- Variable - keep
