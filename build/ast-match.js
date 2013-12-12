@@ -33,26 +33,12 @@
         return collected[type].push(node);
       };
     };
-    visitors = {
-      Node: function(node, state) {
-        return null;
-      },
-      Program: function(node, state) {
-        return null;
-      },
-      Statement: function(node, state) {
-        return null;
-      },
-      Expression: function(node, state) {
-        return null;
-      }
-    };
+    visitors = {};
     for (k in collected) {
       v = collected[k];
       visitors[k] = registerNode(k);
     }
-    console.log(visitors);
-    walk.simple(body, visitors);
+    walk.simple(ast, visitors);
     return console.log(collected);
   });
 

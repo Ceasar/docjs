@@ -2,3 +2,4 @@ node_modules
 *.swp
 *.un~
 Session.vim
+.DS_Store

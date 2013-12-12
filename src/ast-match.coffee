@@ -24,17 +24,10 @@ fs.readFile 'examples/cucumber.js', 'utf8', (err, jsFile) ->
 
   registerNode = (type) -> (node, state) -> collected[type].push node
 
-  visitors =
-    Node: (node, state) -> null
-    Program: (node, state) -> null
-    Statement: (node, state) -> null
-    Expression: (node, state) -> null
-
+  visitors = {}
   for k, v of collected
     visitors[k] = registerNode(k)
 
-  console.log visitors
-
-  walk.simple(body, visitors)
+  walk.simple(ast, visitors)
   console.log collected
 
