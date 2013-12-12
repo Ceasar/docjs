@@ -100,28 +100,41 @@
 
 
   convertSwitchToIf = function(node, index, obj) {
-    var if_node, if_nodes, switchCase, _i, _len, _ref, _results;
-    if_nodes = [];
+    var i, if_node, last_if, parent_if, switchCase, _i, _len, _ref, _results;
+    parent_if = last_if = {};
     _ref = node.cases;
     _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      switchCase = _ref[_i];
-      if_node = {
-        type: 'IfStatement'
-      };
-      _results.push({
-        start: switchCase.start,
-        end: switchCase.end,
-        test: {
-          type: 'BinaryExpression',
-          start: 0,
-          end: 0,
-          left: node.discriminant,
-          operator: '===',
-          right: switchCase.test,
-          consequent: switchCase.consequent
-        }
-      });
+    for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+      switchCase = _ref[i];
+      if (if_node.test.right !== 'default') {
+        if_node = {
+          type: 'IfStatement',
+          start: switchCase.start,
+          end: switchCase.end,
+          test: {
+            type: 'BinaryExpression',
+            start: 0,
+            end: 0,
+            left: node.discriminant,
+            operator: '===',
+            right: switchCase.test,
+            consequent: switchCase.consequent
+          }
+        };
+      } else {
+        if_node = {
+          type: 'BlockStatement',
+          start: switchCase.start,
+          end: switchCase.end,
+          body: consequent
+        };
+      }
+      if (i === 0) {
+        parent_if = if_node;
+      } else {
+        parent_if.alternate = if_node;
+      }
+      _results.push(last_if = if_node);
     }
     return _results;
   };
@@ -129,14 +142,12 @@
   convertForToWhile = function(node, index, obj) {
     var while_node;
     while_node = {
-      type: "WhileStatement"
-    };
-    ({
+      type: "WhileStatement",
       start: node.start,
       end: node.end,
       test: test,
       body: body
-    });
+    };
     while_node.body.body.push(node.update);
     return obj.body.slice(index, 0, node.init);
   };
