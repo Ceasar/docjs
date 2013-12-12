@@ -7,7 +7,9 @@ function testLoops() {
 
   var while_count = 0;
   while(while_count < 10) {
+
     console.log('while_count: ', while_count);
+
     while_count++;
   }
 }

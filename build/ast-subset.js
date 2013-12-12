@@ -26,16 +26,6 @@
 # -- for/of - ignore? what is this..
 # -- debugger - ignore
 #
-
-
-LOOK INTO:
-function declaration -
-var function vs function
-hoisting
-
-named function
-
-
 # - Declarations
 # -- Function - keep
 # -- Variable - keep
@@ -81,7 +71,7 @@ named function
 
 
 (function() {
-  var acorn, fs, walk, _;
+  var acorn, convertForToWhile, fs, walk, _;
 
   fs = require('fs');
 
@@ -91,14 +81,65 @@ named function
 
   walk = require('acorn/util/walk');
 
-  fs.readFile('examples/cucumber.js', 'utf8', function(err, jsFile) {
+  /*
+  #
+  # Input AST:
+  # for(var i=0; i < 10; i++)
+  #   sum++;
+  #
+  # Output AST:
+  # var i=0;
+  # while(i < 10) {
+  #   sum++;
+  #   i++;
+  # }
+  #
+  #
+  #
+  */
+
+
+  convertForToWhile = function(stringifiedAST) {
+    var index, node, obj, while_node, _i, _len, _ref, _results;
+    obj = JSON.parse(stringifiedAST);
+    _ref = obj.body;
+    _results = [];
+    for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+      node = _ref[index];
+      if (node.type === 'ForStatement') {
+        while_node = {
+          type: "WhileStatement"
+        };
+        ({
+          start: node.start,
+          end: node.end,
+          test: test,
+          body: body
+        });
+        while_node.body.body.push(node.update);
+        _results.push(obj.body.slice(index, 0, node.init));
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  fs.readFile('examples/subset/while.js', 'utf8', function(err, jsFile) {
     var ast, body, collected, k, registerNode, stringifiedAST, v, visitors;
     if (err) {
       return console.log(err);
     }
     ast = acorn.parse(jsFile);
     stringifiedAST = JSON.stringify(ast, null, 4);
-    console.log(stringifiedAST);
+    fs.writeFile('out.js', stringifiedAST, function(err) {
+      if (err) {
+        throw err;
+      } else {
+        return console.log('Saved!');
+      }
+    });
+    convertForToWhile(stringifiedAST);
     body = ast.body;
     collected = {
       ExpressionStatement: [],
@@ -134,9 +175,7 @@ named function
       v = collected[k];
       visitors[k] = registerNode(k);
     }
-    console.log(visitors);
-    walk.simple(body, visitors);
-    return console.log(collected);
+    return console.log(visitors);
   });
 
 }).call(this);

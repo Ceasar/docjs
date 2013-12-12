@@ -74,12 +74,54 @@ _     = require 'lodash'
 acorn = require 'acorn'
 walk  = require 'acorn/util/walk'
 
-fs.readFile 'examples/cucumber.js', 'utf8', (err, jsFile) ->
+
+###
+#
+# Input AST:
+# for(var i=0; i < 10; i++)
+#   sum++;
+#
+# Output AST:
+# var i=0;
+# while(i < 10) {
+#   sum++;
+#   i++;
+# }
+#
+#
+#
+###
+
+convertForToWhile = (stringifiedAST) ->
+  obj = JSON.parse(stringifiedAST)
+  for node, index in obj.body
+    # console.log key, value
+    if node.type == 'ForStatement'
+      # build while statement
+      while_node = type: "WhileStatement"
+      start: node.start
+      end: node.end
+      test: test
+      body: body
+      # append the update to the end of the body
+      while_node.body.body.push node.update
+      # append the init into obj.body before the while node.
+      obj.body.slice(index, 0, node.init)
+
+
+fs.readFile 'examples/subset/while.js', 'utf8', (err, jsFile) ->
   if err then return console.log err
 
   ast = acorn.parse(jsFile)
   stringifiedAST = JSON.stringify(ast, null, 4)
-  console.log stringifiedAST
+  # console.log stringifiedAST
+  # write out into file for inspection purposes;
+  fs.writeFile 'out.js', stringifiedAST, (err) ->
+    if err then throw err
+    else console.log 'Saved!'
+
+  # run over ast,
+  convertForToWhile stringifiedAST
 
   body = ast.body
 
@@ -107,6 +149,6 @@ fs.readFile 'examples/cucumber.js', 'utf8', (err, jsFile) ->
 
   console.log visitors
 
-  walk.simple(body, visitors)
-  console.log collected
+  # walk.simple(body, visitors)
+  # console.log collected
 
