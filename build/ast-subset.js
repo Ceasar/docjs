@@ -71,7 +71,7 @@
 
 
 (function() {
-  var acorn, convertForToWhile, fs, walk, _;
+  var acorn, convertForToWhile, convertSwitchToIf, fs, rebuildAST, walk, _;
 
   fs = require('fs');
 
@@ -99,25 +99,60 @@
   */
 
 
-  convertForToWhile = function(stringifiedAST) {
-    var index, node, obj, while_node, _i, _len, _ref, _results;
+  convertSwitchToIf = function(node, index, obj) {
+    var if_node, if_nodes, switchCase, _i, _len, _ref, _results;
+    if_nodes = [];
+    _ref = node.cases;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      switchCase = _ref[_i];
+      if_node = {
+        type: 'IfStatement'
+      };
+      _results.push({
+        start: switchCase.start,
+        end: switchCase.end,
+        test: {
+          type: 'BinaryExpression',
+          start: 0,
+          end: 0,
+          left: node.discriminant,
+          operator: '===',
+          right: switchCase.test,
+          consequent: switchCase.consequent
+        }
+      });
+    }
+    return _results;
+  };
+
+  convertForToWhile = function(node, index, obj) {
+    var while_node;
+    while_node = {
+      type: "WhileStatement"
+    };
+    ({
+      start: node.start,
+      end: node.end,
+      test: test,
+      body: body
+    });
+    while_node.body.body.push(node.update);
+    return obj.body.slice(index, 0, node.init);
+  };
+
+  rebuildAST = function(stringifiedAST) {
+    var index, node, obj, _i, _len, _ref, _results;
     obj = JSON.parse(stringifiedAST);
     _ref = obj.body;
     _results = [];
     for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
       node = _ref[index];
       if (node.type === 'ForStatement') {
-        while_node = {
-          type: "WhileStatement"
-        };
-        ({
-          start: node.start,
-          end: node.end,
-          test: test,
-          body: body
-        });
-        while_node.body.body.push(node.update);
-        _results.push(obj.body.slice(index, 0, node.init));
+        convertForToWhile(node, index, obj);
+      }
+      if (node.type === 'SwitchStatement') {
+        _results.push(convertSwitchToIf(node, index, obj));
       } else {
         _results.push(void 0);
       }
@@ -125,21 +160,20 @@
     return _results;
   };
 
-  fs.readFile('examples/subset/while.js', 'utf8', function(err, jsFile) {
+  fs.readFile('examples/subset/switch.js', 'utf8', function(err, jsFile) {
     var ast, body, collected, k, registerNode, stringifiedAST, v, visitors;
     if (err) {
       return console.log(err);
     }
     ast = acorn.parse(jsFile);
     stringifiedAST = JSON.stringify(ast, null, 4);
-    fs.writeFile('out.js', stringifiedAST, function(err) {
+    fs.writeFile('examples/subset/out/out.js', stringifiedAST, function(err) {
       if (err) {
         throw err;
       } else {
         return console.log('Saved!');
       }
     });
-    convertForToWhile(stringifiedAST);
     body = ast.body;
     collected = {
       ExpressionStatement: [],

@@ -91,37 +91,57 @@ walk  = require 'acorn/util/walk'
 #
 #
 ###
+convertSwitchToIf = (node, index, obj) ->
+  if_nodes = []  # array of if else if nodes
+  for switchCase in node.cases
+    if_node = type: 'IfStatement'
+    start: switchCase.start
+    end: switchCase.end
+    test:
+      type: 'BinaryExpression'  # always check as ===
+      start: 0
+      end: 0    # TODO: how to determine start and end?
+      left: node.discriminant
+      operator: '==='
+      right: switchCase.test
+      consequent: switchCase.consequent
 
-convertForToWhile = (stringifiedAST) ->
+
+convertForToWhile = (node, index, obj) ->
+    # build while statement
+    while_node = type: "WhileStatement"
+    start: node.start
+    end: node.end
+    test: test
+    body: body
+    # append the update to the end of the body
+    while_node.body.body.push node.update
+    # append the init into obj.body before the while node.
+    obj.body.slice index, 0, node.init
+
+rebuildAST = (stringifiedAST) ->
   obj = JSON.parse(stringifiedAST)
   for node, index in obj.body
     # console.log key, value
     if node.type == 'ForStatement'
-      # build while statement
-      while_node = type: "WhileStatement"
-      start: node.start
-      end: node.end
-      test: test
-      body: body
-      # append the update to the end of the body
-      while_node.body.body.push node.update
-      # append the init into obj.body before the while node.
-      obj.body.slice(index, 0, node.init)
+      convertForToWhile node, index, obj
+    if node.type == 'SwitchStatement'
+      convertSwitchToIf node, index, obj
 
 
-fs.readFile 'examples/subset/while.js', 'utf8', (err, jsFile) ->
+fs.readFile 'examples/subset/switch.js', 'utf8', (err, jsFile) ->
   if err then return console.log err
 
   ast = acorn.parse(jsFile)
   stringifiedAST = JSON.stringify(ast, null, 4)
   # console.log stringifiedAST
   # write out into file for inspection purposes;
-  fs.writeFile 'out.js', stringifiedAST, (err) ->
+  fs.writeFile 'examples/subset/out/out.js', stringifiedAST, (err) ->
     if err then throw err
     else console.log 'Saved!'
 
   # run over ast,
-  convertForToWhile stringifiedAST
+  # rebuildAST stringifiedAST
 
   body = ast.body
 
