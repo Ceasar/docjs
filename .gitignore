@@ -1,4 +1,5 @@
 node_modules
+*.swo
 *.swp
 *.un~
 Session.vim
