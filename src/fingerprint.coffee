@@ -3,7 +3,7 @@ _     = require 'lodash'
 acorn = require 'acorn'
 walk  = require 'acorn/util/walk'
 
-nodeTypes = require('../src/types').types
+NODE_TYPES = require('./types').types
 
 
 # Return the immediate children of a given node
@@ -39,16 +39,32 @@ nodeWalk = (node, fn, fnMap) ->
   fnMap[node.type](node) if fnMap?[node.type]?
   fn(node) if fn?
 
-# Check if a given value is a subtree in the Parser API
-isSubTree = (obj) ->
-  return false unless obj?
 
-  # If an array, each element should be a node with a 'type' property
-  if _.isArray(obj) and obj.length > 0
-    return obj[0].type?
-  # Otherwise, this should be a node itself
-  else
-    return obj.type?
+# ============================================================================
+# Utils
+# ============================================================================
+
+treeUtils =
+  # Check if a given value is a subtree in the Parser API
+  isSubTree: (obj) ->
+    return false unless obj?
+
+    # If an array, each element should be a node with a 'type' property
+    if _.isArray(obj) and obj.length > 0
+      return obj[0].type?
+    # Otherwise, this should be a node itself
+    else
+      return obj.type?
+
+projectUtils =
+  getPatternFile: (name) -> "patterns/#{name}.js"
+
+# ============================================================================
+# Hashing
+#
+#   A "hash" for a subtree of the AST is an object that keeps track of the count
+#   of each node type present in the subtree.
+# ============================================================================
 
 # Combine a list of hashes into a single object
 combineHashes = (hashes) ->
@@ -73,33 +89,51 @@ computeHash = (node) ->
   hash[node.type] = if hash[node.type]? then hash[node.type] + 1 else 1
   return hash
 
-# Look at documented iterator pattern and compute its hash
-fs.readFile 'patterns/getterSetter.js', 'utf8', (err, jsFile) ->
-  if err then return console.log err
 
-  ast = acorn.parse(jsFile)
-  nodeFn = (node) -> node.hash = computeHash(node)
-  nodeWalk(ast, nodeFn)
-  debugger
-  # stringifiedAST = JSON.stringify(ast, null, 4)
+# ============================================================================
+# Pattern Identification
+# ============================================================================
 
-  # state = {}
-  # functions = {}
+fingerprintPattern = (patternName) ->
 
-  # registerNodeType = (type) -> (node, state, c) ->
-  #   for own k, v of node
-  #     continue unless isSubTree(v)
+  patternFile = projectUtils.getPatternFile(patternName)
 
-  #     # If it's an array nodes, map over them
-  #     if _.isArray(v)
-  #       c(n, state) for n in v
-  #     else
-  #       c(v, state)
+  # Look at documented iterator pattern and compute its hash
+  fs.readFile patternFile, 'utf8', (err, jsFile) ->
+    return console.log(err) if err
 
-  #   node.hash = computeHash(node)
+    ast = acorn.parse(jsFile)
+    stringifiedAST = JSON.stringify(ast, null, 4)
 
-  # functions[t] = registerNodeType(t) for t in nodeTypes
+    nodeFn = (node) -> node.hash = computeHash(node)
+    nodeWalk(ast, nodeFn)
+    return
 
-  # walk.recursive(ast, state, functions)
-  # debugger
+    state = {}
+    functions = {}
 
+    registerNodeType = (type) -> (node, state, c) ->
+      for own k, v of node
+        continue unless treeUtils.isSubTree(v)
+
+        # If it's an array nodes, map over them
+        if _.isArray(v)
+          c(n, state) for n in v
+        else
+          c(v, state)
+
+      node.hash = computeHash(node)
+
+    for t in NODE_TYPES
+      functions[t] = registerNodeType(t)
+
+    walk.recursive(ast, state, functions)
+
+    debugger
+    return ast
+
+# ============================================================================
+# Main execution
+# ============================================================================
+# fingerprintPattern('iterator')
+fingerprintPattern('getterSetter')

@@ -25,6 +25,29 @@ module.exports = (grunt) ->
         options:
           debounceDelay: 1000
 
-  grunt.registerTask 'default', ['watch']
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    nodemon:
+      dev:
+        script: grunt.option('debug-file')
+        options:
+          nodeArgs: ['--debug-brk']
+          ext: 'js'
+          watch: 'build'
+
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    'node-inspector':
+      dev: {}
+
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    concurrent:
+      tasks: ['nodemon:dev', 'watch', 'node-inspector:dev']
+      options:
+        logConcurrentOutput: true
+
+
+  grunt.registerTask 'default', ['concurrent']
   grunt.registerTask 'buildjs', ['coffee']
 

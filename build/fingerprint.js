@@ -1,5 +1,5 @@
 (function() {
-  var acorn, combineHashes, computeHash, fs, getChildren, isSubTree, nodeTypes, nodeWalk, walk, _,
+  var NODE_TYPES, acorn, combineHashes, computeHash, fingerprintPattern, fs, getChildren, nodeWalk, projectUtils, treeUtils, walk, _,
     __hasProp = {}.hasOwnProperty;
 
   fs = require('fs');
@@ -10,7 +10,7 @@
 
   walk = require('acorn/util/walk');
 
-  nodeTypes = require('../src/types').types;
+  NODE_TYPES = require('./types').types;
 
   getChildren = function(node) {
     var childNode, children, h, k, prop, v, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3;
@@ -66,14 +66,22 @@
     }
   };
 
-  isSubTree = function(obj) {
-    if (obj == null) {
-      return false;
+  treeUtils = {
+    isSubTree: function(obj) {
+      if (obj == null) {
+        return false;
+      }
+      if (_.isArray(obj) && obj.length > 0) {
+        return obj[0].type != null;
+      } else {
+        return obj.type != null;
+      }
     }
-    if (_.isArray(obj) && obj.length > 0) {
-      return obj[0].type != null;
-    } else {
-      return obj.type != null;
+  };
+
+  projectUtils = {
+    getPatternFile: function(name) {
+      return "patterns/" + name + ".js";
     }
   };
 
@@ -116,17 +124,54 @@
     return hash;
   };
 
-  fs.readFile('patterns/getterSetter.js', 'utf8', function(err, jsFile) {
-    var ast, nodeFn;
-    if (err) {
-      return console.log(err);
-    }
-    ast = acorn.parse(jsFile);
-    nodeFn = function(node) {
-      return node.hash = computeHash(node);
-    };
-    nodeWalk(ast, nodeFn);
-    debugger;
-  });
+  fingerprintPattern = function(patternName) {
+    var patternFile;
+    patternFile = projectUtils.getPatternFile(patternName);
+    return fs.readFile(patternFile, 'utf8', function(err, jsFile) {
+      var ast, functions, nodeFn, registerNodeType, state, stringifiedAST, t, _i, _len;
+      if (err) {
+        return console.log(err);
+      }
+      ast = acorn.parse(jsFile);
+      stringifiedAST = JSON.stringify(ast, null, 4);
+      nodeFn = function(node) {
+        return node.hash = computeHash(node);
+      };
+      nodeWalk(ast, nodeFn);
+      return;
+      state = {};
+      functions = {};
+      registerNodeType = function(type) {
+        return function(node, state, c) {
+          var k, n, v, _i, _len;
+          for (k in node) {
+            if (!__hasProp.call(node, k)) continue;
+            v = node[k];
+            if (!treeUtils.isSubTree(v)) {
+              continue;
+            }
+            if (_.isArray(v)) {
+              for (_i = 0, _len = v.length; _i < _len; _i++) {
+                n = v[_i];
+                c(n, state);
+              }
+            } else {
+              c(v, state);
+            }
+          }
+          return node.hash = computeHash(node);
+        };
+      };
+      for (_i = 0, _len = NODE_TYPES.length; _i < _len; _i++) {
+        t = NODE_TYPES[_i];
+        functions[t] = registerNodeType(t);
+      }
+      walk.recursive(ast, state, functions);
+      debugger;
+      return ast;
+    });
+  };
+
+  fingerprintPattern('getterSetter');
 
 }).call(this);

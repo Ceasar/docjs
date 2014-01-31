@@ -11,8 +11,11 @@
     "estraverse": "*",
     "escodegen": "*",
     "grunt": "*",
+    "grunt-concurrent": "*",
     "grunt-contrib-coffee": "*",
     "grunt-contrib-watch": "*",
+    "grunt-nodemon": ">=0.2.0",
+    "grunt-node-inspector": "*",
     "matchdep": "*",
     "lodash": "~2.4.1"
   }
