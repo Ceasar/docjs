@@ -23,13 +23,14 @@ treeUtils =
       return obj.type?
 
 projectUtils =
-  getPatternFile: (name) -> "patterns/#{name}.js"
+  getPatternFile: (name) -> "analysis/patterns/#{name}.js"
+  getFingerprintFile: (name) -> "analysis/fingerprints/#{name}.json"
 
 # ============================================================================
 # Hashing
 #
 #   A "hash" for a subtree of the AST is an object that keeps track of the count
-#   of each node type present in the subtree.
+#   of each node type present in the subtree, essentially a node-type vector.
 # ============================================================================
 
 # Combine a list of hashes into a single object
@@ -59,7 +60,8 @@ computeHash = (node) ->
 # Pattern Identification
 # ============================================================================
 
-fingerprintPattern = (patternName) ->
+# TODO: use promises via 'https://github.com/tildeio/rsvp.js'
+fingerprintPattern = (patternName, success) ->
 
   patternFile = projectUtils.getPatternFile(patternName)
 
@@ -77,7 +79,7 @@ fingerprintPattern = (patternName) ->
       for own k, v of node
         continue unless treeUtils.isSubTree(v)
 
-        # If it's an array nodes, map over them
+        # If it's an array of nodes, map over them
         if _.isArray(v)
           c(n, state) for n in v
         else
@@ -89,13 +91,22 @@ fingerprintPattern = (patternName) ->
       functions[t] = registerNodeType(t)
 
     walk.recursive(ast, state, functions)
+    success(ast)
 
-    debugger
-    return ast
+# Given an already fingerprinted AST (its subtree hashes exist in the tree),
+# write the fingerprint to a file associated with the pattern.
+exportFingerprint = (ast, patternName) ->
+  if ast.hash?
+    fileName = projectUtils.getFingerprintFile(patternName)
+    fs.writeFile fileName, JSON.stringify(ast.hash), (err) ->
+      console.error(err) if (err)
+      console.log("Saved fingerprint for pattern #{patternName}.")
+  else
+    # TODO: is this case necessary? if so, handle it.
 
 # ============================================================================
 # Main execution
 # ============================================================================
-fingerprintPattern('iterator')
-
+fingerprintPattern 'iterator', (ast) ->
+  exportFingerprint(ast, 'iterator')
 

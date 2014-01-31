@@ -1,5 +1,5 @@
 (function() {
-  var NODE_TYPES, acorn, combineHashes, computeHash, fingerprintPattern, fs, projectUtils, treeUtils, walk, _,
+  var NODE_TYPES, acorn, combineHashes, computeHash, exportFingerprint, fingerprintPattern, fs, projectUtils, treeUtils, walk, _,
     __hasProp = {}.hasOwnProperty;
 
   fs = require('fs');
@@ -27,7 +27,10 @@
 
   projectUtils = {
     getPatternFile: function(name) {
-      return "patterns/" + name + ".js";
+      return "analysis/patterns/" + name + ".js";
+    },
+    getFingerprintFile: function(name) {
+      return "analysis/fingerprints/" + name + ".json";
     }
   };
 
@@ -70,7 +73,7 @@
     return hash;
   };
 
-  fingerprintPattern = function(patternName) {
+  fingerprintPattern = function(patternName, success) {
     var patternFile;
     patternFile = projectUtils.getPatternFile(patternName);
     return fs.readFile(patternFile, 'utf8', function(err, jsFile) {
@@ -108,11 +111,27 @@
         functions[t] = registerNodeType(t);
       }
       walk.recursive(ast, state, functions);
-      debugger;
-      return ast;
+      return success(ast);
     });
   };
 
-  fingerprintPattern('iterator');
+  exportFingerprint = function(ast, patternName) {
+    var fileName;
+    if (ast.hash != null) {
+      fileName = projectUtils.getFingerprintFile(patternName);
+      return fs.writeFile(fileName, JSON.stringify(ast.hash), function(err) {
+        if (err) {
+          console.error(err);
+        }
+        return console.log("Saved fingerprint for pattern " + patternName + ".");
+      });
+    } else {
+
+    }
+  };
+
+  fingerprintPattern('iterator', function(ast) {
+    return exportFingerprint(ast, 'iterator');
+  });
 
 }).call(this);
