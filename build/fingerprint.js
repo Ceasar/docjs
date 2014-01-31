@@ -1,5 +1,5 @@
 (function() {
-  var acorn, combineHashes, computeHash, fs, isSubTree, walk, _,
+  var NODE_TYPES, acorn, combineHashes, computeHash, fingerprintPattern, fs, projectUtils, treeUtils, walk, _,
     __hasProp = {}.hasOwnProperty;
 
   fs = require('fs');
@@ -10,14 +10,24 @@
 
   walk = require('acorn/util/walk');
 
-  isSubTree = function(obj) {
-    if (obj == null) {
-      return false;
+  NODE_TYPES = require('./types').types;
+
+  treeUtils = {
+    isSubTree: function(obj) {
+      if (obj == null) {
+        return false;
+      }
+      if (_.isArray(obj) && obj.length > 0) {
+        return obj[0].type != null;
+      } else {
+        return obj.type != null;
+      }
     }
-    if (_.isArray(obj) && obj.length > 0) {
-      return obj[0].type != null;
-    } else {
-      return obj.type != null;
+  };
+
+  projectUtils = {
+    getPatternFile: function(name) {
+      return "patterns/" + name + ".js";
     }
   };
 
@@ -60,43 +70,49 @@
     return hash;
   };
 
-  fs.readFile('patterns/iterator.js', 'utf8', function(err, jsFile) {
-    var ast, functions, nodeTypes, registerNodeType, state, stringifiedAST, t, _i, _len;
-    if (err) {
-      return console.log(err);
-    }
-    ast = acorn.parse(jsFile);
-    stringifiedAST = JSON.stringify(ast, null, 4);
-    state = {};
-    functions = {};
-    nodeTypes = ['BlockStatement', 'ExpressionStatement', 'IfStatement', 'WhileStatement', 'ForStatement', 'ObjectExpression', 'NewExpression'];
-    registerNodeType = function(type) {
-      return function(node, state, c) {
-        var k, n, v, _i, _len;
-        for (k in node) {
-          if (!__hasProp.call(node, k)) continue;
-          v = node[k];
-          if (!isSubTree(v)) {
-            continue;
-          }
-          if (_.isArray(v)) {
-            for (_i = 0, _len = v.length; _i < _len; _i++) {
-              n = v[_i];
-              c(n, state);
+  fingerprintPattern = function(patternName) {
+    var patternFile;
+    patternFile = projectUtils.getPatternFile(patternName);
+    return fs.readFile(patternFile, 'utf8', function(err, jsFile) {
+      var ast, functions, registerNodeType, state, stringifiedAST, t, _i, _len;
+      if (err) {
+        return console.log(err);
+      }
+      ast = acorn.parse(jsFile);
+      stringifiedAST = JSON.stringify(ast, null, 4);
+      state = {};
+      functions = {};
+      registerNodeType = function(type) {
+        return function(node, state, c) {
+          var k, n, v, _i, _len;
+          for (k in node) {
+            if (!__hasProp.call(node, k)) continue;
+            v = node[k];
+            if (!treeUtils.isSubTree(v)) {
+              continue;
             }
-          } else {
-            c(v, state);
+            if (_.isArray(v)) {
+              for (_i = 0, _len = v.length; _i < _len; _i++) {
+                n = v[_i];
+                c(n, state);
+              }
+            } else {
+              c(v, state);
+            }
           }
-        }
-        return node.hash = computeHash(node);
+          return node.hash = computeHash(node);
+        };
       };
-    };
-    for (_i = 0, _len = nodeTypes.length; _i < _len; _i++) {
-      t = nodeTypes[_i];
-      functions[t] = registerNodeType(t);
-    }
-    walk.recursive(ast, state, functions);
-    debugger;
-  });
+      for (_i = 0, _len = NODE_TYPES.length; _i < _len; _i++) {
+        t = NODE_TYPES[_i];
+        functions[t] = registerNodeType(t);
+      }
+      walk.recursive(ast, state, functions);
+      debugger;
+      return ast;
+    });
+  };
+
+  fingerprintPattern('iterator');
 
 }).call(this);
