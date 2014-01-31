@@ -3,6 +3,41 @@ _     = require 'lodash'
 acorn = require 'acorn'
 walk  = require 'acorn/util/walk'
 
+nodeTypes = require('../src/types').types
+
+
+# Return the immediate children of a given node
+getChildren = (node) ->
+  children = []
+  debugger
+  # Check all properties for nodes or node arrays
+  for own k, v of node
+    if v?.type?
+      children.push(v)
+    else if _.isArray(v) and v.length
+      children.push(childNode) for childNode in v if v.type?
+
+  # Special cases
+  if node.type in ['LetStatement', 'LetExpression']
+    for h in node.head
+      children.push(h.id)
+      children.push(h.init) if h.init?
+
+  else if node.type in ['ObjectExpression', 'ObjectPattern']
+    for prop in node.properties
+      children.push(prop.key)
+      children.push(prop.value)
+
+  return children
+
+
+# A generic function to walk the AST
+nodeWalk = (node, fn, fnMap) ->
+  for child in getChildren(node)
+    nodeWalk(child, fn, fnMap)
+  debugger
+  fnMap[node.type](node) if fnMap?[node.type]?
+  fn(node) if fn?
 
 # Check if a given value is a subtree in the Parser API
 isSubTree = (obj) ->
@@ -39,39 +74,32 @@ computeHash = (node) ->
   return hash
 
 # Look at documented iterator pattern and compute its hash
-fs.readFile 'patterns/iterator.js', 'utf8', (err, jsFile) ->
+fs.readFile 'patterns/getterSetter.js', 'utf8', (err, jsFile) ->
   if err then return console.log err
 
   ast = acorn.parse(jsFile)
-  stringifiedAST = JSON.stringify(ast, null, 4)
-
-  state = {}
-  functions = {}
-
-  nodeTypes = [
-    'BlockStatement'
-    'ExpressionStatement'
-    'IfStatement'
-    'WhileStatement'
-    'ForStatement'
-    'ObjectExpression'
-    'NewExpression'
-  ]
-
-  registerNodeType = (type) -> (node, state, c) ->
-    for own k, v of node
-      continue unless isSubTree(v)
-
-      # If it's an array nodes, map over them
-      if _.isArray(v)
-        c(n, state) for n in v
-      else
-        c(v, state)
-
-    node.hash = computeHash(node)
-
-  functions[t] = registerNodeType(t) for t in nodeTypes
-
-  walk.recursive(ast, state, functions)
+  nodeFn = (node) -> node.hash = computeHash(node)
+  nodeWalk(ast, nodeFn)
   debugger
+  # stringifiedAST = JSON.stringify(ast, null, 4)
+
+  # state = {}
+  # functions = {}
+
+  # registerNodeType = (type) -> (node, state, c) ->
+  #   for own k, v of node
+  #     continue unless isSubTree(v)
+
+  #     # If it's an array nodes, map over them
+  #     if _.isArray(v)
+  #       c(n, state) for n in v
+  #     else
+  #       c(v, state)
+
+  #   node.hash = computeHash(node)
+
+  # functions[t] = registerNodeType(t) for t in nodeTypes
+
+  # walk.recursive(ast, state, functions)
+  # debugger
 

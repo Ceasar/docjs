@@ -1,5 +1,5 @@
 (function() {
-  var acorn, combineHashes, computeHash, fs, isSubTree, walk, _,
+  var acorn, combineHashes, computeHash, fs, getChildren, isSubTree, nodeTypes, nodeWalk, walk, _,
     __hasProp = {}.hasOwnProperty;
 
   fs = require('fs');
@@ -9,6 +9,62 @@
   acorn = require('acorn');
 
   walk = require('acorn/util/walk');
+
+  nodeTypes = require('../src/types').types;
+
+  getChildren = function(node) {
+    var childNode, children, h, k, prop, v, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3;
+    children = [];
+    debugger;
+    for (k in node) {
+      if (!__hasProp.call(node, k)) continue;
+      v = node[k];
+      if ((v != null ? v.type : void 0) != null) {
+        children.push(v);
+      } else if (_.isArray(v) && v.length) {
+        if (v.type != null) {
+          for (_i = 0, _len = v.length; _i < _len; _i++) {
+            childNode = v[_i];
+            children.push(childNode);
+          }
+        }
+      }
+    }
+    if ((_ref = node.type) === 'LetStatement' || _ref === 'LetExpression') {
+      _ref1 = node.head;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        h = _ref1[_j];
+        children.push(h.id);
+        if (h.init != null) {
+          children.push(h.init);
+        }
+      }
+    } else if ((_ref2 = node.type) === 'ObjectExpression' || _ref2 === 'ObjectPattern') {
+      _ref3 = node.properties;
+      for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+        prop = _ref3[_k];
+        children.push(prop.key);
+        children.push(prop.value);
+      }
+    }
+    return children;
+  };
+
+  nodeWalk = function(node, fn, fnMap) {
+    var child, _i, _len, _ref;
+    _ref = getChildren(node);
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      child = _ref[_i];
+      nodeWalk(child, fn, fnMap);
+    }
+    debugger;
+    if ((fnMap != null ? fnMap[node.type] : void 0) != null) {
+      fnMap[node.type](node);
+    }
+    if (fn != null) {
+      return fn(node);
+    }
+  };
 
   isSubTree = function(obj) {
     if (obj == null) {
@@ -60,42 +116,16 @@
     return hash;
   };
 
-  fs.readFile('patterns/iterator.js', 'utf8', function(err, jsFile) {
-    var ast, functions, nodeTypes, registerNodeType, state, stringifiedAST, t, _i, _len;
+  fs.readFile('patterns/getterSetter.js', 'utf8', function(err, jsFile) {
+    var ast, nodeFn;
     if (err) {
       return console.log(err);
     }
     ast = acorn.parse(jsFile);
-    stringifiedAST = JSON.stringify(ast, null, 4);
-    state = {};
-    functions = {};
-    nodeTypes = ['BlockStatement', 'ExpressionStatement', 'IfStatement', 'WhileStatement', 'ForStatement', 'ObjectExpression', 'NewExpression'];
-    registerNodeType = function(type) {
-      return function(node, state, c) {
-        var k, n, v, _i, _len;
-        for (k in node) {
-          if (!__hasProp.call(node, k)) continue;
-          v = node[k];
-          if (!isSubTree(v)) {
-            continue;
-          }
-          if (_.isArray(v)) {
-            for (_i = 0, _len = v.length; _i < _len; _i++) {
-              n = v[_i];
-              c(n, state);
-            }
-          } else {
-            c(v, state);
-          }
-        }
-        return node.hash = computeHash(node);
-      };
+    nodeFn = function(node) {
+      return node.hash = computeHash(node);
     };
-    for (_i = 0, _len = nodeTypes.length; _i < _len; _i++) {
-      t = nodeTypes[_i];
-      functions[t] = registerNodeType(t);
-    }
-    walk.recursive(ast, state, functions);
+    nodeWalk(ast, nodeFn);
     debugger;
   });
 
