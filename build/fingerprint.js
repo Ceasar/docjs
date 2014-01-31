@@ -15,16 +15,15 @@
   getChildren = function(node) {
     var childNode, children, h, k, prop, v, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3;
     children = [];
-    debugger;
     for (k in node) {
       if (!__hasProp.call(node, k)) continue;
       v = node[k];
       if ((v != null ? v.type : void 0) != null) {
         children.push(v);
       } else if (_.isArray(v) && v.length) {
-        if (v.type != null) {
-          for (_i = 0, _len = v.length; _i < _len; _i++) {
-            childNode = v[_i];
+        for (_i = 0, _len = v.length; _i < _len; _i++) {
+          childNode = v[_i];
+          if (childNode.type != null) {
             children.push(childNode);
           }
         }
@@ -57,7 +56,6 @@
       child = _ref[_i];
       nodeWalk(child, fn, fnMap);
     }
-    debugger;
     if ((fnMap != null ? fnMap[node.type] : void 0) != null) {
       fnMap[node.type](node);
     }
@@ -103,22 +101,17 @@
   };
 
   computeHash = function(node) {
-    var child, hash, hashes, k, v, _i, _len;
-    hashes = [];
-    for (k in node) {
-      if (!__hasProp.call(node, k)) continue;
-      v = node[k];
-      if (v.hash != null) {
-        hashes.push(v.hash);
-      } else if (_.isArray(v)) {
-        for (_i = 0, _len = v.length; _i < _len; _i++) {
-          child = v[_i];
-          if (child.hash != null) {
-            hashes.push(child.hash);
-          }
-        }
+    var child, hash, hashes;
+    hashes = (function() {
+      var _i, _len, _ref, _results;
+      _ref = getChildren(node);
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        child = _ref[_i];
+        _results.push(child.hash);
       }
-    }
+      return _results;
+    })();
     hash = hashes.length ? combineHashes(hashes) : {};
     hash[node.type] = hash[node.type] != null ? hash[node.type] + 1 : 1;
     return hash;
@@ -128,7 +121,7 @@
     var patternFile;
     patternFile = projectUtils.getPatternFile(patternName);
     return fs.readFile(patternFile, 'utf8', function(err, jsFile) {
-      var ast, functions, nodeFn, registerNodeType, state, stringifiedAST, t, _i, _len;
+      var ast, nodeFn, stringifiedAST;
       if (err) {
         return console.log(err);
       }
@@ -138,36 +131,6 @@
         return node.hash = computeHash(node);
       };
       nodeWalk(ast, nodeFn);
-      return;
-      state = {};
-      functions = {};
-      registerNodeType = function(type) {
-        return function(node, state, c) {
-          var k, n, v, _i, _len;
-          for (k in node) {
-            if (!__hasProp.call(node, k)) continue;
-            v = node[k];
-            if (!treeUtils.isSubTree(v)) {
-              continue;
-            }
-            if (_.isArray(v)) {
-              for (_i = 0, _len = v.length; _i < _len; _i++) {
-                n = v[_i];
-                c(n, state);
-              }
-            } else {
-              c(v, state);
-            }
-          }
-          return node.hash = computeHash(node);
-        };
-      };
-      for (_i = 0, _len = NODE_TYPES.length; _i < _len; _i++) {
-        t = NODE_TYPES[_i];
-        functions[t] = registerNodeType(t);
-      }
-      walk.recursive(ast, state, functions);
-      debugger;
       return ast;
     });
   };

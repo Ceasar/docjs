@@ -9,13 +9,14 @@ NODE_TYPES = require('./types').types
 # Return the immediate children of a given node
 getChildren = (node) ->
   children = []
-  debugger
+
   # Check all properties for nodes or node arrays
   for own k, v of node
     if v?.type?
       children.push(v)
     else if _.isArray(v) and v.length
-      children.push(childNode) for childNode in v if v.type?
+      for childNode in v
+        children.push(childNode) if childNode.type?
 
   # Special cases
   if node.type in ['LetStatement', 'LetExpression']
@@ -35,7 +36,7 @@ getChildren = (node) ->
 nodeWalk = (node, fn, fnMap) ->
   for child in getChildren(node)
     nodeWalk(child, fn, fnMap)
-  debugger
+
   fnMap[node.type](node) if fnMap?[node.type]?
   fn(node) if fn?
 
@@ -76,15 +77,7 @@ combineHashes = (hashes) ->
   return combined
 
 computeHash = (node) ->
-  hashes = []
-
-  for own k, v of node
-    if v.hash?
-      hashes.push(v.hash)
-    else if _.isArray(v)
-      for child in v
-        hashes.push(child.hash) if child.hash?
-
+  hashes = (child.hash for child in getChildren(node))
   hash = if hashes.length then combineHashes(hashes) else {}
   hash[node.type] = if hash[node.type]? then hash[node.type] + 1 else 1
   return hash
@@ -107,29 +100,7 @@ fingerprintPattern = (patternName) ->
 
     nodeFn = (node) -> node.hash = computeHash(node)
     nodeWalk(ast, nodeFn)
-    return
 
-    state = {}
-    functions = {}
-
-    registerNodeType = (type) -> (node, state, c) ->
-      for own k, v of node
-        continue unless treeUtils.isSubTree(v)
-
-        # If it's an array nodes, map over them
-        if _.isArray(v)
-          c(n, state) for n in v
-        else
-          c(v, state)
-
-      node.hash = computeHash(node)
-
-    for t in NODE_TYPES
-      functions[t] = registerNodeType(t)
-
-    walk.recursive(ast, state, functions)
-
-    debugger
     return ast
 
 # ============================================================================
