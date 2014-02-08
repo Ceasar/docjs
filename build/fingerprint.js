@@ -1,5 +1,5 @@
 (function() {
-  var NODE_TYPES, acorn, combineHashes, computeHash, exportFingerprint, fingerprintPattern, fs, projectUtils, treeUtils, walk, _,
+  var NODE_TYPES, acorn, combineHashes, computeHash, exportFingerprint, fingerprintPattern, fs, nodeWalk, projectUtils, treeUtils, walk, _,
     __hasProp = {}.hasOwnProperty;
 
   fs = require('fs');
@@ -12,6 +12,15 @@
 
   NODE_TYPES = require('./types').types;
 
+  projectUtils = {
+    getPatternFile: function(name) {
+      return "analysis/patterns/" + name + ".js";
+    },
+    getFingerprintFile: function(name) {
+      return "analysis/fingerprints/" + name + ".json";
+    }
+  };
+
   treeUtils = {
     isSubTree: function(obj) {
       if (obj == null) {
@@ -22,15 +31,42 @@
       } else {
         return obj.type != null;
       }
-    }
-  };
-
-  projectUtils = {
-    getPatternFile: function(name) {
-      return "analysis/patterns/" + name + ".js";
     },
-    getFingerprintFile: function(name) {
-      return "analysis/fingerprints/" + name + ".json";
+    getChildren: function(node) {
+      var childNode, children, h, k, prop, v, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3;
+      children = [];
+      for (k in node) {
+        if (!__hasProp.call(node, k)) continue;
+        v = node[k];
+        if ((v != null ? v.type : void 0) != null) {
+          children.push(v);
+        } else if (_.isArray(v) && v.length) {
+          for (_i = 0, _len = v.length; _i < _len; _i++) {
+            childNode = v[_i];
+            if (childNode.type != null) {
+              children.push(childNode);
+            }
+          }
+        }
+      }
+      if ((_ref = node.type) === 'LetStatement' || _ref === 'LetExpression') {
+        _ref1 = node.head;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          h = _ref1[_j];
+          children.push(h.id);
+          if (h.init != null) {
+            children.push(h.init);
+          }
+        }
+      } else if ((_ref2 = node.type) === 'ObjectExpression' || _ref2 === 'ObjectPattern') {
+        _ref3 = node.properties;
+        for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+          prop = _ref3[_k];
+          children.push(prop.key);
+          children.push(prop.value);
+        }
+      }
+      return children;
     }
   };
 
@@ -52,65 +88,51 @@
   };
 
   computeHash = function(node) {
-    var child, hash, hashes, k, v, _i, _len;
-    hashes = [];
-    for (k in node) {
-      if (!__hasProp.call(node, k)) continue;
-      v = node[k];
-      if (v.hash != null) {
-        hashes.push(v.hash);
-      } else if (_.isArray(v)) {
-        for (_i = 0, _len = v.length; _i < _len; _i++) {
-          child = v[_i];
-          if (child.hash != null) {
-            hashes.push(child.hash);
-          }
-        }
+    var child, hash, hashes;
+    hashes = (function() {
+      var _i, _len, _ref, _results;
+      _ref = treeUtils.getChildren(node);
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        child = _ref[_i];
+        _results.push(child.hash);
       }
-    }
+      return _results;
+    })();
     hash = hashes.length ? combineHashes(hashes) : {};
     hash[node.type] = hash[node.type] != null ? hash[node.type] + 1 : 1;
     return hash;
+  };
+
+  nodeWalk = function(node, fn, fnMap) {
+    var child, _i, _len, _ref;
+    _ref = treeUtils.getChildren(node);
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      child = _ref[_i];
+      nodeWalk(child, fn, fnMap);
+    }
+    if ((fnMap != null ? fnMap[node.type] : void 0) != null) {
+      fnMap[node.type](node);
+    }
+    if (fn != null) {
+      return fn(node);
+    }
   };
 
   fingerprintPattern = function(patternName, success) {
     var patternFile;
     patternFile = projectUtils.getPatternFile(patternName);
     return fs.readFile(patternFile, 'utf8', function(err, jsFile) {
-      var ast, functions, registerNodeType, state, stringifiedAST, t, _i, _len;
+      var ast, nodeFn, stringifiedAST;
       if (err) {
         return console.log(err);
       }
       ast = acorn.parse(jsFile);
       stringifiedAST = JSON.stringify(ast, null, 4);
-      state = {};
-      functions = {};
-      registerNodeType = function(type) {
-        return function(node, state, c) {
-          var k, n, v, _i, _len;
-          for (k in node) {
-            if (!__hasProp.call(node, k)) continue;
-            v = node[k];
-            if (!treeUtils.isSubTree(v)) {
-              continue;
-            }
-            if (_.isArray(v)) {
-              for (_i = 0, _len = v.length; _i < _len; _i++) {
-                n = v[_i];
-                c(n, state);
-              }
-            } else {
-              c(v, state);
-            }
-          }
-          return node.hash = computeHash(node);
-        };
+      nodeFn = function(node) {
+        return node.hash = computeHash(node);
       };
-      for (_i = 0, _len = NODE_TYPES.length; _i < _len; _i++) {
-        t = NODE_TYPES[_i];
-        functions[t] = registerNodeType(t);
-      }
-      walk.recursive(ast, state, functions);
+      nodeWalk(ast, nodeFn);
       return success(ast);
     });
   };
@@ -130,8 +152,8 @@
     }
   };
 
-  fingerprintPattern('iterator', function(ast) {
-    return exportFingerprint(ast, 'iterator');
+  fingerprintPattern('getterSetter', function(ast) {
+    return exportFingerprint(ast, 'getterSetter');
   });
 
 }).call(this);
