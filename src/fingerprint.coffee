@@ -122,7 +122,7 @@ exportFingerprint = (ast, patternName) ->
 # ============================================================================
 
 # ast = fingerprintPattern('getterSetter')
-fingerprintPattern 'iterator', (ast) ->
-  exportFingerprint(ast, 'iterator')
+fingerprintPattern 'getterSetter', (ast) ->
+  exportFingerprint(ast, 'getterSetter')
 
 

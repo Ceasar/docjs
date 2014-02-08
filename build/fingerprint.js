@@ -152,8 +152,8 @@
     }
   };
 
-  fingerprintPattern('iterator', function(ast) {
-    return exportFingerprint(ast, 'iterator');
+  fingerprintPattern('getterSetter', function(ast) {
+    return exportFingerprint(ast, 'getterSetter');
   });
 
 }).call(this);
