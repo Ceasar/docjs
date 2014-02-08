@@ -23,7 +23,7 @@ module.exports = (grunt) ->
         files: ['src/**/*.coffee']
         tasks: ['buildjs']
         options:
-          debounceDelay: 1000
+          debounceDelay: 2000
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

@@ -11,9 +11,13 @@ NODE_TYPES = require('./types').types
 # Utils
 # ============================================================================
 
+utils =
+  getProp: (propName) -> (object) -> object[propName]
+
 projectUtils =
   getPatternFile: (name) -> "analysis/patterns/#{name}.js"
   getFingerprintFile: (name) -> "analysis/fingerprints/#{name}.json"
+  getTargetFile: (name) -> "analysis/targets/#{name}.js"
 
 
 treeUtils =
@@ -53,6 +57,17 @@ treeUtils =
 
     return children
 
+# Promise wrapper for fs
+promisedFS =
+  read: (fileName) -> new RSVP.Promise (resolve, reject) ->
+    fs.readFile fileName, 'utf8', (err, contents) ->
+      if err? then reject(err) else resolve(contents)
+
+  write: (fileName, contents) -> new RSVP.Promise (resolve, reject) ->
+    fs.writeFile fileName, contents, (err) ->
+      if err? then reject(err) else resolve()
+
+
 
 # ============================================================================
 # Hashing
@@ -89,6 +104,17 @@ nodeWalk = (node, fn, fnMap) ->
   fnMap[node.type](node) if fnMap?[node.type]?
   fn(node) if fn?
 
+# Returns a promise that resolves when a file has been read, its AST traversed,
+# and a fingerprint hash generated.
+generateFingerprint = (fileName) ->
+  # Look at documented iterator pattern and compute its hash
+  promisedFS.read(fileName).then (jsFile) ->
+    ast = acorn.parse(jsFile)
+    storeNodeHash = (node) -> node.hash = computeHash(node)
+
+    nodeWalk ast, storeNodeHash
+    return ast
+
 # Returns a promise that resolves when a fingerprint is generated and exported
 # to a JSON file.
 fingerprintPattern = (patternName) ->
@@ -96,38 +122,52 @@ fingerprintPattern = (patternName) ->
   patternFile = projectUtils.getPatternFile(patternName)
   fingerprintFile = projectUtils.getFingerprintFile(patternName)
 
-  generateFingerprint = () -> new RSVP.Promise (resolve, reject) ->
-    # Look at documented iterator pattern and compute its hash
-    fs.readFile patternFile, 'utf8', (err, jsFile) ->
-      return reject(err) if err?
-
-      ast = acorn.parse(jsFile)
-      stringifiedAST = JSON.stringify(ast, null, 4)
-
-      nodeFn = (node) -> node.hash = computeHash(node)
-      nodeWalk(ast, nodeFn)
-
-      resolve(ast)
-
   # Given an already fingerprinted AST (its subtree hashes exist in the tree),
   # write the fingerprint to a file associated with the pattern.
-  exportFingerprint = (ast) -> new RSVP.Promise (resolve, reject) ->
+  exportFingerprint = (ast) ->
     if ast.hash?
-      fs.writeFile fingerprintFile, JSON.stringify(ast.hash), (err) ->
-        if err?
-          reject(err)
-        else
-          resolve("Saved fingerprint for pattern #{patternName}.")
-    else
-      # TODO: is this case necessary? if so, handle it.
+      contents = JSON.stringify(ast.hash)
+      promisedFS.write(fingerprintFile, contents).then () ->
+        return "Saved fingerprint for pattern #{patternName}."
 
-  return generateFingerprint().then(exportFingerprint)
+    else
+      console.error "No fingerprint found to export"
+
+  return generateFingerprint(patternFile).then(exportFingerprint)
+
+# TODO: figure out how to compare the AST hashes
+identifyPattern = (target, pattern) ->
+
+  targetFile = projectUtils.getTargetFile(target)
+  fingerprintFile = projectUtils.getFingerprintFile(pattern)
+
+  # Returns a promise that resolves when (1) the ast hash for a target file has
+  # been generated and (2) a documented pattern fingerprint is parsed as JSON.
+  return RSVP.hash({
+    targetHash: generateFingerprint(targetFile).then(utils.getProp 'hash')
+    fingerprint: promisedFS.read(fingerprintFile).then(JSON.parse)
+  }).then(({targetHash, fingerprint}) ->
+    debugger
+
+  ).catch(console.error)
+
+
 
 # ============================================================================
 # Main execution
 # ============================================================================
 
-fingerprintPattern('iterator').then (msg) ->
+# fingerprintPattern('iterator').then (msg) ->
+#   console.log(msg)
+
+identifyPattern('loops', 'iterator').then (msg) ->
   console.log(msg)
 
+# ============================================================================
+
+module.exports =
+  projectUtils: projectUtils
+  treeUtils: treeUtils
+  pattern: fingerprintPattern
+  identify: identifyPattern
 

@@ -1,5 +1,5 @@
 (function() {
-  var NODE_TYPES, RSVP, acorn, combineHashes, computeHash, fingerprintPattern, fs, nodeWalk, projectUtils, treeUtils, walk, _,
+  var NODE_TYPES, RSVP, acorn, combineHashes, computeHash, fingerprintPattern, fs, generateFingerprint, identifyPattern, nodeWalk, projectUtils, promisedFS, treeUtils, utils, walk, _,
     __hasProp = {}.hasOwnProperty;
 
   fs = require('fs');
@@ -14,12 +14,23 @@
 
   NODE_TYPES = require('./types').types;
 
+  utils = {
+    getProp: function(propName) {
+      return function(object) {
+        return object[propName];
+      };
+    }
+  };
+
   projectUtils = {
     getPatternFile: function(name) {
       return "analysis/patterns/" + name + ".js";
     },
     getFingerprintFile: function(name) {
       return "analysis/fingerprints/" + name + ".json";
+    },
+    getTargetFile: function(name) {
+      return "analysis/targets/" + name + ".js";
     }
   };
 
@@ -72,6 +83,31 @@
     }
   };
 
+  promisedFS = {
+    read: function(fileName) {
+      return new RSVP.Promise(function(resolve, reject) {
+        return fs.readFile(fileName, 'utf8', function(err, contents) {
+          if (err != null) {
+            return reject(err);
+          } else {
+            return resolve(contents);
+          }
+        });
+      });
+    },
+    write: function(fileName, contents) {
+      return new RSVP.Promise(function(resolve, reject) {
+        return fs.writeFile(fileName, contents, function(err) {
+          if (err != null) {
+            return reject(err);
+          } else {
+            return resolve();
+          }
+        });
+      });
+    }
+  };
+
   combineHashes = function(hashes) {
     var combined, count, h, nodeType, _i, _len;
     combined = {};
@@ -121,47 +157,59 @@
     }
   };
 
-  fingerprintPattern = function(patternName) {
-    var exportFingerprint, fingerprintFile, generateFingerprint, patternFile;
-    patternFile = projectUtils.getPatternFile(patternName);
-    fingerprintFile = projectUtils.getFingerprintFile(patternName);
-    generateFingerprint = function() {
-      return new RSVP.Promise(function(resolve, reject) {
-        return fs.readFile(patternFile, 'utf8', function(err, jsFile) {
-          var ast, nodeFn, stringifiedAST;
-          if (err != null) {
-            return reject(err);
-          }
-          ast = acorn.parse(jsFile);
-          stringifiedAST = JSON.stringify(ast, null, 4);
-          nodeFn = function(node) {
-            return node.hash = computeHash(node);
-          };
-          nodeWalk(ast, nodeFn);
-          return resolve(ast);
-        });
-      });
-    };
-    exportFingerprint = function(ast) {
-      return new RSVP.Promise(function(resolve, reject) {
-        if (ast.hash != null) {
-          return fs.writeFile(fingerprintFile, JSON.stringify(ast.hash), function(err) {
-            if (err != null) {
-              return reject(err);
-            } else {
-              return resolve("Saved fingerprint for pattern " + patternName + ".");
-            }
-          });
-        } else {
-
-        }
-      });
-    };
-    return generateFingerprint().then(exportFingerprint);
+  generateFingerprint = function(fileName) {
+    return promisedFS.read(fileName).then(function(jsFile) {
+      var ast, storeNodeHash;
+      ast = acorn.parse(jsFile);
+      storeNodeHash = function(node) {
+        return node.hash = computeHash(node);
+      };
+      nodeWalk(ast, storeNodeHash);
+      return ast;
+    });
   };
 
-  fingerprintPattern('iterator').then(function(msg) {
+  fingerprintPattern = function(patternName) {
+    var exportFingerprint, fingerprintFile, patternFile;
+    patternFile = projectUtils.getPatternFile(patternName);
+    fingerprintFile = projectUtils.getFingerprintFile(patternName);
+    exportFingerprint = function(ast) {
+      var contents;
+      if (ast.hash != null) {
+        contents = JSON.stringify(ast.hash);
+        return promisedFS.write(fingerprintFile, contents).then(function() {
+          return "Saved fingerprint for pattern " + patternName + ".";
+        });
+      } else {
+        return console.error("No fingerprint found to export");
+      }
+    };
+    return generateFingerprint(patternFile).then(exportFingerprint);
+  };
+
+  identifyPattern = function(target, pattern) {
+    var fingerprintFile, targetFile;
+    targetFile = projectUtils.getTargetFile(target);
+    fingerprintFile = projectUtils.getFingerprintFile(pattern);
+    return RSVP.hash({
+      targetHash: generateFingerprint(targetFile).then(utils.getProp('hash')),
+      fingerprint: promisedFS.read(fingerprintFile).then(JSON.parse)
+    }).then(function(_arg) {
+      var fingerprint, targetHash;
+      targetHash = _arg.targetHash, fingerprint = _arg.fingerprint;
+      debugger;
+    })["catch"](console.error);
+  };
+
+  identifyPattern('loops', 'iterator').then(function(msg) {
     return console.log(msg);
   });
+
+  module.exports = {
+    projectUtils: projectUtils,
+    treeUtils: treeUtils,
+    pattern: fingerprintPattern,
+    identify: identifyPattern
+  };
 
 }).call(this);
