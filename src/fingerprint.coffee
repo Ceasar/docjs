@@ -1,5 +1,6 @@
 fs    = require 'fs'
 _     = require 'lodash'
+RSVP  = require 'rsvp'
 acorn = require 'acorn'
 walk  = require 'acorn/util/walk'
 
@@ -88,41 +89,45 @@ nodeWalk = (node, fn, fnMap) ->
   fnMap[node.type](node) if fnMap?[node.type]?
   fn(node) if fn?
 
-
-# TODO: use promises via 'https://github.com/tildeio/rsvp.js'
-fingerprintPattern = (patternName, success) ->
+# Returns a promise that resolves when a fingerprint is generated and exported
+# to a JSON file.
+fingerprintPattern = (patternName) ->
 
   patternFile = projectUtils.getPatternFile(patternName)
+  fingerprintFile = projectUtils.getFingerprintFile(patternName)
 
-  # Look at documented iterator pattern and compute its hash
-  fs.readFile patternFile, 'utf8', (err, jsFile) ->
-    return console.log(err) if err
+  generateFingerprint = () -> new RSVP.Promise (resolve, reject) ->
+    # Look at documented iterator pattern and compute its hash
+    fs.readFile patternFile, 'utf8', (err, jsFile) ->
+      return reject(err) if err?
 
-    ast = acorn.parse(jsFile)
-    stringifiedAST = JSON.stringify(ast, null, 4)
+      ast = acorn.parse(jsFile)
+      stringifiedAST = JSON.stringify(ast, null, 4)
 
-    nodeFn = (node) -> node.hash = computeHash(node)
-    nodeWalk(ast, nodeFn)
+      nodeFn = (node) -> node.hash = computeHash(node)
+      nodeWalk(ast, nodeFn)
 
-    success(ast)
+      resolve(ast)
 
-# Given an already fingerprinted AST (its subtree hashes exist in the tree),
-# write the fingerprint to a file associated with the pattern.
-exportFingerprint = (ast, patternName) ->
-  if ast.hash?
-    fileName = projectUtils.getFingerprintFile(patternName)
-    fs.writeFile fileName, JSON.stringify(ast.hash), (err) ->
-      console.error(err) if (err)
-      console.log("Saved fingerprint for pattern #{patternName}.")
-  else
-    # TODO: is this case necessary? if so, handle it.
+  # Given an already fingerprinted AST (its subtree hashes exist in the tree),
+  # write the fingerprint to a file associated with the pattern.
+  exportFingerprint = (ast) -> new RSVP.Promise (resolve, reject) ->
+    if ast.hash?
+      fs.writeFile fingerprintFile, JSON.stringify(ast.hash), (err) ->
+        if err?
+          reject(err)
+        else
+          resolve("Saved fingerprint for pattern #{patternName}.")
+    else
+      # TODO: is this case necessary? if so, handle it.
+
+  return generateFingerprint().then(exportFingerprint)
 
 # ============================================================================
 # Main execution
 # ============================================================================
 
-# ast = fingerprintPattern('getterSetter')
-fingerprintPattern 'getterSetter', (ast) ->
-  exportFingerprint(ast, 'getterSetter')
+fingerprintPattern('iterator').then (msg) ->
+  console.log(msg)
 
 

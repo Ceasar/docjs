@@ -10,6 +10,7 @@
     "acorn": "*",
     "estraverse": "*",
     "escodegen": "*",
+    "rsvp": "*",
     "grunt": "*",
     "grunt-concurrent": "*",
     "grunt-contrib-coffee": "*",

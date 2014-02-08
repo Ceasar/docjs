@@ -1,10 +1,12 @@
 (function() {
-  var NODE_TYPES, acorn, combineHashes, computeHash, exportFingerprint, fingerprintPattern, fs, nodeWalk, projectUtils, treeUtils, walk, _,
+  var NODE_TYPES, RSVP, acorn, combineHashes, computeHash, fingerprintPattern, fs, nodeWalk, projectUtils, treeUtils, walk, _,
     __hasProp = {}.hasOwnProperty;
 
   fs = require('fs');
 
   _ = require('lodash');
+
+  RSVP = require('rsvp');
 
   acorn = require('acorn');
 
@@ -119,41 +121,47 @@
     }
   };
 
-  fingerprintPattern = function(patternName, success) {
-    var patternFile;
+  fingerprintPattern = function(patternName) {
+    var exportFingerprint, fingerprintFile, generateFingerprint, patternFile;
     patternFile = projectUtils.getPatternFile(patternName);
-    return fs.readFile(patternFile, 'utf8', function(err, jsFile) {
-      var ast, nodeFn, stringifiedAST;
-      if (err) {
-        return console.log(err);
-      }
-      ast = acorn.parse(jsFile);
-      stringifiedAST = JSON.stringify(ast, null, 4);
-      nodeFn = function(node) {
-        return node.hash = computeHash(node);
-      };
-      nodeWalk(ast, nodeFn);
-      return success(ast);
-    });
-  };
-
-  exportFingerprint = function(ast, patternName) {
-    var fileName;
-    if (ast.hash != null) {
-      fileName = projectUtils.getFingerprintFile(patternName);
-      return fs.writeFile(fileName, JSON.stringify(ast.hash), function(err) {
-        if (err) {
-          console.error(err);
-        }
-        return console.log("Saved fingerprint for pattern " + patternName + ".");
+    fingerprintFile = projectUtils.getFingerprintFile(patternName);
+    generateFingerprint = function() {
+      return new RSVP.Promise(function(resolve, reject) {
+        return fs.readFile(patternFile, 'utf8', function(err, jsFile) {
+          var ast, nodeFn, stringifiedAST;
+          if (err != null) {
+            return reject(err);
+          }
+          ast = acorn.parse(jsFile);
+          stringifiedAST = JSON.stringify(ast, null, 4);
+          nodeFn = function(node) {
+            return node.hash = computeHash(node);
+          };
+          nodeWalk(ast, nodeFn);
+          return resolve(ast);
+        });
       });
-    } else {
+    };
+    exportFingerprint = function(ast) {
+      return new RSVP.Promise(function(resolve, reject) {
+        if (ast.hash != null) {
+          return fs.writeFile(fingerprintFile, JSON.stringify(ast.hash), function(err) {
+            if (err != null) {
+              return reject(err);
+            } else {
+              return resolve("Saved fingerprint for pattern " + patternName + ".");
+            }
+          });
+        } else {
 
-    }
+        }
+      });
+    };
+    return generateFingerprint().then(exportFingerprint);
   };
 
-  fingerprintPattern('getterSetter', function(ast) {
-    return exportFingerprint(ast, 'getterSetter');
+  fingerprintPattern('iterator').then(function(msg) {
+    return console.log(msg);
   });
 
 }).call(this);
