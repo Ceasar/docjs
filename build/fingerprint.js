@@ -1,5 +1,5 @@
 (function() {
-  var NODE_TYPES, acorn, combineHashes, computeHash, fingerprintPattern, fs, getChildren, nodeWalk, projectUtils, treeUtils, walk, _,
+  var NODE_TYPES, acorn, combineHashes, computeHash, exportFingerprint, fingerprintPattern, fs, nodeWalk, projectUtils, treeUtils, walk, _,
     __hasProp = {}.hasOwnProperty;
 
   fs = require('fs');
@@ -12,55 +12,12 @@
 
   NODE_TYPES = require('./types').types;
 
-  getChildren = function(node) {
-    var childNode, children, h, k, prop, v, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3;
-    children = [];
-    for (k in node) {
-      if (!__hasProp.call(node, k)) continue;
-      v = node[k];
-      if ((v != null ? v.type : void 0) != null) {
-        children.push(v);
-      } else if (_.isArray(v) && v.length) {
-        for (_i = 0, _len = v.length; _i < _len; _i++) {
-          childNode = v[_i];
-          if (childNode.type != null) {
-            children.push(childNode);
-          }
-        }
-      }
-    }
-    if ((_ref = node.type) === 'LetStatement' || _ref === 'LetExpression') {
-      _ref1 = node.head;
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        h = _ref1[_j];
-        children.push(h.id);
-        if (h.init != null) {
-          children.push(h.init);
-        }
-      }
-    } else if ((_ref2 = node.type) === 'ObjectExpression' || _ref2 === 'ObjectPattern') {
-      _ref3 = node.properties;
-      for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
-        prop = _ref3[_k];
-        children.push(prop.key);
-        children.push(prop.value);
-      }
-    }
-    return children;
-  };
-
-  nodeWalk = function(node, fn, fnMap) {
-    var child, _i, _len, _ref;
-    _ref = getChildren(node);
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      child = _ref[_i];
-      nodeWalk(child, fn, fnMap);
-    }
-    if ((fnMap != null ? fnMap[node.type] : void 0) != null) {
-      fnMap[node.type](node);
-    }
-    if (fn != null) {
-      return fn(node);
+  projectUtils = {
+    getPatternFile: function(name) {
+      return "analysis/patterns/" + name + ".js";
+    },
+    getFingerprintFile: function(name) {
+      return "analysis/fingerprints/" + name + ".json";
     }
   };
 
@@ -74,12 +31,42 @@
       } else {
         return obj.type != null;
       }
-    }
-  };
-
-  projectUtils = {
-    getPatternFile: function(name) {
-      return "patterns/" + name + ".js";
+    },
+    getChildren: function(node) {
+      var childNode, children, h, k, prop, v, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3;
+      children = [];
+      for (k in node) {
+        if (!__hasProp.call(node, k)) continue;
+        v = node[k];
+        if ((v != null ? v.type : void 0) != null) {
+          children.push(v);
+        } else if (_.isArray(v) && v.length) {
+          for (_i = 0, _len = v.length; _i < _len; _i++) {
+            childNode = v[_i];
+            if (childNode.type != null) {
+              children.push(childNode);
+            }
+          }
+        }
+      }
+      if ((_ref = node.type) === 'LetStatement' || _ref === 'LetExpression') {
+        _ref1 = node.head;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          h = _ref1[_j];
+          children.push(h.id);
+          if (h.init != null) {
+            children.push(h.init);
+          }
+        }
+      } else if ((_ref2 = node.type) === 'ObjectExpression' || _ref2 === 'ObjectPattern') {
+        _ref3 = node.properties;
+        for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+          prop = _ref3[_k];
+          children.push(prop.key);
+          children.push(prop.value);
+        }
+      }
+      return children;
     }
   };
 
@@ -104,7 +91,7 @@
     var child, hash, hashes;
     hashes = (function() {
       var _i, _len, _ref, _results;
-      _ref = getChildren(node);
+      _ref = treeUtils.getChildren(node);
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         child = _ref[_i];
@@ -117,7 +104,22 @@
     return hash;
   };
 
-  fingerprintPattern = function(patternName) {
+  nodeWalk = function(node, fn, fnMap) {
+    var child, _i, _len, _ref;
+    _ref = treeUtils.getChildren(node);
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      child = _ref[_i];
+      nodeWalk(child, fn, fnMap);
+    }
+    if ((fnMap != null ? fnMap[node.type] : void 0) != null) {
+      fnMap[node.type](node);
+    }
+    if (fn != null) {
+      return fn(node);
+    }
+  };
+
+  fingerprintPattern = function(patternName, success) {
     var patternFile;
     patternFile = projectUtils.getPatternFile(patternName);
     return fs.readFile(patternFile, 'utf8', function(err, jsFile) {
@@ -131,10 +133,27 @@
         return node.hash = computeHash(node);
       };
       nodeWalk(ast, nodeFn);
-      return ast;
+      return success(ast);
     });
   };
 
-  fingerprintPattern('getterSetter');
+  exportFingerprint = function(ast, patternName) {
+    var fileName;
+    if (ast.hash != null) {
+      fileName = projectUtils.getFingerprintFile(patternName);
+      return fs.writeFile(fileName, JSON.stringify(ast.hash), function(err) {
+        if (err) {
+          console.error(err);
+        }
+        return console.log("Saved fingerprint for pattern " + patternName + ".");
+      });
+    } else {
+
+    }
+  };
+
+  fingerprintPattern('iterator', function(ast) {
+    return exportFingerprint(ast, 'iterator');
+  });
 
 }).call(this);
