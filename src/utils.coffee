@@ -1,3 +1,5 @@
+{Promise} = require 'rsvp'
+
 ###
 # Call a Node-style async function and return a promise.
 #
@@ -5,7 +7,7 @@
 # @param {...*} var_args A variable number of arguments to pass to the Node function.
 # @return {Promise}
 ###
-q = (fn, args...) -> new Promise (resolve, reject) ->
+exports.q = (fn, args...) -> new Promise (resolve, reject) ->
   cb = (err, var_args...) ->
     if (err)
       reject(err)
