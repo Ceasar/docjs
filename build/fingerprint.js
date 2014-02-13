@@ -1,5 +1,5 @@
 (function() {
-  var NODE_TYPES, RSVP, acorn, combineHashes, computeHash, fingerprintPattern, fs, generateFingerprint, identifyPattern, nodeWalk, projectUtils, promisedFS, treeUtils, utils, walk, _,
+  var NODE_TYPES, RSVP, acorn, combineHashes, computeHash, fingerprintPattern, fs, generateFingerprint, identifyPattern, nodeWalk, projectUtils, q, treeUtils, utils, walk, _,
     __hasProp = {}.hasOwnProperty;
 
   fs = require('fs');
@@ -11,6 +11,8 @@
   acorn = require('acorn');
 
   walk = require('acorn/util/walk');
+
+  q = require('./utils').q;
 
   NODE_TYPES = require('./types').types;
 
@@ -83,31 +85,6 @@
     }
   };
 
-  promisedFS = {
-    read: function(fileName) {
-      return new RSVP.Promise(function(resolve, reject) {
-        return fs.readFile(fileName, 'utf8', function(err, contents) {
-          if (err != null) {
-            return reject(err);
-          } else {
-            return resolve(contents);
-          }
-        });
-      });
-    },
-    write: function(fileName, contents) {
-      return new RSVP.Promise(function(resolve, reject) {
-        return fs.writeFile(fileName, contents, function(err) {
-          if (err != null) {
-            return reject(err);
-          } else {
-            return resolve();
-          }
-        });
-      });
-    }
-  };
-
   combineHashes = function(hashes) {
     var combined, count, h, nodeType, _i, _len;
     combined = {};
@@ -158,7 +135,7 @@
   };
 
   generateFingerprint = function(fileName) {
-    return promisedFS.read(fileName).then(function(jsFile) {
+    return q(fs.readFile, fileName, 'utf8').then(function(jsFile) {
       var ast, storeNodeHash;
       ast = acorn.parse(jsFile);
       storeNodeHash = function(node) {
@@ -177,7 +154,7 @@
       var contents;
       if (ast.hash != null) {
         contents = JSON.stringify(ast.hash);
-        return promisedFS.write(fingerprintFile, contents).then(function() {
+        return q(fs.writeFile, fingerprintFile, contents).then(function() {
           return "Saved fingerprint for pattern " + patternName + ".";
         });
       } else {
@@ -193,7 +170,7 @@
     fingerprintFile = projectUtils.getFingerprintFile(pattern);
     return RSVP.hash({
       targetHash: generateFingerprint(targetFile).then(utils.getProp('hash')),
-      fingerprint: promisedFS.read(fingerprintFile).then(JSON.parse)
+      fingerprint: q(fs.readFile, fingerprintFile, 'utf8').then(JSON.parse)
     }).then(function(_arg) {
       var fingerprint, targetHash;
       targetHash = _arg.targetHash, fingerprint = _arg.fingerprint;

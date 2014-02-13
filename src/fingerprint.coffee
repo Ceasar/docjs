@@ -4,6 +4,7 @@ RSVP  = require 'rsvp'
 acorn = require 'acorn'
 walk  = require 'acorn/util/walk'
 
+{q} = require './utils'
 NODE_TYPES = require('./types').types
 
 
@@ -57,17 +58,6 @@ treeUtils =
 
     return children
 
-# Promise wrapper for fs
-promisedFS =
-  read: (fileName) -> new RSVP.Promise (resolve, reject) ->
-    fs.readFile fileName, 'utf8', (err, contents) ->
-      if err? then reject(err) else resolve(contents)
-
-  write: (fileName, contents) -> new RSVP.Promise (resolve, reject) ->
-    fs.writeFile fileName, contents, (err) ->
-      if err? then reject(err) else resolve()
-
-
 
 # ============================================================================
 # Hashing
@@ -108,7 +98,7 @@ nodeWalk = (node, fn, fnMap) ->
 # and a fingerprint hash generated.
 generateFingerprint = (fileName) ->
   # Look at documented iterator pattern and compute its hash
-  promisedFS.read(fileName).then (jsFile) ->
+  q(fs.readFile, fileName, 'utf8').then (jsFile) ->
     ast = acorn.parse(jsFile)
     storeNodeHash = (node) -> node.hash = computeHash(node)
 
@@ -127,7 +117,7 @@ fingerprintPattern = (patternName) ->
   exportFingerprint = (ast) ->
     if ast.hash?
       contents = JSON.stringify(ast.hash)
-      promisedFS.write(fingerprintFile, contents).then () ->
+      q(fs.writeFile, fingerprintFile, contents).then () ->
         return "Saved fingerprint for pattern #{patternName}."
 
     else
@@ -145,7 +135,7 @@ identifyPattern = (target, pattern) ->
   # been generated and (2) a documented pattern fingerprint is parsed as JSON.
   return RSVP.hash({
     targetHash: generateFingerprint(targetFile).then(utils.getProp 'hash')
-    fingerprint: promisedFS.read(fingerprintFile).then(JSON.parse)
+    fingerprint: q(fs.readFile, fingerprintFile, 'utf8').then(JSON.parse)
   }).then(({targetHash, fingerprint}) ->
     debugger
 
