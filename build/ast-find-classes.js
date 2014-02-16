@@ -7,7 +7,7 @@
 
   esprima = require('esprima');
 
-  fs.readFile('examples/cucumber.js', 'utf8', function(err, jsFile) {
+  fs.readFile('analysis/targets/cucumber.js', 'utf8', function(err, jsFile) {
     var ast, body, classes, decl, expr, stringifiedAST, _i, _len;
     if (err) {
       return console.log(err);

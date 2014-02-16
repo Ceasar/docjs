@@ -2,7 +2,7 @@ fs      = require 'fs'
 _       = require 'lodash'
 esprima = require 'esprima'
 
-fs.readFile 'examples/cucumber.js', 'utf8', (err, jsFile) ->
+fs.readFile 'analysis/targets/cucumber.js', 'utf8', (err, jsFile) ->
   if err then return console.log err
 
   ast = esprima.parse(jsFile)
