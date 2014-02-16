@@ -147,16 +147,17 @@
   };
 
   fingerprintPattern = function(patternName) {
-    var exportFingerprint, fingerprintFile, patternFile;
+    var exportFingerprint, fingerprintFile, patternFile, successMsg;
     patternFile = projectUtils.getPatternFile(patternName);
     fingerprintFile = projectUtils.getFingerprintFile(patternName);
+    successMsg = function(name) {
+      return "Saved fingerprint for pattern " + name + ".";
+    };
     exportFingerprint = function(ast) {
       var contents;
       if (ast.hash != null) {
         contents = JSON.stringify(ast.hash);
-        return q(fs.writeFile, fingerprintFile, contents).then(function() {
-          return "Saved fingerprint for pattern " + patternName + ".";
-        });
+        return q(fs.writeFile, fingerprintFile, contents).then(successMsg);
       } else {
         return console.error("No fingerprint found to export");
       }

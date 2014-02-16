@@ -112,13 +112,14 @@ fingerprintPattern = (patternName) ->
   patternFile = projectUtils.getPatternFile(patternName)
   fingerprintFile = projectUtils.getFingerprintFile(patternName)
 
+  successMsg = (name) -> "Saved fingerprint for pattern #{name}."
+
   # Given an already fingerprinted AST (its subtree hashes exist in the tree),
   # write the fingerprint to a file associated with the pattern.
   exportFingerprint = (ast) ->
     if ast.hash?
       contents = JSON.stringify(ast.hash)
-      q(fs.writeFile, fingerprintFile, contents).then () ->
-        return "Saved fingerprint for pattern #{patternName}."
+      q(fs.writeFile, fingerprintFile, contents).then(successMsg)
 
     else
       console.error "No fingerprint found to export"
