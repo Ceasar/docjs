@@ -1,30 +1,30 @@
 var myRevealingModule = (function () {
 
-        var privateVar = "Ben Cherry",
-            publicVar  = "Hey there!";
+    var privateVar = "Ben Cherry",
+        publicVar  = "Hey there!";
 
-        function privateFunction() {
-            console.log( "Name:" + privateVar );
-        }
+    function privateFunction() {
+        console.log( "Name:" + privateVar );
+    }
 
-        function publicSetName( strName ) {
-            privateVar = strName;
-        }
+    function publicSetName( strName ) {
+        privateVar = strName;
+    }
 
-        function publicGetName() {
-            privateFunction();
-        }
+    function publicGetName() {
+        privateFunction();
+    }
 
 
-        // Reveal public pointers to
-        // private functions and properties
+    // Reveal public pointers to
+    // private functions and properties
 
-        return {
-            setName: publicSetName,
-            greeting: publicVar,
-            getName: publicGetName
-        };
+    return {
+        setName: publicSetName,
+        greeting: publicVar,
+        getName: publicGetName
+    };
 
-    })();
+})();
 
 myRevealingModule.setName( "Paul Kinlan" );
