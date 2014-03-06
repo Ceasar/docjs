@@ -1,9 +1,10 @@
+_ = require 'lodash'
 ###
 Utilities for working with the abstract syntax tree
 ###
 
 # Given an AST node, return a list of its immediate children
-getChildren: (node) ->
+getChildren = (node) ->
   children = []
 
   # Check all properties for nodes or node arrays
@@ -32,77 +33,13 @@ getChildren: (node) ->
 # @param fn A callback, called on every child of the root node
 # @param fnMap A map of AST types to functions called on each of those types
 nodeWalk = (node, fn, fnMap) ->
-  for child in treeUtils.getChildren(node)
+  for child in getChildren(node)
     nodeWalk(child, fn, fnMap)
 
   fnMap[node.type](node) if fnMap?[node.type]?
   fn(node) if fn?
 
-
-# List of all the possible JavaScript AST node types, as defined by the
-# Mozilla Parser API
-TYPES = [
-  "Node",
-  "Program",
-  "Function",
-  "Statement",
-  "EmptyStatement",
-  "BlockStatement",
-  "ExpressionStatement",
-  "IfStatement",
-  "LabeledStatement",
-  "BreakStatement",
-  "ContinueStatement",
-  "WithStatement",
-  "SwitchStatement",
-  "ReturnStatement",
-  "ThrowStatement",
-  "TryStatement",
-  "WhileStatement",
-  "DoWhileStatement",
-  "ForStatement",
-  "ForInStatement",
-  "ForOfStatement",
-  "LetStatement",
-  "DebuggerStatement",
-  "Declaration",
-  "FunctionDeclaration",
-  "VariableDeclaration",
-  "VariableDeclarator",
-  "Expression",
-  "ThisExpression",
-  "ArrayExpression",
-  "ObjectExpression",
-  "FunctionExpression",
-  "ArrowExpression",
-  "SequenceExpression",
-  "UnaryExpression",
-  "BinaryExpression",
-  "AssignmentExpression",
-  "UpdateExpression",
-  "LogicalExpression",
-  "ConditionalExpression",
-  "NewExpression",
-  "CallExpression",
-  "MemberExpression",
-  "MemberExpression",
-  "ComprehensionExpression",
-  "GeneratorExpression",
-  "GraphExpression",
-  "GraphIndexExpression",
-  "LetExpression",
-  "Pattern",
-  "ObjectPattern",
-  "ArrayPattern",
-  "SwitchCase",
-  "CatchClause",
-  "ComprehensionBlock",
-  "Identifier",
-  "Literal"
-]
-
 module.exports = {
-  TYPES: TYPES
   getChildren: getChildren
   nodeWalk: nodeWalk
 }
