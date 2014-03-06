@@ -4,9 +4,9 @@ RSVP  = require 'rsvp'
 acorn = require 'acorn'
 walk  = require 'acorn/util/walk'
 
-{q} = require './utils'
-{getChildren, nodeWalk} = require('./ast')
-NODE_TYPES = require('./types').types
+{q}                     = require './utils'
+{getChildren, nodeWalk} = require './ast'
+NODE_TYPES              = require('./types').types
 
 
 # ============================================================================
