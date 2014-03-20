@@ -80,7 +80,7 @@ getNodeTypes = (ast, depth) ->
   getNodeVector = (node) -> node.hash = computeHash(node)
 
   nodeWalk ast, getNodeVector, null, depth
-  return ast.hash
+  return ast
 
 
 module.exports =
