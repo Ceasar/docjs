@@ -107,3 +107,6 @@ exports.TYPES = TYPES = [
   "Identifier",
   "Literal"
 ]
+
+for type in TYPES
+  exports['is'+type] = (node) -> node?.type == type

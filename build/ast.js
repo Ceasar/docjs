@@ -1,5 +1,5 @@
 (function() {
-  var TYPES, getChildren, getNodeSrc, nodeWalk, _,
+  var TYPES, getChildren, getNodeSrc, nodeWalk, type, _, _i, _len,
     __hasProp = {}.hasOwnProperty;
 
   _ = require('lodash');
@@ -69,5 +69,12 @@
   };
 
   exports.TYPES = TYPES = ["Node", "Program", "Function", "Statement", "EmptyStatement", "BlockStatement", "ExpressionStatement", "IfStatement", "LabeledStatement", "BreakStatement", "ContinueStatement", "WithStatement", "SwitchStatement", "ReturnStatement", "ThrowStatement", "TryStatement", "WhileStatement", "DoWhileStatement", "ForStatement", "ForInStatement", "ForOfStatement", "LetStatement", "DebuggerStatement", "Declaration", "FunctionDeclaration", "VariableDeclaration", "VariableDeclarator", "Expression", "ThisExpression", "ArrayExpression", "ObjectExpression", "FunctionExpression", "ArrowExpression", "SequenceExpression", "UnaryExpression", "BinaryExpression", "AssignmentExpression", "UpdateExpression", "LogicalExpression", "ConditionalExpression", "NewExpression", "CallExpression", "MemberExpression", "MemberExpression", "ComprehensionExpression", "GeneratorExpression", "GraphExpression", "GraphIndexExpression", "LetExpression", "Pattern", "ObjectPattern", "ArrayPattern", "SwitchCase", "CatchClause", "ComprehensionBlock", "Identifier", "Literal"];
+
+  for (_i = 0, _len = TYPES.length; _i < _len; _i++) {
+    type = TYPES[_i];
+    exports['is' + type] = function(node) {
+      return (node != null ? node.type : void 0) === type;
+    };
+  }
 
 }).call(this);
