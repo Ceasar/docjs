@@ -4,7 +4,7 @@ Utilities for working with the abstract syntax tree
 ###
 
 # Given an AST node, return a list of its immediate children
-getChildren = (node) ->
+exports.getChildren = getChildren = (node) ->
   children = []
 
   # Check all properties for nodes or node arrays
@@ -32,7 +32,7 @@ getChildren = (node) ->
 # @param node An AST node
 # @param fn A callback, called on every child of the root node
 # @param fnMap A map of AST types to functions called on each of those types
-nodeWalk = (node, fn, fnMap) ->
+exports.nodeWalk = nodeWalk = (node, fn, fnMap) ->
   for child in getChildren(node)
     nodeWalk(child, fn, fnMap)
 
@@ -41,12 +41,14 @@ nodeWalk = (node, fn, fnMap) ->
 
 # Given a node with location information and a source file, return the string
 # of source code corresponding to the node
-getNodeSrc = (node, src) ->
-  TODO
+exports.getNodeSrc = getNodeSrc = (node, src) ->
+  {start, end} = node.loc
+  lines = src.split('\n') # TODO too naive?
+  return lines.slice(start.line-1, end.line).join('\n')
 
 # List of all the possible JavaScript AST node types, as defined by the
 # Mozilla Parser API
-TYPES = [
+exports.TYPES = TYPES = [
   "Node",
   "Program",
   "Function",
@@ -105,9 +107,3 @@ TYPES = [
   "Identifier",
   "Literal"
 ]
-
-module.exports = {
-  TYPES: TYPES
-  getChildren: getChildren
-  nodeWalk: nodeWalk
-}

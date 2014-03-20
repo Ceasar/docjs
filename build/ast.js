@@ -9,7 +9,7 @@
   */
 
 
-  getChildren = function(node) {
+  exports.getChildren = getChildren = function(node) {
     var childNode, children, h, k, prop, v, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3;
     children = [];
     for (k in node) {
@@ -46,7 +46,7 @@
     return children;
   };
 
-  nodeWalk = function(node, fn, fnMap) {
+  exports.nodeWalk = nodeWalk = function(node, fn, fnMap) {
     var child, _i, _len, _ref;
     _ref = getChildren(node);
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -61,16 +61,13 @@
     }
   };
 
-  getNodeSrc = function(node, src) {
-    return TODO;
+  exports.getNodeSrc = getNodeSrc = function(node, src) {
+    var end, lines, start, _ref;
+    _ref = node.loc, start = _ref.start, end = _ref.end;
+    lines = src.split('\n');
+    return lines.slice(start.line - 1, end.line).join('\n');
   };
 
-  TYPES = ["Node", "Program", "Function", "Statement", "EmptyStatement", "BlockStatement", "ExpressionStatement", "IfStatement", "LabeledStatement", "BreakStatement", "ContinueStatement", "WithStatement", "SwitchStatement", "ReturnStatement", "ThrowStatement", "TryStatement", "WhileStatement", "DoWhileStatement", "ForStatement", "ForInStatement", "ForOfStatement", "LetStatement", "DebuggerStatement", "Declaration", "FunctionDeclaration", "VariableDeclaration", "VariableDeclarator", "Expression", "ThisExpression", "ArrayExpression", "ObjectExpression", "FunctionExpression", "ArrowExpression", "SequenceExpression", "UnaryExpression", "BinaryExpression", "AssignmentExpression", "UpdateExpression", "LogicalExpression", "ConditionalExpression", "NewExpression", "CallExpression", "MemberExpression", "MemberExpression", "ComprehensionExpression", "GeneratorExpression", "GraphExpression", "GraphIndexExpression", "LetExpression", "Pattern", "ObjectPattern", "ArrayPattern", "SwitchCase", "CatchClause", "ComprehensionBlock", "Identifier", "Literal"];
-
-  module.exports = {
-    TYPES: TYPES,
-    getChildren: getChildren,
-    nodeWalk: nodeWalk
-  };
+  exports.TYPES = TYPES = ["Node", "Program", "Function", "Statement", "EmptyStatement", "BlockStatement", "ExpressionStatement", "IfStatement", "LabeledStatement", "BreakStatement", "ContinueStatement", "WithStatement", "SwitchStatement", "ReturnStatement", "ThrowStatement", "TryStatement", "WhileStatement", "DoWhileStatement", "ForStatement", "ForInStatement", "ForOfStatement", "LetStatement", "DebuggerStatement", "Declaration", "FunctionDeclaration", "VariableDeclaration", "VariableDeclarator", "Expression", "ThisExpression", "ArrayExpression", "ObjectExpression", "FunctionExpression", "ArrowExpression", "SequenceExpression", "UnaryExpression", "BinaryExpression", "AssignmentExpression", "UpdateExpression", "LogicalExpression", "ConditionalExpression", "NewExpression", "CallExpression", "MemberExpression", "MemberExpression", "ComprehensionExpression", "GeneratorExpression", "GraphExpression", "GraphIndexExpression", "LetExpression", "Pattern", "ObjectPattern", "ArrayPattern", "SwitchCase", "CatchClause", "ComprehensionBlock", "Identifier", "Literal"];
 
 }).call(this);
