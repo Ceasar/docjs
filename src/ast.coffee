@@ -107,6 +107,7 @@ TYPES = [
 ]
 
 module.exports = {
+  TYPES: TYPES
   getChildren: getChildren
   nodeWalk: nodeWalk
 }
