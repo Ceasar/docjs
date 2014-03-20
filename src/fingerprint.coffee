@@ -77,11 +77,14 @@ identifyPattern = (target, pattern) ->
 # Main execution
 # ============================================================================
 
-# fingerprintPattern('iterator').then (msg) ->
-#   console.log(msg)
-
-identifyPattern('loops', 'iterator').then (msg) ->
+fingerprintPattern('singleton').then (msg) ->
+  console.log 'hit this'
   console.log(msg)
+
+# console.log 'hi'
+# identifyPattern('singleton', 'singleton').then (msg) ->
+#   console.log 'helloooo'
+#   console.log(msg)
 
 # ============================================================================
 

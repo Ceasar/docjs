@@ -74,7 +74,8 @@
     })["catch"](console.error);
   };
 
-  identifyPattern('loops', 'iterator').then(function(msg) {
+  fingerprintPattern('singleton').then(function(msg) {
+    console.log('hit this');
     return console.log(msg);
   });
 
