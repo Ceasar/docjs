@@ -2,12 +2,27 @@
 Attempting to identify module pattern
 ###
 
+acorn = require 'acorn'
 fs = require 'fs'
-fingerrint = require './fingerrint'
+{all} = require 'rsvp'
+
+{nodeWalk} = require './ast'
 {q} = require './utils'
 
 
-readFile = (file) -> q(fs.readFile, file, 'utf8')
+# Return whether the node is an immediately-invoked function expression (IIFE)
+isIIFE = (node) ->
+  node.type == 'CallExpression' && node.callee?.type == 'FunctionExpression'
 
 
-# Main
+moduleDir = 'analysis/examples/modules'
+
+asts = fs.readdirSync(moduleDir).map (file) ->
+  acorn.parse(fs.readFileSync(moduleDir+'/'+file, 'utf8'))
+
+iifes = []
+
+for ast in asts
+  nodeWalk ast, (node) ->
+    if isIIFE(node)
+      iifes.push(node)

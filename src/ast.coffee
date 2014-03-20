@@ -11,7 +11,7 @@ getChildren = (node) ->
   for own k, v of node
     if v?.type?
       children.push(v)
-    else if _.isArray(v) and v.length
+    else if Array.isArray(v) and v.length
       for childNode in v
         children.push(childNode) if childNode.type?
 
@@ -38,6 +38,73 @@ nodeWalk = (node, fn, fnMap) ->
 
   fnMap[node.type](node) if fnMap?[node.type]?
   fn(node) if fn?
+
+# Given a node with location information and a source file, return the string
+# of source code corresponding to the node
+getNodeSrc = (node, src) ->
+  TODO
+
+# List of all the possible JavaScript AST node types, as defined by the
+# Mozilla Parser API
+TYPES = [
+  "Node",
+  "Program",
+  "Function",
+  "Statement",
+  "EmptyStatement",
+  "BlockStatement",
+  "ExpressionStatement",
+  "IfStatement",
+  "LabeledStatement",
+  "BreakStatement",
+  "ContinueStatement",
+  "WithStatement",
+  "SwitchStatement",
+  "ReturnStatement",
+  "ThrowStatement",
+  "TryStatement",
+  "WhileStatement",
+  "DoWhileStatement",
+  "ForStatement",
+  "ForInStatement",
+  "ForOfStatement",
+  "LetStatement",
+  "DebuggerStatement",
+  "Declaration",
+  "FunctionDeclaration",
+  "VariableDeclaration",
+  "VariableDeclarator",
+  "Expression",
+  "ThisExpression",
+  "ArrayExpression",
+  "ObjectExpression",
+  "FunctionExpression",
+  "ArrowExpression",
+  "SequenceExpression",
+  "UnaryExpression",
+  "BinaryExpression",
+  "AssignmentExpression",
+  "UpdateExpression",
+  "LogicalExpression",
+  "ConditionalExpression",
+  "NewExpression",
+  "CallExpression",
+  "MemberExpression",
+  "MemberExpression",
+  "ComprehensionExpression",
+  "GeneratorExpression",
+  "GraphExpression",
+  "GraphIndexExpression",
+  "LetExpression",
+  "Pattern",
+  "ObjectPattern",
+  "ArrayPattern",
+  "SwitchCase",
+  "CatchClause",
+  "ComprehensionBlock",
+  "Identifier",
+  "Literal"
+]
 
 module.exports = {
   getChildren: getChildren

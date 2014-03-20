@@ -1,5 +1,5 @@
 (function() {
-  var TYPES, nodeWalk,
+  var TYPES, getNodeSrc, nodeWalk,
     __hasProp = {}.hasOwnProperty;
 
   ({
@@ -15,7 +15,7 @@
         v = node[k];
         if ((v != null ? v.type : void 0) != null) {
           children.push(v);
-        } else if (_.isArray(v) && v.length) {
+        } else if (Array.isArray(v) && v.length) {
           for (_i = 0, _len = v.length; _i < _len; _i++) {
             childNode = v[_i];
             if (childNode.type != null) {
@@ -58,6 +58,10 @@
     if (fn != null) {
       return fn(node);
     }
+  };
+
+  getNodeSrc = function(node, src) {
+    return TODO;
   };
 
   TYPES = ["Node", "Program", "Function", "Statement", "EmptyStatement", "BlockStatement", "ExpressionStatement", "IfStatement", "LabeledStatement", "BreakStatement", "ContinueStatement", "WithStatement", "SwitchStatement", "ReturnStatement", "ThrowStatement", "TryStatement", "WhileStatement", "DoWhileStatement", "ForStatement", "ForInStatement", "ForOfStatement", "LetStatement", "DebuggerStatement", "Declaration", "FunctionDeclaration", "VariableDeclaration", "VariableDeclarator", "Expression", "ThisExpression", "ArrayExpression", "ObjectExpression", "FunctionExpression", "ArrowExpression", "SequenceExpression", "UnaryExpression", "BinaryExpression", "AssignmentExpression", "UpdateExpression", "LogicalExpression", "ConditionalExpression", "NewExpression", "CallExpression", "MemberExpression", "MemberExpression", "ComprehensionExpression", "GeneratorExpression", "GraphExpression", "GraphIndexExpression", "LetExpression", "Pattern", "ObjectPattern", "ArrayPattern", "SwitchCase", "CatchClause", "ComprehensionBlock", "Identifier", "Literal"];
