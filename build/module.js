@@ -4,7 +4,9 @@ Attempting to identify module pattern
 
 
 (function() {
-  var acorn, ast, asts, fs, getNodeSrc, iifes, isIIFE, moduleDir, nodeWalk, path, q, srcs, _i, _len, _ref;
+  var CodePointer, Module, acorn, ast, fs, getModule, iifes, isIIFE, moduleDir, path, program, programs, q, srcs, _, _i, _len;
+
+  _ = require('lodash');
 
   acorn = require('acorn');
 
@@ -12,18 +14,47 @@ Attempting to identify module pattern
 
   path = require('path');
 
-  _ref = require('./ast'), nodeWalk = _ref.nodeWalk, getNodeSrc = _ref.getNodeSrc;
+  ast = require('./ast');
 
   q = require('./utils').q;
 
   isIIFE = function(node) {
-    var _ref1;
-    return node.type === 'CallExpression' && ((_ref1 = node.callee) != null ? _ref1.type : void 0) === 'FunctionExpression';
+    return ast.isCallExpression(node) && ast.isFunctionExpression(ast.callee);
   };
+
+  getModule = function(node) {
+    var body, returnExpr, _ref;
+    if (!isIIFE(node)) {
+      return null;
+    }
+    body = node.callee.body;
+    returnExpr = (_ref = _.find(body, ast.isReturnStatement)) != null ? _ref.argument : void 0;
+    if (!returnExpr) {
+      return null;
+    }
+  };
+
+  CodePointer = (function() {
+    function CodePointer(_arg) {
+      this.name = _arg.name, this.line = _arg.line;
+    }
+
+    return CodePointer;
+
+  })();
+
+  Module = (function() {
+    function Module(_arg) {
+      this.name = _arg.name, this.api = _arg.api;
+    }
+
+    return Module;
+
+  })();
 
   moduleDir = 'analysis/examples/modules';
 
-  asts = fs.readdirSync(moduleDir).map(function(file) {
+  programs = fs.readdirSync(moduleDir).map(function(file) {
     var fileStr;
     file = path.join(moduleDir, file);
     fileStr = fs.readFileSync(file, 'utf8');
@@ -37,12 +68,12 @@ Attempting to identify module pattern
 
   srcs = [];
 
-  for (_i = 0, _len = asts.length; _i < _len; _i++) {
-    ast = asts[_i];
-    nodeWalk(ast, function(node) {
+  for (_i = 0, _len = programs.length; _i < _len; _i++) {
+    program = programs[_i];
+    ast.nodeWalk(program, function(node) {
       if (isIIFE(node)) {
         iifes.push(node);
-        return srcs.push(getNodeSrc(node, fs.readFileSync(node.loc.source, 'utf8')));
+        return srcs.push(ast.getNodeSrc(node, fs.readFileSync(node.loc.source, 'utf8')));
       }
     });
   }
