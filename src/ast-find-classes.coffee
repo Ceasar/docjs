@@ -1,28 +1,74 @@
-fs      = require 'fs'
-_       = require 'lodash'
-esprima = require 'esprima'
+fs    = require 'fs'
+_     = require 'lodash'
+RSVP  = require 'rsvp'
+acorn = require 'acorn'
+walk  = require 'acorn/util/walk'
 
-fs.readFile 'analysis/targets/cucumber.js', 'utf8', (err, jsFile) ->
-  if err then return console.log err
+{q}         = require './utils'
+astUtils    = require './ast'
+NODE_TYPES  = require('./types').types
 
-  ast = esprima.parse(jsFile)
-  stringifiedAST = JSON.stringify(ast, null, 4)
 
-  body = ast.body
-  classes = {}
+findClassDefinitions = (ast) ->
+  classDefinitions = {}
 
-  # Identify classes declared at the top level
-  for expr in body
-    if expr.type is esprima.Syntax.VariableDeclaration and \
-        expr.declarations.length is 1
+  nodeTypeVector = astUtils.getNodeTypes(ast)
 
-      # Scan for IIFF
-      decl = expr.declarations[0]
-      if decl.init.type is esprima.Syntax.CallExpression and \
-          decl.init.callee.type is esprima.Syntax.FunctionExpression and \
-          decl.init.callee.id is null and \
-          decl.init.callee.body.type is esprima.Syntax.BlockStatement
+  ###
+  # TODO
+  #
+  # * match on CoffeeScript's class syntax
+  ###
 
-        classes[decl.id.name] = decl.init
+  nullFn = () -> null
+  SEARCH_DEPTH  = 10
 
-  console.log(classes)
+  String::isCapitalized = () -> @charAt(0).toUpperCase() is @charAt(0)
+
+  capitalizedVars = {}
+
+  # First pass: find the names of variables that might be classes
+  astUtils.nodeWalk(ast, nullFn, {
+    AssignmentExpression: (node) ->
+      # 'app.MyClass = ...'
+      if node.left.type is 'MemberExpression'
+        klass = node.left.property.name
+        capitalizedVars[klass] = node.right if klass.isCapitalized()
+
+      # 'MyClass = ...'
+      else if node.left.type is 'Identifier'
+        klass = node.left.name
+        capitalizedVars[klass] = node.right if klass.isCapitalized()
+
+    # 'var MyClass = ...'
+    VariableDeclarator: (node) ->
+      klass = node.id.name
+      capitalizedVars[klass] = node.init if node.init? and klass.isCapitalized()
+
+    # 'function MyClass (...) { ... }'
+    FunctionDeclaration: (node) ->
+      klass = node.id?.name
+      capitalizedVars[klass] = node if klass? and klass.isCapitalized()
+
+  }, SEARCH_DEPTH)
+
+
+  # Second pass: verify by looking for `.prototype` stuff
+  # TODO: is it valid?
+  astUtils.nodeWalk(ast, nullFn, {
+    MemberExpression: (node) ->
+      if node.property.name is 'prototype'
+        klass = node.object.name
+        unless classDefinitions[klass]?
+          classDefinitions[klass] = capitalizedVars[klass]
+
+  }, SEARCH_DEPTH)
+
+  return classDefinitions
+
+q(fs.readFile, 'analysis/targets/classes.js', 'utf8')
+  .then(acorn.parse)
+  .then(findClassDefinitions)
+  .then(console.log)
+  .catch(console.error)
+
