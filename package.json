@@ -18,6 +18,7 @@
     "grunt-nodemon": ">=0.2.0",
     "grunt-node-inspector": "*",
     "matchdep": "*",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "fishbone": "^1.0.1"
   }
 }

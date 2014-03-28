@@ -27,11 +27,24 @@
   Jigsaw.prototype = Object.create(Puzzle);
 
 
+  var Poker = function () {
+    this.prototype = Object.create(Game);
+    this.type = 'card';
+    this.description = 'No Limit Texas Hold Em';
+  };
+
+  function VideoGame () {
+    this.prototype = Object.create(Game);
+    this.type = 'video';
+  }
+
 
   module.exports = {
-    Game: Game,
-    Puzzle: Puzzle,
-    Jigsaw: Jigsaw
+    Game:       Game,
+    Puzzle:     Puzzle,
+    Jigsaw:     Jigsaw,
+    Poker:      Poker,
+    VideoGame:  VideoGame
   };
 
 }());
