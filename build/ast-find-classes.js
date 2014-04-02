@@ -174,13 +174,10 @@
     return classDefinitions.toJSON();
   };
 
-  acorn.parseWithLocations = _.partialRight(acorn.parse, {
-    locations: true
-  });
-
-  q(fs.readFile, 'analysis/targets/classes.js', 'utf8').then(acorn.parseWithLocations).then(findClassDefinitions).then(function(def) {
-    debugger;
-    return def;
-  }).then(console.log)["catch"](console.error);
+  exports.getClassDefinitionsPromise = function(targetFile) {
+    return q(fs.readFile, targetFile, 'utf8').then(_.partialRight(acorn.parse, {
+      locations: true
+    })).then(findClassDefinitions)["catch"](console.error);
+  };
 
 }).call(this);
