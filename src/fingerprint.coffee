@@ -4,9 +4,9 @@ RSVP  = require 'rsvp'
 acorn = require 'acorn'
 walk  = require 'acorn/util/walk'
 
-{q} = require './utils'
-{getChildren, nodeWalk} = require('./ast')
-NODE_TYPES = require('./types').types
+{q}         = require './utils'
+astUtils    = require './ast'
+NODE_TYPES  = require('./types').types
 
 
 # ============================================================================
@@ -23,29 +23,6 @@ projectUtils =
 
 
 # ============================================================================
-# Hashing
-#
-#   A "hash" for a subtree of the AST is an object that keeps track of the count
-#   of each node type present in the subtree, essentially a node-type vector.
-# ============================================================================
-
-# Combine a list of hashes into a single object
-combineHashes = (hashes) ->
-  combined = {}
-  for h in hashes
-    for own nodeType, count of h
-      combined[nodeType] = 0 unless combined[nodeType]?
-      combined[nodeType] += count
-  return combined
-
-computeHash = (node) ->
-  hashes = (child.hash for child in getChildren(node))
-  hash = if hashes.length then combineHashes(hashes) else {}
-  hash[node.type] = if hash[node.type]? then hash[node.type] + 1 else 1
-  return hash
-
-
-# ============================================================================
 # Pattern Identification
 # ============================================================================
 
@@ -53,12 +30,9 @@ computeHash = (node) ->
 # and a fingerprint hash generated.
 generateFingerprint = (fileName) ->
   # Look at documented iterator pattern and compute its hash
-  q(fs.readFile, fileName, 'utf8').then (jsFile) ->
-    ast = acorn.parse(jsFile)
-    storeNodeHash = (node) -> node.hash = computeHash(node)
-
-    nodeWalk ast, storeNodeHash
-    return ast
+  q(fs.readFile, fileName, 'utf8')
+    .then(acorn.parse)
+    .then(astUtils.getNodeTypes)
 
 # Returns a promise that resolves when a fingerprint is generated and exported
 # to a JSON file.
@@ -90,7 +64,7 @@ identifyPattern = (target, pattern) ->
   # Returns a promise that resolves when (1) the ast hash for a target file has
   # been generated and (2) a documented pattern fingerprint is parsed as JSON.
   return RSVP.hash({
-    targetHash: generateFingerprint(targetFile).then(utils.getProp 'hash')
+    targetHash: generateFingerprint(targetFile)
     fingerprint: q(fs.readFile, fingerprintFile, 'utf8').then(JSON.parse)
   }).then(({targetHash, fingerprint}) ->
     debugger

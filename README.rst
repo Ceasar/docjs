@@ -26,3 +26,10 @@ Development requires installing ``grunt-cli`` (``npm install -g grunt-cli``).
   interactively debug your code.
 
 JS source code examples for analysis are included in the examples/ dir.
+
+Running tests
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To run the tests, simply::
+
+    make test

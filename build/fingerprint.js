@@ -1,6 +1,5 @@
 (function() {
-  var NODE_TYPES, RSVP, acorn, combineHashes, computeHash, fingerprintPattern, fs, generateFingerprint, getChildren, identifyPattern, nodeWalk, projectUtils, q, utils, walk, _, _ref,
-    __hasProp = {}.hasOwnProperty;
+  var NODE_TYPES, RSVP, acorn, astUtils, fingerprintPattern, fs, generateFingerprint, identifyPattern, projectUtils, q, utils, walk, _;
 
   fs = require('fs');
 
@@ -14,7 +13,7 @@
 
   q = require('./utils').q;
 
-  _ref = require('./ast'), getChildren = _ref.getChildren, nodeWalk = _ref.nodeWalk;
+  astUtils = require('./ast');
 
   NODE_TYPES = require('./types').types;
 
@@ -38,50 +37,8 @@
     }
   };
 
-  combineHashes = function(hashes) {
-    var combined, count, h, nodeType, _i, _len;
-    combined = {};
-    for (_i = 0, _len = hashes.length; _i < _len; _i++) {
-      h = hashes[_i];
-      for (nodeType in h) {
-        if (!__hasProp.call(h, nodeType)) continue;
-        count = h[nodeType];
-        if (combined[nodeType] == null) {
-          combined[nodeType] = 0;
-        }
-        combined[nodeType] += count;
-      }
-    }
-    return combined;
-  };
-
-  computeHash = function(node) {
-    var child, hash, hashes;
-    hashes = (function() {
-      var _i, _len, _ref1, _results;
-      _ref1 = getChildren(node);
-      _results = [];
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        child = _ref1[_i];
-        _results.push(child.hash);
-      }
-      return _results;
-    })();
-    hash = hashes.length ? combineHashes(hashes) : {};
-    hash[node.type] = hash[node.type] != null ? hash[node.type] + 1 : 1;
-    return hash;
-  };
-
   generateFingerprint = function(fileName) {
-    return q(fs.readFile, fileName, 'utf8').then(function(jsFile) {
-      var ast, storeNodeHash;
-      ast = acorn.parse(jsFile);
-      storeNodeHash = function(node) {
-        return node.hash = computeHash(node);
-      };
-      nodeWalk(ast, storeNodeHash);
-      return ast;
-    });
+    return q(fs.readFile, fileName, 'utf8').then(acorn.parse).then(astUtils.getNodeTypes);
   };
 
   fingerprintPattern = function(patternName) {
@@ -108,7 +65,7 @@
     targetFile = projectUtils.getTargetFile(target);
     fingerprintFile = projectUtils.getFingerprintFile(pattern);
     return RSVP.hash({
-      targetHash: generateFingerprint(targetFile).then(utils.getProp('hash')),
+      targetHash: generateFingerprint(targetFile),
       fingerprint: q(fs.readFile, fingerprintFile, 'utf8').then(JSON.parse)
     }).then(function(_arg) {
       var fingerprint, targetHash;
