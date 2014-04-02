@@ -9,11 +9,11 @@ Usage:
 ###
 _       = require 'lodash'
 fs      = require 'fs'
-esprima = require 'esprima'
+acorn = require 'acorn'
 
 
 getAbstractSyntaxTree = (jsFile) ->
-  return esprima.parse(jsFile)
+  return acorn.parse(jsFile)
 
 
 readFile = (filename, cb) ->
@@ -43,3 +43,6 @@ main = (filename) ->
 if (require.main is module)
   filename = process.argv[2]
   main(filename)
+
+module.exports =
+  findDecorators: findDecorators
