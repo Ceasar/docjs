@@ -4,11 +4,10 @@ RSVP  = require 'rsvp'
 Model = require 'fishbone'
 acorn = require 'acorn'
 walk  = require 'acorn/util/walk'
-CodeCatalog = require('./code-catalog').CodeCatalog
-
-{q}         = require './utils'
-astUtils    = require './ast'
-NODE_TYPES  = require('./types').types
+CodeCatalog = require('../code-catalog').CodeCatalog
+{q}         = require '../utils'
+astUtils    = require '../ast'
+NODE_TYPES  = require('../types').types
 
 
 OBJECT_EXPRESSION = 'ObjectExpression'
@@ -154,7 +153,7 @@ walkTopLevelSingleton = (node, singletons) ->
 
 
 nullFn = -> null
-findSingletonDefinition = (ast) ->
+findSingletonDefinitions = (ast) ->
   singletons = new CodeCatalog()
   astUtils.nodeWalk ast, nullFn, {
     # find a function or variable declaration
@@ -166,9 +165,5 @@ findSingletonDefinition = (ast) ->
   return singletons.toJSON()
 
 
-exports.getPromise = (targetFile) ->
-  q(fs.readFile, targetFile, 'utf8')
-    .then(_.partialRight acorn.parse, {locations: true})
-    .then(findSingletonDefinition)
-
-
+module.exports =
+  findSingletons: findSingletonDefinitions
