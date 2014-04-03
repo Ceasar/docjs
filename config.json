@@ -1,0 +1,9 @@
+{
+  "files": [ ],
+  "directories": [
+    "analysis/targets"
+  ],
+  "patterns": {
+    "exclude": [ "singleton" ]
+  }
+}
