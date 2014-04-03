@@ -7,9 +7,10 @@ Usage:
   node decorators.coffee <filename>
 
 ###
-_       = require 'lodash'
-fs      = require 'fs'
-acorn = require 'acorn'
+_           = require 'lodash'
+fs          = require 'fs'
+acorn       = require 'acorn'
+CodeCatalog = require('../code-catalog').CodeCatalog
 
 
 getAbstractSyntaxTree = (jsFile) ->
@@ -21,8 +22,9 @@ readFile = (filename, cb) ->
     if err then console.log err else cb jsFile
 
 
+decorators = new CodeCatalog()
+
 findDecorators = (ast) ->
-  decorators = []
   for node in ast.body
     if node.expression?
       expression = node.expression
@@ -30,8 +32,8 @@ findDecorators = (ast) ->
         name = expression.left.name
         if expression.right.arguments?
           if name in _.pluck(expression.right.arguments, 'name')
-            decorators.push name
-  return decorators
+            decorators.add name, expression
+  return decorators.toJSON()
 
 
 main = (filename) ->
