@@ -13,7 +13,7 @@ var Cucumber = (function() {
     Cucumber.prototype.toString = function () {
       return "A " + this.length + " cm " + this.color + " cucumber.";
     };
-})();
+}());
 
 /*
  * Cut a cucumber in half.
@@ -23,4 +23,4 @@ var cutInHalf = function (cucumber) {
         new Cucumber(cucumber.color, cucumber.length / 2),
         new Cucumber(cucumber.color, cucumber.length / 2),
     ];
-}
+};
