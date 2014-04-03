@@ -12,7 +12,7 @@ module.exports = (grunt) ->
       glob_to_multiple:
         expand: true
         cwd: 'src/'
-        src: ['*.coffee']
+        src: ['**/*.coffee']
         dest: 'build/'
         ext: '.js'
 

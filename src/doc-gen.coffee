@@ -1,23 +1,37 @@
 _     = require 'lodash'
 fs    = require 'fs'
 RSVP  = require 'rsvp'
+acorn = require 'acorn'
 
-{q}         = require './utils'
-findClasses = require('./find-class-pattern')
-config      = require('./doc-gen-config')
+{q}             = require './utils'
+findDecorators  = require('./patterns/decorator').findDecorators
+findClasses     = require('./patterns/class').findClasses
+config          = require('./doc-gen-config')
+
+
+getAbstractSyntaxTree = _.partialRight acorn.parse, { locations: true }
 
 # -----------------------------------------------------------------------------
 
 documentation = {}
 
-runFileAnalysis = (filename) ->
-  # TODO: add more pattern matching
 
-  findClasses.getPromise(filename)
-    .then (definitions) ->
-      return if _.isEmpty(definitions)
-      documentation[filename] = {} unless documentation.filename?
-      documentation[filename].classes = definitions
+documentPatterns = (filename) -> (ast) ->
+  # TODO: add more pattern matching
+  classDefinitions  = findClasses(ast)
+  decorators        = findDecorators(ast)
+  return if _.isEmpty(classDefinitions) and _.isEmpty(decorators)
+
+  documentation[filename] = {} unless documentation.filename?
+  documentation[filename].classes     = classDefinitions
+  documentation[filename].decorators  = decorators
+
+
+runFileAnalysis = (filename) ->
+  q(fs.readFile, filename, 'utf8')
+    .then(getAbstractSyntaxTree)
+    .then(documentPatterns filename)
+
 
 runDirectoryAnalysis = (dirname) ->
 
@@ -42,17 +56,22 @@ runDirectoryAnalysis = (dirname) ->
 # -----------------------------------------------------------------------------
 
 # Main execution
-
 # TODO: pretty print the documentation
 
-config.getPromise().then((config) ->
-  analysis =
-    (runFileAnalysis(file) for file in config.files)
-      .concat(runDirectoryAnalysis(dir) for dir in config.directories)
+main = () ->
+  config.getPromise().then((config) ->
+    analysis =
+      (runFileAnalysis(file) for file in config.files)
+        .concat(runDirectoryAnalysis(dir) for dir in config.directories)
 
-  RSVP.all(analysis)
+    RSVP.all(analysis)
 
-).then(() ->
-  debugger
-).catch(console.error)
+  ).then(() ->
+
+    console.log(documentation)
+
+  ).catch(console.error)
+
+
+main() if module is require.main
 

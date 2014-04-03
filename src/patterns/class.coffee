@@ -4,19 +4,20 @@ RSVP  = require 'rsvp'
 acorn = require 'acorn'
 walk  = require 'acorn/util/walk'
 
-{q}         = require './utils'
-astUtils    = require './ast'
-CodeCatalog = require('./code-catalog').CodeCatalog
-NODE_TYPES  = require('./types').types
+{q}         = require '../utils'
+astUtils    = require '../ast'
+CodeCatalog = require('../code-catalog').CodeCatalog
+NODE_TYPES  = require('../types').types
 
 THIS_EXPRESSION_TYPE      = 'ThisExpression'
 FUNCTION_EXPRESSION_TYPE  = 'FunctionExpression'
 
 # -----------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------
+findClassDefinitions = (ast) ->
 
-findClassDefinitions = (classDefinitions, capitalizedVars) -> (ast) ->
+  classDefinitions = new CodeCatalog()
+  capitalizedVars  = new CodeCatalog()
 
   nodeTypeVector = astUtils.getNodeTypes(ast)
 
@@ -126,11 +127,6 @@ findClassDefinitions = (classDefinitions, capitalizedVars) -> (ast) ->
 
 # -----------------------------------------------------------------------------
 
-exports.getPromise = (targetFile) ->
-  classDefinitions = new CodeCatalog()
-  capitalizedVars  = new CodeCatalog()
-
-  q(fs.readFile, targetFile, 'utf8')
-    .then(_.partialRight acorn.parse, {locations: true})
-    .then(findClassDefinitions classDefinitions, capitalizedVars)
+module.exports =
+  findClasses: findClassDefinitions
 

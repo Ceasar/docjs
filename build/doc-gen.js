@@ -1,5 +1,5 @@
 (function() {
-  var RSVP, config, documentation, findClasses, fs, q, runDirectoryAnalysis, runFileAnalysis, _;
+  var RSVP, acorn, config, documentPatterns, documentation, findClasses, findDecorators, fs, getAbstractSyntaxTree, main, q, runDirectoryAnalysis, runFileAnalysis, _;
 
   _ = require('lodash');
 
@@ -7,24 +7,40 @@
 
   RSVP = require('rsvp');
 
+  acorn = require('acorn');
+
   q = require('./utils').q;
 
-  findClasses = require('./find-class-pattern');
+  findDecorators = require('./patterns/decorator').findDecorators;
+
+  findClasses = require('./patterns/class').findClasses;
 
   config = require('./doc-gen-config');
 
+  getAbstractSyntaxTree = _.partialRight(acorn.parse, {
+    locations: true
+  });
+
   documentation = {};
 
-  runFileAnalysis = function(filename) {
-    return findClasses.getPromise(filename).then(function(definitions) {
-      if (_.isEmpty(definitions)) {
+  documentPatterns = function(filename) {
+    return function(ast) {
+      var classDefinitions, decorators;
+      classDefinitions = findClasses(ast);
+      decorators = findDecorators(ast);
+      if (_.isEmpty(classDefinitions) && _.isEmpty(decorators)) {
         return;
       }
       if (documentation.filename == null) {
         documentation[filename] = {};
       }
-      return documentation[filename].classes = definitions;
-    });
+      documentation[filename].classes = classDefinitions;
+      return documentation[filename].decorators = decorators;
+    };
+  };
+
+  runFileAnalysis = function(filename) {
+    return q(fs.readFile, filename, 'utf8').then(getAbstractSyntaxTree).then(documentPatterns(filename));
   };
 
   runDirectoryAnalysis = function(dirname) {
@@ -46,30 +62,36 @@
     return q(fs.readdir, dirname).then(_.partialRight(_.filter, filterFilenames)).then(_.partialRight(_.map, runAnalysis)).then(RSVP.all);
   };
 
-  config.getPromise().then(function(config) {
-    var analysis, dir, file;
-    analysis = ((function() {
-      var _i, _len, _ref, _results;
-      _ref = config.files;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        file = _ref[_i];
-        _results.push(runFileAnalysis(file));
-      }
-      return _results;
-    })()).concat((function() {
-      var _i, _len, _ref, _results;
-      _ref = config.directories;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        dir = _ref[_i];
-        _results.push(runDirectoryAnalysis(dir));
-      }
-      return _results;
-    })());
-    return RSVP.all(analysis);
-  }).then(function() {
-    debugger;
-  })["catch"](console.error);
+  main = function() {
+    return config.getPromise().then(function(config) {
+      var analysis, dir, file;
+      analysis = ((function() {
+        var _i, _len, _ref, _results;
+        _ref = config.files;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          file = _ref[_i];
+          _results.push(runFileAnalysis(file));
+        }
+        return _results;
+      })()).concat((function() {
+        var _i, _len, _ref, _results;
+        _ref = config.directories;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          dir = _ref[_i];
+          _results.push(runDirectoryAnalysis(dir));
+        }
+        return _results;
+      })());
+      return RSVP.all(analysis);
+    }).then(function() {
+      return console.log(documentation);
+    })["catch"](console.error);
+  };
+
+  if (module === require.main) {
+    main();
+  }
 
 }).call(this);
