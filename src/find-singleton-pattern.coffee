@@ -17,18 +17,18 @@ MEMBER_EXPRESSION = 'MemberExpression'
 
 nullFn = -> null
 findSingletonDefinition = (ast) ->
-# TODO: only works to find a single singleton because of the way codecatalog is setup
+  singletons = new CodeCatalog()
 
-  singletonDef = new CodeCatalog()
-  privateMethods = new CodeCatalog()
-  privateProperties = new CodeCatalog()
-  publicMethods = new CodeCatalog()
-  publicProperties = new CodeCatalog()
-  init = undefined
-  instance = undefined
   astUtils.nodeWalk ast, nullFn, {
     # find a function or variable declaration
     VariableDeclaration: (node) ->
+      singletonDef = new CodeCatalog()
+      privateMethods = new CodeCatalog()
+      privateProperties = new CodeCatalog()
+      publicMethods = new CodeCatalog()
+      publicProperties = new CodeCatalog()
+      init = undefined
+      instance = undefined
       # --------------------------------------------------------------------------
       # run first pass
       # --------------------------------------------------------------------------
@@ -133,6 +133,19 @@ findSingletonDefinition = (ast) ->
             # same as functiondec
 
         }
+
+      singletonDef.add('name', instance)
+      singletonDef.add('init_method', init)
+      singletonDef.add('private_methods', privateMethods.toJSON())
+      singletonDef.add('public_methods', publicMethods.toJSON())
+      singletonDef.add('private_properties', privateProperties.toJSON())
+      singletonDef.add('public_properties', publicProperties.toJSON())
+      if(instance? and !singletons.has instance)
+        singletons.add(instance, singletonDef.toJSON())
+
+      # then clear the singletondef and the singleton
+
+
     # private methods
     # public methods
     # private properties
@@ -140,7 +153,14 @@ findSingletonDefinition = (ast) ->
     # instance, init function
     # should all be defined at this line
     FunctionDeclaration: (node) ->
-  # --------------------------------------------------------------------------
+      singletonDef = new CodeCatalog()
+      privateMethods = new CodeCatalog()
+      privateProperties = new CodeCatalog()
+      publicMethods = new CodeCatalog()
+      publicProperties = new CodeCatalog()
+      init = undefined
+      instance = undefined
+      # --------------------------------------------------------------------------
       # run first pass
       # --------------------------------------------------------------------------
       # check that it returns an object
@@ -207,7 +227,7 @@ findSingletonDefinition = (ast) ->
       #   Look inside this function
       #     Label private, public methods/variables
 
-      if instance
+      if(instance)
         initFunction = false
         # start the checks - this should be the exact same as the FunctionDeclaration checks
         astUtils.nodeWalk node, nullFn, {
@@ -244,17 +264,24 @@ findSingletonDefinition = (ast) ->
             # same as functiondec
 
         }
+
+      singletonDef.add('name', instance)
+      singletonDef.add('init_method', init)
+      singletonDef.add('private_methods', privateMethods.toJSON())
+      singletonDef.add('public_methods', publicMethods.toJSON())
+      singletonDef.add('private_properties', privateProperties.toJSON())
+      singletonDef.add('public_properties', publicProperties.toJSON())
+      if(instance? and !singletons.has instance)
+        singletons.add(instance, singletonDef.toJSON())
+
+      # then clear the singletondef and the singleton
+
+
   }
 
 
-  singletonDef.add('name', instance)
-  singletonDef.add('init_method', init)
-  singletonDef.add('private_methods', privateMethods.toJSON())
-  singletonDef.add('public_methods', publicMethods.toJSON())
-  singletonDef.add('private_properties', privateProperties.toJSON())
-  singletonDef.add('public_properties', publicProperties.toJSON())
-  console.log singletonDef.toJSON()
-  return singletonDef.toJSON()
+  console.log singletons.toJSON()
+  return singletons.toJSON()
 
 
 exports.getPromise = (targetFile) ->
