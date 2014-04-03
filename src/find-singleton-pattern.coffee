@@ -28,7 +28,7 @@ findSingletonDefinition = (ast) ->
   instance = undefined
   astUtils.nodeWalk ast, nullFn, {
     # find a function or variable declaration
-    FunctionDeclaration: (node) ->
+    VariableDeclaration: (node) ->
       # --------------------------------------------------------------------------
       # run first pass
       # --------------------------------------------------------------------------
@@ -110,7 +110,7 @@ findSingletonDefinition = (ast) ->
                 # walk the return statement. Everything inside the object is
                 _.map ret_node.argument.properties, (prop) ->
                   # walk the properties
-                  if(prop.value.type == 'FunctionDeclaration')
+                  if(prop.value.type == 'FunctionExpression')
                     publicMethods.add(prop.key.name, prop.value)
 
                   else if(prop.value.type == 'Literal')
@@ -125,7 +125,7 @@ findSingletonDefinition = (ast) ->
               VariableDeclaration: (priv_var_node) ->
                 _.map priv_var_node.declarations, (decl) ->
                   if(!publicProperties.has(decl.id?.name))
-                    privateMethods.add(decl.id.name, decl.init)
+                    privateProperties.add(decl.id.name, decl.init)
             }, 2  # only get the shallowest return node
 
         VariableDeclaration: (node) ->
@@ -138,7 +138,7 @@ findSingletonDefinition = (ast) ->
     # public properties
     # instance, init function
     # should all be defined at this line
-    VariableDeclaration: (node) ->
+    FunctionDeclaration: (node) ->
 
       # --------------------------------------------------------------------------
       # run first pass
