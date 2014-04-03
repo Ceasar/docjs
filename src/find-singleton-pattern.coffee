@@ -96,42 +96,43 @@ findSingletonDefinition = (ast) ->
       #   Look inside this function
       #     Label private, public methods/variables
 
-      initFunction = false
-      # start the checks - this should be the exact same as the FunctionDeclaration checks
-      astUtils.nodeWalk node, nullFn, {
-        FunctionDeclaration: (fun_node) ->
-          # check if it's name is equal to init
-          if(fun_node.id.name == init)
-            # it's the function node
-            initFunction = true  # used for checking return statement
-            # walk the initFunction, find any declarations
-            astUtils.nodeWalk fun_node, nullFn, {
-              ReturnStatement: (ret_node) ->
-                # walk the return statement. Everything inside the object is
-                _.map ret_node.argument.properties, (prop) ->
-                  # walk the properties
-                  if(prop.value.type == 'FunctionExpression')
-                    publicMethods.add(prop.key.name, prop.value)
+      if(instance)
+        initFunction = false
+        # start the checks - this should be the exact same as the FunctionDeclaration checks
+        astUtils.nodeWalk node, nullFn, {
+          FunctionDeclaration: (fun_node) ->
+            # check if it's name is equal to init
+            if(fun_node.id.name == init)
+              # it's the function node
+              initFunction = true  # used for checking return statement
+              # walk the initFunction, find any declarations
+              astUtils.nodeWalk fun_node, nullFn, {
+                ReturnStatement: (ret_node) ->
+                  # walk the return statement. Everything inside the object is
+                  _.map ret_node.argument.properties, (prop) ->
+                    # walk the properties
+                    if(prop.value.type == 'FunctionExpression')
+                      publicMethods.add(prop.key.name, prop.value)
 
-                  else if(prop.value.type == 'Literal')
-                    publicProperties.add(prop.key.name, prop.value)
+                    else if(prop.value.type == 'Literal')
+                      publicProperties.add(prop.key.name, prop.value)
 
 
-              FunctionDeclaration: (priv_fun_node) ->
-                if(!publicMethods.has(priv_fun_node.id?.name))
-                  privateMethods.add(priv_fun_node.id.name, priv_fun_node)
+                FunctionDeclaration: (priv_fun_node) ->
+                  if(!publicMethods.has(priv_fun_node.id?.name))
+                    privateMethods.add(priv_fun_node.id.name, priv_fun_node)
 
-                # this is a private function
-              VariableDeclaration: (priv_var_node) ->
-                _.map priv_var_node.declarations, (decl) ->
-                  if(!publicProperties.has(decl.id?.name))
-                    privateProperties.add(decl.id.name, decl.init)
-            }, 2  # only get the shallowest return node
+                  # this is a private function
+                VariableDeclaration: (priv_var_node) ->
+                  _.map priv_var_node.declarations, (decl) ->
+                    if(!publicProperties.has(decl.id?.name))
+                      privateProperties.add(decl.id.name, decl.init)
+              }, 2  # only get the shallowest return node
 
-        VariableDeclaration: (node) ->
-          # same as functiondec
+          VariableDeclaration: (node) ->
+            # same as functiondec
 
-      }
+        }
     # private methods
     # public methods
     # private properties
@@ -139,8 +140,7 @@ findSingletonDefinition = (ast) ->
     # instance, init function
     # should all be defined at this line
     FunctionDeclaration: (node) ->
-
-      # --------------------------------------------------------------------------
+  # --------------------------------------------------------------------------
       # run first pass
       # --------------------------------------------------------------------------
       # check that it returns an object
@@ -166,7 +166,7 @@ findSingletonDefinition = (ast) ->
                 isSingleton = false
                 astUtils.nodeWalk fun_node, nullFn, {
                   IfStatement: (if_node) ->
-                    # check if there's a unary expression comparing a !<Identifier>
+                   # check if there's a unary expression comparing a !<Identifier>
                     test = if_node.test
                     if(test.operator == '!' && test.argument.type == 'Identifier')
                       # run through the if statement, search for assigning the istance
@@ -207,48 +207,43 @@ findSingletonDefinition = (ast) ->
       #   Look inside this function
       #     Label private, public methods/variables
 
-      initFunction = false
-      # start the checks - this should be the exact same as the FunctionDeclaration checks
-      astUtils.nodeWalk node, nullFn, {
-        FunctionDeclaration: (fun_node) ->
-          # check if it's name is equal to init
-          if(fun_node.id.name == init)
-            # it's the function node
-            initFunction = true  # used for checking return statement
-            # walk the initFunction, find any declarations
-            astUtils.nodeWalk fun_node, nullFn, {
-              ReturnStatement: (ret_node) ->
-                # walk the return statement. Everything inside the object is
-                _.map ret_node.argument.properties, (prop) ->
-                  # walk the properties
-                  if(prop.value.type == 'FunctionDeclaration')
-                    publicMethods.add(prop.key.name, prop.value)
+      if instance
+        initFunction = false
+        # start the checks - this should be the exact same as the FunctionDeclaration checks
+        astUtils.nodeWalk node, nullFn, {
+          FunctionDeclaration: (fun_node) ->
+            # check if it's name is equal to init
+            if(fun_node.id.name == init)
+              # it's the function node
+              initFunction = true  # used for checking return statement
+              # walk the initFunction, find any declarations
+              astUtils.nodeWalk fun_node, nullFn, {
+                ReturnStatement: (ret_node) ->
+                  # walk the return statement. Everything inside the object is
+                  _.map ret_node.argument.properties, (prop) ->
+                    # walk the properties
+                    if(prop.value.type == 'FunctionExpression')
+                      publicMethods.add(prop.key.name, prop.value)
 
-                  else if(prop.value.type == 'Literal')
-                    publicProperties.add(prop.key.name, prop.value)
+                    else if(prop.value.type == 'Literal')
+                      publicProperties.add(prop.key.name, prop.value)
 
 
-              FunctionDeclaration: (priv_fun_node) ->
-                if(!publicMethods.has(priv_fun_node.id?.name))
-                  privateMethods.add(priv_fun_node.id.name, priv_fun_node)
+                FunctionDeclaration: (priv_fun_node) ->
+                  if(!publicMethods.has(priv_fun_node.id?.name))
+                    privateMethods.add(priv_fun_node.id.name, priv_fun_node)
 
-                # this is a private function
-              VariableDeclaration: (priv_var_node) ->
-                _.map priv_var_node.declarations, (decl) ->
-                  if(!publicProperties.has(decl.id?.name))
-                    privateMethods.add(decl.id.name, decl.init)
-            }, 2  # only get the shallowest return node
+                  # this is a private function
+                VariableDeclaration: (priv_var_node) ->
+                  _.map priv_var_node.declarations, (decl) ->
+                    if(!publicProperties.has(decl.id?.name))
+                      privateProperties.add(decl.id.name, decl.init)
+              }, 2  # only get the shallowest return node
 
-        VariableDeclaration: (node) ->
-          # same as functiondec
+          VariableDeclaration: (node) ->
+            # same as functiondec
 
-      }
-    # private methods
-    # public methods
-    # private properties
-    # public properties
-    # instance, init function
-    # should all be defined at this line
+        }
   }
 
 
