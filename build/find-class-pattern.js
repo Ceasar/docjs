@@ -1,14 +1,11 @@
 (function() {
-  var CodeCatalog, FUNCTION_EXPRESSION_TYPE, Model, NODE_TYPES, RSVP, THIS_EXPRESSION_TYPE, acorn, astUtils, capitalizedVars, classDefinitions, findClassDefinitions, fs, q, walk, _,
-    __hasProp = {}.hasOwnProperty;
+  var CodeCatalog, FUNCTION_EXPRESSION_TYPE, NODE_TYPES, RSVP, THIS_EXPRESSION_TYPE, acorn, astUtils, capitalizedVars, classDefinitions, findClassDefinitions, fs, q, walk, _;
 
   fs = require('fs');
 
   _ = require('lodash');
 
   RSVP = require('rsvp');
-
-  Model = require('fishbone');
 
   acorn = require('acorn');
 
@@ -18,60 +15,13 @@
 
   astUtils = require('./ast');
 
+  CodeCatalog = require('./code-catalog').CodeCatalog;
+
   NODE_TYPES = require('./types').types;
 
   THIS_EXPRESSION_TYPE = 'ThisExpression';
 
   FUNCTION_EXPRESSION_TYPE = 'FunctionExpression';
-
-  /*
-  # Adds events to simple JS objects.
-  # Prevents overwriting of entries (unless you remove that name first).
-  */
-
-
-  CodeCatalog = Model({
-    init: function(entries) {
-      var k, v, _results;
-      _results = [];
-      for (k in entries) {
-        if (!__hasProp.call(entries, k)) continue;
-        v = entries[k];
-        _results.push(this[k] = v);
-      }
-      return _results;
-    },
-    add: function(name, pointer) {
-      if (this.has(name)) {
-        return false;
-      }
-      this.trigger('add', {
-        name: name,
-        pointer: pointer
-      });
-      this[name] = pointer;
-      return true;
-    },
-    remove: function(name) {
-      if (!this.has(name)) {
-        return false;
-      }
-      this.trigger('remove', {
-        name: name
-      });
-      delete this[name];
-      return true;
-    },
-    has: function(name) {
-      return this[name] != null;
-    },
-    get: function(name) {
-      return this[name];
-    },
-    toJSON: function() {
-      return _.omit(this, _.isFunction);
-    }
-  });
 
   classDefinitions = new CodeCatalog();
 
@@ -83,7 +33,7 @@
     /*
     # TODO
     #
-    # * match on CoffeeScript's class syntax
+    # match on CoffeeScript's class syntax?
     */
 
     nullFn = function() {
@@ -174,10 +124,10 @@
     return classDefinitions.toJSON();
   };
 
-  exports.getClassDefinitionsPromise = function(targetFile) {
+  exports.getPromise = function(targetFile) {
     return q(fs.readFile, targetFile, 'utf8').then(_.partialRight(acorn.parse, {
       locations: true
-    })).then(findClassDefinitions)["catch"](console.error);
+    })).then(findClassDefinitions);
   };
 
 }).call(this);
