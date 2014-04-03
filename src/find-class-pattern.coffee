@@ -1,45 +1,18 @@
 fs    = require 'fs'
 _     = require 'lodash'
 RSVP  = require 'rsvp'
-Model = require 'fishbone'
 acorn = require 'acorn'
 walk  = require 'acorn/util/walk'
 
 {q}         = require './utils'
 astUtils    = require './ast'
+CodeCatalog = require('./code-catalog').CodeCatalog
 NODE_TYPES  = require('./types').types
 
 THIS_EXPRESSION_TYPE      = 'ThisExpression'
 FUNCTION_EXPRESSION_TYPE  = 'FunctionExpression'
 
 # -----------------------------------------------------------------------------
-
-###
-# Adds events to simple JS objects.
-# Prevents overwriting of entries (unless you remove that name first).
-###
-CodeCatalog = Model
-
-  init: (entries) ->
-    @[k] = v for own k, v of entries
-
-  add: (name, pointer) ->
-    return false if @has(name)
-    @trigger 'add', { name: name, pointer: pointer }
-    @[name] = pointer
-    return true
-
-  remove: (name) ->
-    return false unless @has(name)
-    @trigger 'remove', { name: name }
-    delete @[name]
-    return true
-
-  has: (name) -> @[name]?
-
-  get: (name) -> @[name]
-
-  toJSON: ()  -> _.omit(@, _.isFunction)
 
 classDefinitions = new CodeCatalog()
 capitalizedVars  = new CodeCatalog()
@@ -53,7 +26,7 @@ findClassDefinitions = (ast) ->
   ###
   # TODO
   #
-  # * match on CoffeeScript's class syntax
+  # match on CoffeeScript's class syntax?
   ###
 
   nullFn = () -> null
@@ -154,11 +127,10 @@ findClassDefinitions = (ast) ->
 
   return classDefinitions.toJSON()
 
+# -----------------------------------------------------------------------------
 
-exports.getClassDefinitionsPromise = (targetFile) ->
-
+exports.getPromise = (targetFile) ->
   q(fs.readFile, targetFile, 'utf8')
     .then(_.partialRight acorn.parse, {locations: true})
     .then(findClassDefinitions)
-    .catch(console.error)
 

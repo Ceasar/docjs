@@ -131,7 +131,7 @@
       return node.hash = computeHash(node);
     };
     nodeWalk(ast, getNodeVector, null, depth);
-    return ast.hash;
+    return ast;
   };
 
   module.exports = {
