@@ -28,12 +28,12 @@
     classDefinitions = new CodeCatalog();
     capitalizedVars = new CodeCatalog();
     nodeTypeVector = astUtils.getNodeTypes(ast);
-    /*
-    # TODO
-    #
-    # match on CoffeeScript's class syntax?
-    */
 
+    /*
+     * TODO
+     *
+     * match on CoffeeScript's class syntax?
+     */
     nullFn = function() {
       return null;
     };

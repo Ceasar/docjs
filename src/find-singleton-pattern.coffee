@@ -4,6 +4,7 @@ RSVP  = require 'rsvp'
 Model = require 'fishbone'
 acorn = require 'acorn'
 walk  = require 'acorn/util/walk'
+CodeCatalog = require('./code-catalog').CodeCatalog
 
 {q}         = require './utils'
 astUtils    = require './ast'
@@ -14,47 +15,20 @@ OBJECT_EXPRESSION = 'ObjectExpression'
 RETURN_STATEMENT = 'ReturnStatement'
 MEMBER_EXPRESSION = 'MemberExpression'
 
-###
-# Adds events to simple JS objects.
-# Prevents overwriting of entries (unless you remove that name first).
-###
-CodeCatalog = Model
-
-  init: (entries) ->
-    @[k] = v for own k, v of entries
-
-  add: (name, pointer) ->
-    return false if @has(name)
-    @trigger 'add', { name: name, pointer: pointer }
-    @[name] = pointer
-    return true
-
-  remove: (name) ->
-    return false unless @has(name)
-    @trigger 'remove', { name: name }
-    delete @[name]
-    return true
-
-  has: (name) -> @[name]?
-
-  get: (name) -> @[name]
-
-  toJSON: ()  -> _.omit(@, _.isFunction)
-
 nullFn = -> null
 findSingletonDefinition = (ast) ->
+# TODO: only works to find a single singleton because of the way codecatalog is setup
 
-  singletonPointers = new CodeCatalog()
+  singletonDef = new CodeCatalog()
   privateMethods = new CodeCatalog()
   privateProperties = new CodeCatalog()
   publicMethods = new CodeCatalog()
   publicProperties = new CodeCatalog()
+  init = undefined
+  instance = undefined
   astUtils.nodeWalk ast, nullFn, {
     # find a function or variable declaration
     FunctionDeclaration: (node) ->
-      init = undefined
-      instance = undefined
-
       # --------------------------------------------------------------------------
       # run first pass
       # --------------------------------------------------------------------------
@@ -81,7 +55,7 @@ findSingletonDefinition = (ast) ->
                 isSingleton = false
                 astUtils.nodeWalk fun_node, nullFn, {
                   IfStatement: (if_node) ->
-                    # check if there's a unary expression comparing a !<Identifier>
+                   # check if there's a unary expression comparing a !<Identifier>
                     test = if_node.test
                     if(test.operator == '!' && test.argument.type == 'Identifier')
                       # run through the if statement, search for assigning the istance
@@ -165,9 +139,6 @@ findSingletonDefinition = (ast) ->
     # instance, init function
     # should all be defined at this line
     VariableDeclaration: (node) ->
-
-      init = undefined
-      instance = undefined
 
       # --------------------------------------------------------------------------
       # run first pass
@@ -280,15 +251,20 @@ findSingletonDefinition = (ast) ->
     # should all be defined at this line
   }
 
-acorn.parseWithLocations = _.partialRight acorn.parse, {locations: true}
 
-q(fs.readFile, 'analysis/targets/singleton.js', 'utf8')
-  .then(acorn.parseWithLocations)
-  .then(findSingletonDefinition)
-  .then((def) ->
-    debugger
-    return def )
-  .then(console.log)
-  .catch(console.error)
+  singletonDef.add('name', instance)
+  singletonDef.add('init_method', init)
+  singletonDef.add('private_methods', privateMethods.toJSON())
+  singletonDef.add('public_methods', publicMethods.toJSON())
+  singletonDef.add('private_properties', privateProperties.toJSON())
+  singletonDef.add('public_properties', publicProperties.toJSON())
+  console.log singletonDef.toJSON()
+  return 'hello'
 
-console.log 'hello'
+
+exports.getPromise = (targetFile) ->
+  q(fs.readFile, targetFile, 'utf8')
+    .then(_.partialRight acorn.parse, {locations: true})
+    .then(findSingletonDefinition)
+
+
