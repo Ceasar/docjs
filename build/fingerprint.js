@@ -1,5 +1,5 @@
 (function() {
-  var NODE_TYPES, RSVP, acorn, astUtils, fingerprintPattern, fs, generateFingerprint, identifyPattern, projectUtils, q, utils, walk, _;
+  var NODE_TYPES, RSVP, acorn, astUtils, fingerprintPattern, fs, generateFingerprint, identifyPattern, identifySingleton, projectUtils, q, utils, walk, _;
 
   fs = require('fs');
 
@@ -74,10 +74,12 @@
     })["catch"](console.error);
   };
 
-  fingerprintPattern('singleton').then(function(msg) {
-    console.log('hit this');
-    return console.log(msg);
-  });
+  identifySingleton = function() {
+    return fingerprintPattern('singleton').then(function(msg) {
+      console.log('hit this');
+      return console.log(msg);
+    });
+  };
 
   module.exports = {
     projectUtils: projectUtils,

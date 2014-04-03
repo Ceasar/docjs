@@ -72,19 +72,22 @@ identifyPattern = (target, pattern) ->
   ).catch(console.error)
 
 
+identifySingleton = ->
+
+  fingerprintPattern('singleton').then (msg) ->
+    console.log 'hit this'
+    console.log(msg)
+
+  # console.log 'hi'
+  # identifyPattern('singleton', 'singleton').then (msg) ->
+  #   console.log 'helloooo'
+  #   console.log(msg)
+
+
 
 # ============================================================================
 # Main execution
 # ============================================================================
-
-fingerprintPattern('singleton').then (msg) ->
-  console.log 'hit this'
-  console.log(msg)
-
-# console.log 'hi'
-# identifyPattern('singleton', 'singleton').then (msg) ->
-#   console.log 'helloooo'
-#   console.log(msg)
 
 # ============================================================================
 
