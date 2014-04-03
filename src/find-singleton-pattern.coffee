@@ -259,7 +259,7 @@ findSingletonDefinition = (ast) ->
   singletonDef.add('private_properties', privateProperties.toJSON())
   singletonDef.add('public_properties', publicProperties.toJSON())
   console.log singletonDef.toJSON()
-  return 'hello'
+  return singletonDef.toJSON()
 
 
 exports.getPromise = (targetFile) ->
