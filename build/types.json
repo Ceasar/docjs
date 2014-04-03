@@ -43,7 +43,6 @@
     "NewExpression",
     "CallExpression",
     "MemberExpression",
-    "MemberExpression",
     "ComprehensionExpression",
     "GeneratorExpression",
     "GraphExpression",
