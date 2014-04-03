@@ -3,7 +3,8 @@ var myModule = (function () {
 
   // Module object
   var module = {},
-    privateVariable = "Hello World";
+    privateVariable = "Hello World",
+    sharedMethod;
 
   function privateMethod() {
     // ...
@@ -13,6 +14,12 @@ var myModule = (function () {
   module.publicMethod = function () {
     console.log( privateVariable );
   };
+
+  module['publicMethod2'] = function () {
+    privateMethod()
+  }
+
+
 
   return module;
 
