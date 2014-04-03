@@ -14,12 +14,9 @@ FUNCTION_EXPRESSION_TYPE  = 'FunctionExpression'
 
 # -----------------------------------------------------------------------------
 
-classDefinitions = new CodeCatalog()
-capitalizedVars  = new CodeCatalog()
-
 # -----------------------------------------------------------------------------
 
-findClassDefinitions = (ast) ->
+findClassDefinitions = (classDefinitions, capitalizedVars) -> (ast) ->
 
   nodeTypeVector = astUtils.getNodeTypes(ast)
 
@@ -130,7 +127,10 @@ findClassDefinitions = (ast) ->
 # -----------------------------------------------------------------------------
 
 exports.getPromise = (targetFile) ->
+  classDefinitions = new CodeCatalog()
+  capitalizedVars  = new CodeCatalog()
+
   q(fs.readFile, targetFile, 'utf8')
     .then(_.partialRight acorn.parse, {locations: true})
-    .then(findClassDefinitions)
+    .then(findClassDefinitions classDefinitions, capitalizedVars)
 
