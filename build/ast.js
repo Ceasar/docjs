@@ -1,5 +1,5 @@
 (function() {
-  var getChildren, getNodeTypes, nodeWalk, nodeWalkSingleLevel, _,
+  var getChildren, getNodeTypes, nodeWalk, _,
     __hasProp = {}.hasOwnProperty;
 
   _ = require('lodash');
@@ -85,35 +85,6 @@
 
 
   /*
-   * A generic function to walk a single level of the AST
-   *
-   * @param node   An AST node
-   * @param fn     Callback function, called on every child of the root node
-   * @param fnMap  A map of AST types to functions called on each of those types
-   * @param limit  How deep in the subtree to walk (default = whole tree)
-   */
-
-  nodeWalkSingleLevel = function(node, fn, fnMap, limit) {
-    var child, _i, _len, _ref, _results;
-    console.log(node);
-    _ref = getChildren(node);
-    _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      child = _ref[_i];
-      if ((fnMap != null ? fnMap[node.type] : void 0) != null) {
-        fnMap[node.type](node);
-      }
-      if (fn != null) {
-        _results.push(fn(node));
-      } else {
-        _results.push(void 0);
-      }
-    }
-    return _results;
-  };
-
-
-  /*
    * Generate a node-type vector for a subtree, optionally limited to a depth
    * limit. A "hash" for a subtree of the AST is an object that keeps track of the
    * count of each node type present in the subtree.
@@ -166,7 +137,6 @@
   module.exports = {
     getChildren: getChildren,
     nodeWalk: nodeWalk,
-    nodeWalkSingleLevel: nodeWalkSingleLevel,
     getNodeTypes: getNodeTypes
   };
 

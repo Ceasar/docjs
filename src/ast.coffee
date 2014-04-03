@@ -53,21 +53,6 @@ nodeWalk = (node, fn, fnMap, limit) ->
   fnMap[node.type](node) if fnMap?[node.type]?
   fn(node) if fn?
 
-###
-# A generic function to walk a single level of the AST
-#
-# @param node   An AST node
-# @param fn     Callback function, called on every child of the root node
-# @param fnMap  A map of AST types to functions called on each of those types
-# @param limit  How deep in the subtree to walk (default = whole tree)
-###
-nodeWalkSingleLevel = (node, fn, fnMap, limit) ->
-  console.log node
-  for child in getChildren(node)
-    fnMap[node.type](node) if fnMap?[node.type]?
-    fn(node) if fn?
-
-
 
 ###
 # Generate a node-type vector for a subtree, optionally limited to a depth
@@ -102,6 +87,5 @@ getNodeTypes = (ast, depth) ->
 module.exports =
   getChildren:  getChildren
   nodeWalk:     nodeWalk
-  nodeWalkSingleLevel:     nodeWalkSingleLevel
   getNodeTypes: getNodeTypes
 
