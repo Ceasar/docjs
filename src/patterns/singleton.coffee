@@ -76,17 +76,10 @@ walkTopLevelSingleton = (node, singletons) ->
                   instance = exists.instance
                   init = exists.init
 
-              ReturnStatement: (final_ret_node) ->
+              # ReturnStatement: (final_ret_node) ->
                 # have another check to verify instance
-                # if isSingleton
-                #   instance
-                  # if the return statement, then the argument is the instance
-                  # final_ret_node.argument
             }
 
-        astUtils.nodeWalk ret_node.argument.properties, nullFn, {
-          FunctionDeclaration: (fun_node) ->
-        }
   }
   # --------------------------------------------------------------------------
   # run second pass on node

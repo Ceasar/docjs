@@ -48,7 +48,6 @@ nodeWalk = (node, fn, fnMap, limit) ->
   else
     for child in getChildren(node)
       nodeWalk(child, fn, fnMap)
-  # console.log node.type
 
   fnMap[node.type](node) if fnMap?[node.type]?
   fn(node) if fn?
