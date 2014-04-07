@@ -6,6 +6,7 @@ acorn = require 'acorn'
 {q}             = require './utils'
 findDecorators  = require('./patterns/decorator').findDecorators
 findClasses     = require('./patterns/class').findClasses
+findSingletons  = require('./patterns/singleton').findSingletons
 config          = require('./doc-gen-config')
 
 
@@ -20,11 +21,14 @@ documentPatterns = (filename) -> (ast) ->
   # TODO: add more pattern matching
   classDefinitions  = findClasses(ast)
   decorators        = findDecorators(ast)
-  return if _.isEmpty(classDefinitions) and _.isEmpty(decorators)
+  singletons        = findSingletons(ast)
+  return if _.isEmpty(classDefinitions) and _.isEmpty(decorators) and
+    _.isEmpty(singletons)
 
   documentation[filename] = {} unless documentation.filename?
   documentation[filename].classes     = classDefinitions
   documentation[filename].decorators  = decorators
+  documentation[filename].singletons  = singletons
 
 
 runFileAnalysis = (filename) ->
@@ -74,4 +78,3 @@ main = () ->
 
 
 main() if module is require.main
-

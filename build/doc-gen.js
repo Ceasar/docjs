@@ -1,5 +1,5 @@
 (function() {
-  var RSVP, acorn, config, documentPatterns, documentation, findClasses, findDecorators, fs, getAbstractSyntaxTree, main, q, runDirectoryAnalysis, runFileAnalysis, _;
+  var RSVP, acorn, config, documentPatterns, documentation, findClasses, findDecorators, findSingletons, fs, getAbstractSyntaxTree, main, q, runDirectoryAnalysis, runFileAnalysis, _;
 
   _ = require('lodash');
 
@@ -15,6 +15,8 @@
 
   findClasses = require('./patterns/class').findClasses;
 
+  findSingletons = require('./patterns/singleton').findSingletons;
+
   config = require('./doc-gen-config');
 
   getAbstractSyntaxTree = _.partialRight(acorn.parse, {
@@ -25,17 +27,19 @@
 
   documentPatterns = function(filename) {
     return function(ast) {
-      var classDefinitions, decorators;
+      var classDefinitions, decorators, singletons;
       classDefinitions = findClasses(ast);
       decorators = findDecorators(ast);
-      if (_.isEmpty(classDefinitions) && _.isEmpty(decorators)) {
+      singletons = findSingletons(ast);
+      if (_.isEmpty(classDefinitions) && _.isEmpty(decorators) && _.isEmpty(singletons)) {
         return;
       }
       if (documentation.filename == null) {
         documentation[filename] = {};
       }
       documentation[filename].classes = classDefinitions;
-      return documentation[filename].decorators = decorators;
+      documentation[filename].decorators = decorators;
+      return documentation[filename].singletons = singletons;
     };
   };
 

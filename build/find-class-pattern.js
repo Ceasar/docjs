@@ -23,6 +23,7 @@
 
   FUNCTION_EXPRESSION_TYPE = 'FunctionExpression';
 
+<<<<<<< HEAD
   findClassDefinitions = function(classDefinitions, capitalizedVars) {
     return function(ast) {
       var SEARCH_DEPTH, nodeTypeVector, nullFn, simpleClassDefinitionHelper;
@@ -53,6 +54,35 @@
             if (klass.isCapitalized()) {
               return capitalizedVars.add(klass, node.right);
             }
+=======
+  classDefinitions = new CodeCatalog();
+
+  capitalizedVars = new CodeCatalog();
+
+  findClassDefinitions = function(ast) {
+    var SEARCH_DEPTH, nodeTypeVector, nullFn, simpleClassDefinitionHelper;
+    nodeTypeVector = astUtils.getNodeTypes(ast);
+
+    /*
+     * TODO
+     *
+     * match on CoffeeScript's class syntax?
+     */
+    nullFn = function() {
+      return null;
+    };
+    SEARCH_DEPTH = 10;
+    String.prototype.isCapitalized = function() {
+      return this.charAt(0).toUpperCase() === this.charAt(0);
+    };
+    astUtils.nodeWalk(ast, nullFn, {
+      AssignmentExpression: function(node) {
+        var klass;
+        if (node.left.type === 'MemberExpression') {
+          klass = node.left.property.name;
+          if (klass.isCapitalized()) {
+            return capitalizedVars.add(klass, node.right);
+>>>>>>> somewhat working exporting of singleton
           }
         },
         VariableDeclarator: function(node) {
