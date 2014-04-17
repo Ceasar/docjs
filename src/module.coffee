@@ -1,5 +1,5 @@
 ###
-Attempting to identify module pattern
+# Identify the 'module' pattern given an AST.
 ###
 _     = require 'lodash'
 acorn = require 'acorn'
@@ -9,10 +9,7 @@ path  = require 'path'
 ast = require './ast'
 {q} = require './utils'
 
-
-# Return whether the node is an immediately-invoked function expression (IIFE)
-isIIFE = (node) ->
-  ast.isCallExpression(node) and ast.isFunctionExpression(node.callee)
+# -----------------------------------------------------------------------------
 
 getName = (node) ->
   if ast.isIdentifier(node)
@@ -46,13 +43,12 @@ getModuleMembers = (stmts, moduleName) ->
 
 # If a node is a module, return the module definition, else return null
 getModule = (node) ->
-  if not isIIFE(node)
-    return null
+  return null unless ast.isIIFE(node)
 
-  body = node.callee.body.body # TODO might be expression if fat-arrow-function
-  returnExpr =  _.find(body, ast.isReturnStatement)?.argument
-  if !returnExpr
-    return null
+  # TODO might be expression if fat-arrow-function
+  body        = node.callee.body.body
+  returnExpr  =  _.find(body, ast.isReturnStatement)?.argument
+  return null unless returnExpr
 
   module = new Module()
   if ast.isObjectExpression(returnExpr)
@@ -90,18 +86,21 @@ class Module
 moduleDir = 'analysis/examples/modules'
 
 programs = fs.readdirSync(moduleDir).map (file) ->
-  file = path.join(moduleDir, file)
+  file    = path.join(moduleDir, file)
   fileStr = fs.readFileSync(file, 'utf8')
-  acorn.parse(fileStr, {locations: true, sourceFile: file})
+  acorn.parse fileStr,
+    locations: true
+    sourceFile: file
 
-iifes = []
-srcs = []
+iifes   = []
+srcs    = []
 modules = []
 
 for program in programs
   ast.nodeWalk program, (node) ->
-    if isIIFE(node)
+    if ast.isIIFE(node)
       iifes.push(node)
       modules.push(getModule(node))
+      # TODO: remove synchronous call
       srcs.push(ast.getNodeSrc(node, fs.readFileSync(node.loc.source, 'utf8')))
-debugger
+

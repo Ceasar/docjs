@@ -1,10 +1,10 @@
 /*
-Attempting to identify module pattern
+# Identify the 'module' pattern given an AST.
 */
 
 
 (function() {
-  var CodePointer, Module, acorn, ast, findIdentifierLoc, fs, getModule, getModuleMembers, getName, iifes, isIIFE, moduleDir, modules, path, program, programs, q, srcs, _, _i, _len;
+  var CodePointer, Module, acorn, ast, findIdentifierLoc, fs, getModule, getModuleMembers, getName, iifes, moduleDir, modules, path, program, programs, q, srcs, _, _i, _len;
 
   _ = require('lodash');
 
@@ -17,10 +17,6 @@ Attempting to identify module pattern
   ast = require('./ast');
 
   q = require('./utils').q;
-
-  isIIFE = function(node) {
-    return ast.isCallExpression(node) && ast.isFunctionExpression(node.callee);
-  };
 
   getName = function(node) {
     if (ast.isIdentifier(node)) {
@@ -69,7 +65,7 @@ Attempting to identify module pattern
 
   getModule = function(node) {
     var body, codePointer, key, kind, loc, module, name, returnExpr, value, _i, _len, _ref, _ref1, _ref2;
-    if (!isIIFE(node)) {
+    if (!ast.isIIFE(node)) {
       return null;
     }
     body = node.callee.body.body;
@@ -140,14 +136,12 @@ Attempting to identify module pattern
   for (_i = 0, _len = programs.length; _i < _len; _i++) {
     program = programs[_i];
     ast.nodeWalk(program, function(node) {
-      if (isIIFE(node)) {
+      if (ast.isIIFE(node)) {
         iifes.push(node);
         modules.push(getModule(node));
         return srcs.push(ast.getNodeSrc(node, fs.readFileSync(node.loc.source, 'utf8')));
       }
     });
   }
-
-  debugger;
 
 }).call(this);
