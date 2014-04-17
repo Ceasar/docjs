@@ -50,7 +50,7 @@ var http = require('http')
  * If successful, write back the typeof the parsed data to the HTTP response.
  *
  */
-var onRequest = (req, res) {
+var onRequest = function (req, res) {
   // {{ [] == [] }}
   var body = '';
   // {{ body == '' }}
@@ -60,11 +60,13 @@ var onRequest = (req, res) {
 
   req.on('data', function (chunk) {
     body += chunk;
-  })
+  });
 
   req.on('end', function () {
+    var data;
+
     try {
-      var data = JSON.parse(body);
+      data = JSON.parse(body);
     } catch (er) {
       res.statusCode = 400;
       return res.end('error: ' + er.message);
@@ -72,8 +74,8 @@ var onRequest = (req, res) {
 
     res.write(typeof data);
     res.end();
-  })
-}
+  });
+};
 
 var server = http.createServer(onRequest).listen(1337);
 
@@ -95,7 +97,7 @@ var server = http.createServer(onRequest).listen(1337);
  *
  */
 fs.readFile('/etc/passwd', function (err, data) {
-  if (err) throw err;
+  if (err) { throw err; }
   console.log(data);
 });
 
@@ -120,9 +122,9 @@ fs.readFile('/etc/passwd', function (err, data) {
  *
  */
 fs.rename('/tmp/hello', '/tmp/world', function (err) {
-  if (err) throw err;
+  if (err) { throw err; }
   fs.stat('/tmp/world', function (err, stats) {
-    if (err) throw err;
+    if (err) { throw err; }
     console.log('stats: ' + JSON.stringify(stats));
   });
 });
