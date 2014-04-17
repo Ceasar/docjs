@@ -68,8 +68,8 @@
 
   main = function() {
     return config.getPromise().then(function(config) {
-      var analysis, dir, file;
-      analysis = ((function() {
+      var analyses, dir, file;
+      analyses = ((function() {
         var _i, _len, _ref, _results;
         _ref = config.files;
         _results = [];
@@ -88,7 +88,7 @@
         }
         return _results;
       })());
-      return RSVP.all(analysis);
+      return RSVP.all(analyses);
     }).then(function() {
       return console.log(documentation);
     })["catch"](console.error);

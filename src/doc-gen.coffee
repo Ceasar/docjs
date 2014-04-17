@@ -64,11 +64,11 @@ runDirectoryAnalysis = (dirname) ->
 
 main = () ->
   config.getPromise().then((config) ->
-    analysis =
+    analyses =
       (runFileAnalysis(file) for file in config.files)
         .concat(runDirectoryAnalysis(dir) for dir in config.directories)
 
-    RSVP.all(analysis)
+    RSVP.all(analyses)
 
   ).then(() ->
 
