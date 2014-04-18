@@ -8,6 +8,7 @@ findDecorators  = require('./patterns/decorator').findDecorators
 findClasses     = require('./patterns/class').findClasses
 findSingletons  = require('./patterns/singleton').findSingletons
 findModules     = require('./patterns/module').findModules
+findMVC         = require('./patterns/mvc').findMVC
 config          = require('./doc-gen-config')
 pprint          = require('./pprint')
 
@@ -35,6 +36,7 @@ documentPatterns = (fileName) -> (ast) ->
   decorators  = findDecorators(ast)
   singletons  = undefined # findSingletons(ast)
   modules     = findModules(ast)
+  mvc         = findMVC(ast)
 
   # Exit if no patterns were found.
   return if _.every([classes, decorators, singletons, modules], _.isEmpty)
@@ -45,6 +47,7 @@ documentPatterns = (fileName) -> (ast) ->
       .reject(_.isEmpty)
       .flatten()
       .value()
+
 
 
 # Run various pattern-matching modules on one file.
