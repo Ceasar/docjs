@@ -93,6 +93,13 @@ findBackboneDefinitions = (ast, backboneDefs) ->
 
 
 findEmberDefinitions = (ast, emberDefs) ->
+  # App
+  # Controllers
+  # Handlebars helpers
+  # DS.Model
+  # Router
+
+
 
 
 findAngularDefinitions = (ast, angularDefs) ->
