@@ -14,16 +14,23 @@ nullFn = () -> null
 
 findMVCDefinitions = (ast) ->
   # generic mvc definitions
-  backboneDefinitions = new CodeCatalog()
-  findBackboneDefinitions(ast, backboneDefinitions)
+  backboneDefs = new CodeCatalog()
+  findBackboneDefinitions(ast, backboneDefs)
   emberDefinitions = new CodeCatalog()
-  findEmberDefinitions(ast, emberDefinitions)
+  findEmberDefinitions(ast, emberDefs)
   angularDefinitions = new CodeCatalog()
-  findEmberDefinitions(ast, angularDefinitions)
+  findEmberDefinitions(ast, angularDefs)
+
+  mvcDefinitions = new CodeCatalog()
+  mvcDefinitions.add('backbone', backboneDefs.toJSON())
+  mvcDefinitions.add('ember', emberDefs.toJSON())
+  mvcDefinitions.add('angular', angularDefs.toJSON())
 
 
 
-findBackboneDefinitions = (ast, backboneDefinitions) ->
+
+
+findBackboneDefinitions = (ast, backboneDefs) ->
 
   modelDefs = new CodeCatalog()
   viewDefs = new CodeCatalog()
@@ -80,10 +87,15 @@ findBackboneDefinitions = (ast, backboneDefinitions) ->
               console.log ('found a collection!')
               collectionDefs.add(name, right)
   })
+  backboneDefs.add('models', modelDefs.toJSON())
+  backboneDefs.add('views', viewsDefs.toJSON())
+  backboneDefs.add('collections', collectionDefs.toJSON())
+  return backboneDefs
 
-findEmberDefinitions = (ast, emberDefinitions) ->
 
-findAngularDefinitions = (ast, angularDefinitions) ->
+findEmberDefinitions = (ast, emberDefs) ->
+
+findAngularDefinitions = (ast, angularDefs) ->
 
 
 module.exports =
