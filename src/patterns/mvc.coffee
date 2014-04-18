@@ -16,9 +16,9 @@ findMVCDefinitions = (ast) ->
   # generic mvc definitions
   backboneDefs = new CodeCatalog()
   findBackboneDefinitions(ast, backboneDefs)
-  emberDefinitions = new CodeCatalog()
+  emberDefs = new CodeCatalog()
   findEmberDefinitions(ast, emberDefs)
-  angularDefinitions = new CodeCatalog()
+  angularDefs = new CodeCatalog()
   findEmberDefinitions(ast, angularDefs)
 
   mvcDefinitions = new CodeCatalog()
@@ -65,13 +65,12 @@ findBackboneDefinitions = (ast, backboneDefs) ->
     AssignmentExpression: (node) ->
       name = undefined
       if (right = node.right) and right.type == 'CallExpression'
-          # grab the name of the model
-          # if it's a exports.xxx, then it's a member expression
-          if node.left.type == 'MemberExpression' and node.left.object.name == 'exports'
-            name = node.left.property.name
-          else if node.left.type == 'hi'
-            console.log 'hi'
-
+        # grab the name of the model
+        # if it's a exports.xxx, then it's a member expression
+        if node.left.type == 'MemberExpression' and node.left.object.name == 'exports'
+          name = node.left.property.name
+        else if node.left.type == 'hi'
+          console.log 'hi'
         # inside the call expression
         if (right.callee.property?.name == 'extend') and (callee = right.callee.object) and
             callee.type == 'MemberExpression' and callee.object.name == 'Backbone' and
@@ -88,12 +87,13 @@ findBackboneDefinitions = (ast, backboneDefs) ->
               collectionDefs.add(name, right)
   })
   backboneDefs.add('models', modelDefs.toJSON())
-  backboneDefs.add('views', viewsDefs.toJSON())
+  backboneDefs.add('views', viewDefs.toJSON())
   backboneDefs.add('collections', collectionDefs.toJSON())
   return backboneDefs
 
 
 findEmberDefinitions = (ast, emberDefs) ->
+
 
 findAngularDefinitions = (ast, angularDefs) ->
 
