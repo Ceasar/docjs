@@ -1,5 +1,5 @@
 (function() {
-  var RSVP, acorn, config, documentPatterns, documentation, findClasses, findDecorators, findSingletons, fs, getAbstractSyntaxTree, main, q, runDirectoryAnalysis, runFileAnalysis, _;
+  var RSVP, acorn, config, documentPatterns, documentation, findClasses, findDecorators, findModules, findSingletons, fs, getAbstractSyntaxTree, main, q, runDirectoryAnalysis, runFileAnalysis, _;
 
   _ = require('lodash');
 
@@ -17,34 +17,49 @@
 
   findSingletons = require('./patterns/singleton').findSingletons;
 
+  findModules = require('./patterns/module').findModules;
+
   config = require('./doc-gen-config');
 
-  getAbstractSyntaxTree = _.partialRight(acorn.parse, {
-    locations: true
-  });
+  getAbstractSyntaxTree = function(fileName) {
+    return _.partialRight(acorn.parse, {
+      locations: true,
+      sourceFile: fileName
+    });
+  };
 
   documentation = {};
 
   documentPatterns = function(filename) {
     return function(ast) {
-      var classDefinitions, decorators, singletons;
-      classDefinitions = findClasses(ast);
+      var classes, decorators, doc, modules, singletons;
+      classes = findClasses(ast);
       decorators = findDecorators(ast);
       singletons = findSingletons(ast);
-      if (_.isEmpty(classDefinitions) && _.isEmpty(decorators) && _.isEmpty(singletons)) {
+      modules = findModules(ast);
+      if (_.every([classes, decorators, singletons, modules], _.isEmpty)) {
         return;
       }
       if (documentation.filename == null) {
-        documentation[filename] = {};
+        doc = documentation[filename] = {};
       }
-      documentation[filename].classes = classDefinitions;
-      documentation[filename].decorators = decorators;
-      return documentation[filename].singletons = singletons;
+      if (!_.isEmpty(classes)) {
+        doc.classes = classes;
+      }
+      if (!_.isEmpty(decorators)) {
+        doc.decorators = decorators;
+      }
+      if (!_.isEmpty(singletons)) {
+        doc.singletons = singletons;
+      }
+      if (!_.isEmpty(modules)) {
+        return doc.modules = modules;
+      }
     };
   };
 
-  runFileAnalysis = function(filename) {
-    return q(fs.readFile, filename, 'utf8').then(getAbstractSyntaxTree).then(documentPatterns(filename));
+  runFileAnalysis = function(fileName) {
+    return q(fs.readFile, fileName, 'utf8').then(getAbstractSyntaxTree(fileName)).then(documentPatterns(fileName));
   };
 
   runDirectoryAnalysis = function(dirname) {

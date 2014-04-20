@@ -7,10 +7,18 @@ acorn = require 'acorn'
 findDecorators  = require('./patterns/decorator').findDecorators
 findClasses     = require('./patterns/class').findClasses
 findSingletons  = require('./patterns/singleton').findSingletons
+findModules     = require('./patterns/module').findModules
 config          = require('./doc-gen-config')
 
 
-getAbstractSyntaxTree = _.partialRight acorn.parse, { locations: true }
+# Returns a FUNCTION that takes a string of file contents and parses it into a
+# Mozilla Parser API-compatible AST data structure.
+getAbstractSyntaxTree = (fileName) ->
+  _.partialRight(acorn.parse, {
+    locations:  true
+    sourceFile: fileName
+  })
+
 
 # -----------------------------------------------------------------------------
 
@@ -19,24 +27,29 @@ documentation = {}
 
 documentPatterns = (filename) -> (ast) ->
   # TODO: add more pattern matching
-  classDefinitions  = findClasses(ast)
-  decorators        = findDecorators(ast)
-  singletons        = findSingletons(ast)
-  return if _.isEmpty(classDefinitions) and _.isEmpty(decorators) and
-    _.isEmpty(singletons)
+  classes     = findClasses(ast)
+  decorators  = findDecorators(ast)
+  singletons  = findSingletons(ast)
+  modules     = findModules(ast)
 
-  documentation[filename] = {} unless documentation.filename?
-  documentation[filename].classes     = classDefinitions
-  documentation[filename].decorators  = decorators
-  documentation[filename].singletons  = singletons
+  # Exit if no patterns were found.
+  return if _.every([classes, decorators, singletons, modules], _.isEmpty)
 
+  doc = documentation[filename] = {} unless documentation.filename?
 
-runFileAnalysis = (filename) ->
-  q(fs.readFile, filename, 'utf8')
-    .then(getAbstractSyntaxTree)
-    .then(documentPatterns filename)
+  doc.classes     = classes     unless _.isEmpty(classes)
+  doc.decorators  = decorators  unless _.isEmpty(decorators)
+  doc.singletons  = singletons  unless _.isEmpty(singletons)
+  doc.modules     = modules     unless _.isEmpty(modules)
 
+# Run various pattern-matching modules on one file.
+runFileAnalysis = (fileName) ->
+  q(fs.readFile, fileName, 'utf8')
+    .then(getAbstractSyntaxTree fileName)
+    .then(documentPatterns fileName)
 
+# Run various pattern-matching modules on all files (& recursively within all
+# sub-folders) in one folder.
 runDirectoryAnalysis = (dirname) ->
 
   filterFilenames = (fname) ->
@@ -78,3 +91,4 @@ main = () ->
 
 
 main() if module is require.main
+
