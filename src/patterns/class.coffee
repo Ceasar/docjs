@@ -7,7 +7,7 @@ walk  = require 'acorn/util/walk'
 {q}         = require '../utils'
 astUtils    = require '../ast'
 CodeCatalog = require('../code-catalog').CodeCatalog
-NODE_TYPES  = require('../types').types
+NODE_TYPES  = astUtils.TYPES
 
 THIS_EXPRESSION_TYPE      = 'ThisExpression'
 FUNCTION_EXPRESSION_TYPE  = 'FunctionExpression'

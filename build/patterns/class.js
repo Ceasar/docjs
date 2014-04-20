@@ -17,7 +17,7 @@
 
   CodeCatalog = require('../code-catalog').CodeCatalog;
 
-  NODE_TYPES = require('../types').types;
+  NODE_TYPES = astUtils.TYPES;
 
   THIS_EXPRESSION_TYPE = 'ThisExpression';
 
@@ -28,12 +28,12 @@
     classDefinitions = new CodeCatalog();
     capitalizedVars = new CodeCatalog();
     nodeTypeVector = astUtils.getNodeTypes(ast);
-
     /*
-     * TODO
-     *
-     * match on CoffeeScript's class syntax?
-     */
+    # TODO
+    #
+    # match on CoffeeScript's class syntax?
+    */
+
     nullFn = function() {
       return null;
     };

@@ -1,8 +1,8 @@
-
 /*
 
 Finds the decorators in a Javascript program.
- */
+*/
+
 
 (function() {
   var CodeCatalog, acorn, findDecorators, fs, _,

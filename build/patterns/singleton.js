@@ -19,7 +19,7 @@
 
   astUtils = require('../ast');
 
-  NODE_TYPES = require('../types').types;
+  NODE_TYPES = astUtils.TYPES;
 
   OBJECT_EXPRESSION = 'ObjectExpression';
 
@@ -63,7 +63,7 @@
         var containsExistance, _ref;
         if (((_ref = ret_node.argument) != null ? _ref.type : void 0) === 'ObjectExpression') {
           containsExistance = false;
-          _.map(ret_node.argument.properties, function(pair) {
+          return _.map(ret_node.argument.properties, function(pair) {
             var fun_node, isSingleton;
             if (pair.value.type === 'FunctionExpression') {
               fun_node = pair.value;
@@ -77,13 +77,9 @@
                     instance = exists.instance;
                     return init = exists.init;
                   }
-                },
-                ReturnStatement: function(final_ret_node) {}
+                }
               });
             }
-          });
-          return astUtils.nodeWalk(ret_node.argument.properties, nullFn, {
-            FunctionDeclaration: function(fun_node) {}
           });
         }
       }
