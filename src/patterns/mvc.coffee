@@ -26,6 +26,8 @@ findMVCDefinitions = (ast) ->
   mvcDefinitions.add('ember', emberDefs.toJSON())
   mvcDefinitions.add('angular', angularDefs.toJSON())
 
+  return mvcDefinitions.toJSON()
+
 
 
 
@@ -97,6 +99,74 @@ findEmberDefinitions = (ast, emberDefs) ->
   # Controllers
   # Handlebars helpers
   # DS.Model
+  # Router
+  #
+  emberComponents = new CodeCatalog()
+
+
+  ## find the app
+  astUtils.nodeWalk(ast, nullFn, {
+      # if its var M = Backbone.Model.extend....
+      VariableDeclarator: (node) ->
+        name = undefined
+        ###
+        # Check for Ember.Application.create
+        ###
+        if (right = node.init) and right.type == 'CallExpression'
+
+          # console.log right?.callee?.object?.name
+          if right?.callee?.object?.object?.name == 'Ember' and
+              right?.callee?.object?.property?.name == 'Application' and
+              right?.callee?.property?.name == 'create'
+            # this is an ember Application object. grab the name
+            name = node.id.name
+            console.log name
+
+            if name?
+              # if emberComponents already contains the name, then add it to it
+              if emberComponents.has(name)
+                emberComponents.add('Application', right)
+              else
+                emberComponents.add(name, new CodeCatalog)
+                emberComponents.get(name).add('Application', right)
+
+      AssignmentExpression: (node) ->
+        name = undefined
+        ###
+        # Check for Ember.Application.create
+        ###
+        if (right = node.right) and right.type == 'CallExpression'
+          # grab the name of the model
+          # if it's a exports.xxx, then it's a member expression
+          if node.left.type == 'MemberExpression' and node.left.object.name == 'exports'
+            name = node.left.property.name
+          else if node.left.type == 'hi'
+            console.log 'hi'
+
+          # console.log right?.callee?.object?.name
+          if right?.callee?.object?.object?.name == 'Ember' and
+              right?.callee?.object?.property?.name == 'Application' and
+              right?.callee?.property?.name == 'create'
+            # this is an ember Application object. traverse node.left for the final thingie's name
+            # console.log node.left
+            # walk the left node - for each memberExpression, if its property is a "Identifier", set name to it
+            astUtils.nodeWalk(node.left, nullFn, {
+              Identifier: (node) ->
+                  name = node.name
+            })
+            console.log name
+
+            if name?
+              # if emberComponents already contains the name, then add it to it
+              if emberComponents.has(name)
+                emberComponents.add('Application', right)
+              else
+                emberComponents.add(name, new CodeCatalog)
+                emberComponents.get(name).add('Application', right)
+    })
+
+
+
   # Router
 
 

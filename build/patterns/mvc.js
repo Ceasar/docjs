@@ -34,7 +34,8 @@
     mvcDefinitions = new CodeCatalog();
     mvcDefinitions.add('backbone', backboneDefs.toJSON());
     mvcDefinitions.add('ember', emberDefs.toJSON());
-    return mvcDefinitions.add('angular', angularDefs.toJSON());
+    mvcDefinitions.add('angular', angularDefs.toJSON());
+    return mvcDefinitions.toJSON();
   };
 
   findBackboneDefinitions = function(ast, backboneDefs) {
@@ -94,7 +95,65 @@
     return backboneDefs;
   };
 
-  findEmberDefinitions = function(ast, emberDefs) {};
+  findEmberDefinitions = function(ast, emberDefs) {
+    var emberComponents;
+    emberComponents = new CodeCatalog();
+    return astUtils.nodeWalk(ast, nullFn, {
+      VariableDeclarator: function(node) {
+        var name, right, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+        name = void 0;
+
+        /*
+         * Check for Ember.Application.create
+         */
+        if ((right = node.init) && right.type === 'CallExpression') {
+          if ((right != null ? (_ref = right.callee) != null ? (_ref1 = _ref.object) != null ? (_ref2 = _ref1.object) != null ? _ref2.name : void 0 : void 0 : void 0 : void 0) === 'Ember' && (right != null ? (_ref3 = right.callee) != null ? (_ref4 = _ref3.object) != null ? (_ref5 = _ref4.property) != null ? _ref5.name : void 0 : void 0 : void 0 : void 0) === 'Application' && (right != null ? (_ref6 = right.callee) != null ? (_ref7 = _ref6.property) != null ? _ref7.name : void 0 : void 0 : void 0) === 'create') {
+            name = node.id.name;
+            console.log(name);
+            if (name != null) {
+              if (emberComponents.has(name)) {
+                return emberComponents.add('Application', right);
+              } else {
+                emberComponents.add(name, new CodeCatalog);
+                return emberComponents.get(name).add('Application', right);
+              }
+            }
+          }
+        }
+      },
+      AssignmentExpression: function(node) {
+        var name, right, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+        name = void 0;
+
+        /*
+         * Check for Ember.Application.create
+         */
+        if ((right = node.right) && right.type === 'CallExpression') {
+          if (node.left.type === 'MemberExpression' && node.left.object.name === 'exports') {
+            name = node.left.property.name;
+          } else if (node.left.type === 'hi') {
+            console.log('hi');
+          }
+          if ((right != null ? (_ref = right.callee) != null ? (_ref1 = _ref.object) != null ? (_ref2 = _ref1.object) != null ? _ref2.name : void 0 : void 0 : void 0 : void 0) === 'Ember' && (right != null ? (_ref3 = right.callee) != null ? (_ref4 = _ref3.object) != null ? (_ref5 = _ref4.property) != null ? _ref5.name : void 0 : void 0 : void 0 : void 0) === 'Application' && (right != null ? (_ref6 = right.callee) != null ? (_ref7 = _ref6.property) != null ? _ref7.name : void 0 : void 0 : void 0) === 'create') {
+            astUtils.nodeWalk(node.left, nullFn, {
+              Identifier: function(node) {
+                return name = node.name;
+              }
+            });
+            console.log(name);
+            if (name != null) {
+              if (emberComponents.has(name)) {
+                return emberComponents.add('Application', right);
+              } else {
+                emberComponents.add(name, new CodeCatalog);
+                return emberComponents.get(name).add('Application', right);
+              }
+            }
+          }
+        }
+      }
+    });
+  };
 
   findAngularDefinitions = function(ast, angularDefs) {};
 
