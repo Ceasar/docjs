@@ -30,11 +30,12 @@
     emberDefs = new CodeCatalog();
     findEmberDefinitions(ast, emberDefs);
     angularDefs = new CodeCatalog();
-    findEmberDefinitions(ast, angularDefs);
+    findAngularDefinitions(ast, angularDefs);
     mvcDefinitions = new CodeCatalog();
     mvcDefinitions.add('backbone', backboneDefs.toJSON());
     mvcDefinitions.add('ember', emberDefs.toJSON());
     mvcDefinitions.add('angular', angularDefs.toJSON());
+    console.log(mvcDefinitions.toJSON());
     return mvcDefinitions.toJSON();
   };
 
@@ -68,11 +69,11 @@
         var callee, name, right, _ref;
         name = void 0;
         if ((right = node.right) && right.type === 'CallExpression') {
-          if (node.left.type === 'MemberExpression' && node.left.object.name === 'exports') {
-            name = node.left.property.name;
-          } else if (node.left.type === 'hi') {
-            console.log('hi');
-          }
+          astUtils.nodeWalk(node.left, nullFn, {
+            Identifier: function(node) {
+              return name = node.name;
+            }
+          });
           if ((((_ref = right.callee.property) != null ? _ref.name : void 0) === 'extend') && (callee = right.callee.object) && callee.type === 'MemberExpression' && callee.object.name === 'Backbone' && callee.property.type === 'Identifier') {
             switch (callee.property.name) {
               case 'Model':
@@ -95,12 +96,10 @@
     return backboneDefs;
   };
 
-  findEmberDefinitions = function(ast, emberDefs) {
-    var emberComponents;
-    emberComponents = new CodeCatalog();
-    return astUtils.nodeWalk(ast, nullFn, {
+  findEmberDefinitions = function(ast, emberComponents) {
+    astUtils.nodeWalk(ast, nullFn, {
       VariableDeclarator: function(node) {
-        var name, right, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+        var ember_temp, name, right, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
         name = void 0;
 
         /*
@@ -114,15 +113,16 @@
               if (emberComponents.has(name)) {
                 return emberComponents.add('Application', right);
               } else {
-                emberComponents.add(name, new CodeCatalog);
-                return emberComponents.get(name).add('Application', right);
+                ember_temp = new CodeCatalog();
+                ember_temp.add('Application', right);
+                return emberComponents.add(name, ember_temp.toJSON());
               }
             }
           }
         }
       },
       AssignmentExpression: function(node) {
-        var name, right, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+        var ember_temp, name, right, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
         name = void 0;
 
         /*
@@ -145,14 +145,16 @@
               if (emberComponents.has(name)) {
                 return emberComponents.add('Application', right);
               } else {
-                emberComponents.add(name, new CodeCatalog);
-                return emberComponents.get(name).add('Application', right);
+                ember_temp = new CodeCatalog();
+                ember_temp.add('Application', right);
+                return emberComponents.add(name, ember_temp.toJSON());
               }
             }
           }
         }
       }
     });
+    return emberComponents;
   };
 
   findAngularDefinitions = function(ast, angularDefs) {};

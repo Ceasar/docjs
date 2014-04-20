@@ -19,12 +19,13 @@ findMVCDefinitions = (ast) ->
   emberDefs = new CodeCatalog()
   findEmberDefinitions(ast, emberDefs)
   angularDefs = new CodeCatalog()
-  findEmberDefinitions(ast, angularDefs)
+  findAngularDefinitions(ast, angularDefs)
 
   mvcDefinitions = new CodeCatalog()
   mvcDefinitions.add('backbone', backboneDefs.toJSON())
   mvcDefinitions.add('ember', emberDefs.toJSON())
   mvcDefinitions.add('angular', angularDefs.toJSON())
+  console.log mvcDefinitions.toJSON()
 
   return mvcDefinitions.toJSON()
 
@@ -68,11 +69,11 @@ findBackboneDefinitions = (ast, backboneDefs) ->
       name = undefined
       if (right = node.right) and right.type == 'CallExpression'
         # grab the name of the model
-        # if it's a exports.xxx, then it's a member expression
-        if node.left.type == 'MemberExpression' and node.left.object.name == 'exports'
-          name = node.left.property.name
-        else if node.left.type == 'hi'
-          console.log 'hi'
+        # walk the left node - for each memberExpression, if its property is a "Identifier", set name to it
+        astUtils.nodeWalk(node.left, nullFn, {
+          Identifier: (node) ->
+              name = node.name
+        })
         # inside the call expression
         if (right.callee.property?.name == 'extend') and (callee = right.callee.object) and
             callee.type == 'MemberExpression' and callee.object.name == 'Backbone' and
@@ -94,15 +95,13 @@ findBackboneDefinitions = (ast, backboneDefs) ->
   return backboneDefs
 
 
-findEmberDefinitions = (ast, emberDefs) ->
+findEmberDefinitions = (ast, emberComponents) ->
   # App
   # Controllers
   # Handlebars helpers
   # DS.Model
   # Router
   #
-  emberComponents = new CodeCatalog()
-
 
   ## find the app
   astUtils.nodeWalk(ast, nullFn, {
@@ -127,8 +126,9 @@ findEmberDefinitions = (ast, emberDefs) ->
               if emberComponents.has(name)
                 emberComponents.add('Application', right)
               else
-                emberComponents.add(name, new CodeCatalog)
-                emberComponents.get(name).add('Application', right)
+                ember_temp = new CodeCatalog()
+                ember_temp.add('Application', right)
+                emberComponents.add(name, ember_temp.toJSON())
 
       AssignmentExpression: (node) ->
         name = undefined
@@ -161,11 +161,13 @@ findEmberDefinitions = (ast, emberDefs) ->
               if emberComponents.has(name)
                 emberComponents.add('Application', right)
               else
-                emberComponents.add(name, new CodeCatalog)
-                emberComponents.get(name).add('Application', right)
+                ember_temp = new CodeCatalog()
+                ember_temp.add('Application', right)
+                emberComponents.add(name, ember_temp.toJSON())
     })
 
 
+  return emberComponents
 
   # Router
 

@@ -4,7 +4,7 @@ define(function (require, exports) {
 
   var Backbone  = require('backbone');
 
-  exports.MapStorage = Backbone.Collection.extend({
+  e.e.e.e.e.MapStorage = Backbone.Collection.extend({
 
     // API is hosted on the same server that serves this client application
     url: function (mapName) {
