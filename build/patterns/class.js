@@ -17,7 +17,7 @@
 
   CodeCatalog = require('../code-catalog').CodeCatalog;
 
-  NODE_TYPES = require('../types').types;
+  NODE_TYPES = astUtils.TYPES;
 
   THIS_EXPRESSION_TYPE = 'ThisExpression';
 

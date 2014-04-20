@@ -14,9 +14,9 @@
 
   path = require('path');
 
-  ast = require('./ast');
+  ast = require('../ast');
 
-  q = require('./utils').q;
+  q = require('../utils').q;
 
   getName = function(node) {
     if (ast.isIdentifier(node)) {

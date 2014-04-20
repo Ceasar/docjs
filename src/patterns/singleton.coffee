@@ -4,15 +4,17 @@ RSVP  = require 'rsvp'
 Model = require 'fishbone'
 acorn = require 'acorn'
 walk  = require 'acorn/util/walk'
+
 CodeCatalog = require('../code-catalog').CodeCatalog
 {q}         = require '../utils'
 astUtils    = require '../ast'
-NODE_TYPES  = require('../types').types
+NODE_TYPES  = astUtils.TYPES
 
 
 OBJECT_EXPRESSION = 'ObjectExpression'
-RETURN_STATEMENT = 'ReturnStatement'
+RETURN_STATEMENT  = 'ReturnStatement'
 MEMBER_EXPRESSION = 'MemberExpression'
+
 findSingletonInitMethod = (if_node) ->
 
  # check if there's a unary expression comparing a !<Identifier>
@@ -58,7 +60,8 @@ walkTopLevelSingleton = (node, singletons) ->
     ReturnStatement: (ret_node) ->
       # at the topmost level, check if return an object
       if ret_node.argument?.type == 'ObjectExpression'
-        # continue the check - Look for a function that checks existance and returns a variable
+        # continue the check:
+        # Look for a function that checks existance and returns a variable
         containsExistance = false
 
 
@@ -93,7 +96,8 @@ walkTopLevelSingleton = (node, singletons) ->
 
   if(instance)
     initFunction = false
-    # start the checks - this should be the exact same as the FunctionDeclaration checks
+    # start the checks:
+    # this should be the exact same as the FunctionDeclaration checks
     astUtils.nodeWalk node, nullFn, {
       FunctionDeclaration: (fun_node) ->
         # check if it's name is equal to init

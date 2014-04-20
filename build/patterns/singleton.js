@@ -19,7 +19,7 @@
 
   astUtils = require('../ast');
 
-  NODE_TYPES = require('../types').types;
+  NODE_TYPES = astUtils.TYPES;
 
   OBJECT_EXPRESSION = 'ObjectExpression';
 

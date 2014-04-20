@@ -6,8 +6,8 @@ acorn = require 'acorn'
 fs    = require 'fs'
 path  = require 'path'
 
-ast = require './ast'
-{q} = require './utils'
+ast = require '../ast'
+{q} = require '../utils'
 
 # -----------------------------------------------------------------------------
 
