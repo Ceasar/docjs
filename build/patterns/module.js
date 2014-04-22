@@ -1,7 +1,7 @@
-/*
-# Identify the 'module' pattern
-*/
 
+/*
+ * Identify the 'module' pattern
+ */
 
 (function() {
   var CodePointer, Module, acorn, astUtils, findIdentifierLoc, findModuleDefinitions, fs, getModule, getModuleMembers, getName, path, q, _;
@@ -69,10 +69,10 @@
     }
   };
 
-  /*
-  # TODO: documentation
-  */
 
+  /*
+   * TODO: documentation
+   */
 
   getModuleMembers = function(stmts, moduleName) {
     var left, module, name, right, stmt, _i, _len, _ref;

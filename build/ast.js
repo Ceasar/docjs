@@ -1,7 +1,7 @@
-/*
-# Utilities for working with the abstract syntax tree
-*/
 
+/*
+ * Utilities for working with the abstract syntax tree
+ */
 
 (function() {
   var TYPES, getChildren, getNodeSrc, getNodeTypes, isIIFE, nodeWalk, ty, type, typeTree, _, _i, _len,
@@ -119,15 +119,15 @@
     return children;
   };
 
-  /*
-  # A generic function to walk the AST
-  #
-  # @param node   An AST node
-  # @param fn     Callback function, called on every child of the root node
-  # @param fnMap  A map of AST types to functions called on each of those types
-  # @param limit  How deep in the subtree to walk (default = whole tree)
-  */
 
+  /*
+   * A generic function to walk the AST
+   *
+   * @param node   An AST node
+   * @param fn     Callback function, called on every child of the root node
+   * @param fnMap  A map of AST types to functions called on each of those types
+   * @param limit  How deep in the subtree to walk (default = whole tree)
+   */
 
   nodeWalk = function(node, fn, fnMap, limit) {
     var child, _j, _k, _len1, _len2, _ref, _ref1;
@@ -154,11 +154,11 @@
     }
   };
 
-  /*
-  # Given a node with location information and a source file, return the string
-  # of source code corresponding to the node
-  */
 
+  /*
+   * Given a node with location information and a source file, return the string
+   * of source code corresponding to the node
+   */
 
   getNodeSrc = function(node, src) {
     var end, lines, start, _ref;
@@ -171,15 +171,15 @@
     return exports.isCallExpression(node) && exports.isFunctionExpression(node.callee);
   };
 
-  /*
-  # Generate a node-type vector for a subtree, optionally limited to a depth
-  # limit. A "hash" for a subtree of the AST is an object that keeps track of the
-  # count of each node type present in the subtree.
-  #
-  # @param ast    (Object) an AST subtree
-  # @param depth  (Number) optional argument that limits the depth of the traversal
-  */
 
+  /*
+   * Generate a node-type vector for a subtree, optionally limited to a depth
+   * limit. A "hash" for a subtree of the AST is an object that keeps track of the
+   * count of each node type present in the subtree.
+   *
+   * @param ast    (Object) an AST subtree
+   * @param depth  (Number) optional argument that limits the depth of the traversal
+   */
 
   getNodeTypes = function(ast, depth) {
     var combineHashes, computeHash, getNodeVector;

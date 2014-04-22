@@ -1,5 +1,5 @@
 (function() {
-  var RSVP, acorn, config, documentPatterns, documentation, findClasses, findDecorators, findModules, findSingletons, fs, getAbstractSyntaxTree, main, q, runDirectoryAnalysis, runFileAnalysis, _;
+  var RSVP, acorn, config, documentPatterns, documentation, findClasses, findDecorators, findModules, findSingletons, fs, getAbstractSyntaxTree, main, pprint, q, runDirectoryAnalysis, runFileAnalysis, _;
 
   _ = require('lodash');
 
@@ -20,6 +20,8 @@
   findModules = require('./patterns/module').findModules;
 
   config = require('./doc-gen-config');
+
+  pprint = require('./pprint');
 
   getAbstractSyntaxTree = function(fileName) {
     return _.partialRight(acorn.parse, {
@@ -105,7 +107,7 @@
       })());
       return RSVP.all(analyses);
     }).then(function() {
-      return console.log(documentation);
+      return pprint.pprint(documentation);
     })["catch"](console.error);
   };
 
