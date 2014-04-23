@@ -1,5 +1,5 @@
 (function() {
-  var CodeCatalog, RSVP, acorn, astUtils, findAngularDefinitions, findBackboneDefinitions, findEmberDefinitions, findMVCDefinitions, fs, nullFn, q, walk, _;
+  var CodeCatalog, MVCPattern, RSVP, acorn, astUtils, findAngularDefinitions, findBackboneDefinitions, findEmberDefinitions, findMVCDefinitions, fs, nullFn, q, walk, _;
 
   fs = require('fs');
 
@@ -16,6 +16,8 @@
   astUtils = require('../ast');
 
   CodeCatalog = require('../code-catalog').CodeCatalog;
+
+  MVCPattern = require('../code-catalog').MVCPattern;
 
   nullFn = function() {
     return null;
@@ -92,15 +94,15 @@
     application = ember.getCatalog('application');
     router = ember.getCatalog('router');
     controllers = ember.getCatalog('controllers');
-    array_controllers = controllers.getCatalog('array_controllers');
-    object_controllers = controllers.getCatalog('object_controllers');
+    array_controllers = controllers.addCatalog('array_controllers');
+    object_controllers = controllers.addCatalog('object_controllers');
     models = ember.getCatalog('models');
     views = ember.getCatalog('views');
-    checkbox_views = views.getCatalog('checkbox');
-    textfield_views = views.getCatalog('textfield');
-    select_views = views.getCatalog('select');
-    textarea_views = views.getCatalog('textarea');
-    view_views = views.getCatalog('view');
+    checkbox_views = views.addCatalog('checkbox');
+    textfield_views = views.addCatalog('textfield');
+    select_views = views.addCatalog('select');
+    textarea_views = views.addCatalog('textarea');
+    view_views = views.addCatalog('view');
     astUtils.nodeWalk(ast, nullFn, {
       VariableDeclarator: function(node) {
         var controller_type, name, right, view_type, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref22, _ref23, _ref24, _ref25, _ref26, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
@@ -122,9 +124,9 @@
         if ((right != null ? (_ref8 = right.callee) != null ? (_ref9 = _ref8.object) != null ? (_ref10 = _ref9.object) != null ? _ref10.name : void 0 : void 0 : void 0 : void 0) === 'Ember' && (controller_type = right != null ? (_ref11 = right.callee) != null ? (_ref12 = _ref11.object) != null ? _ref12.property.name : void 0 : void 0 : void 0) && (controller_type === 'ArrayController' || controller_type === 'ObjectController') && (right != null ? (_ref13 = right.callee) != null ? (_ref14 = _ref13.property) != null ? _ref14.name : void 0 : void 0 : void 0) === 'extend') {
           name = node.id.name;
           if (controller_type === 'ArrayController') {
-            array_controllers.addPointer(name, node.right);
+            array_controllers.addPointer(name, node.right.loc);
           } else {
-            object_controllers.addPointer(name, node.right);
+            object_controllers.addPointer(name, node.right.loc);
           }
         }
 
@@ -133,7 +135,7 @@
          */
         if ((right != null ? (_ref15 = right.callee) != null ? (_ref16 = _ref15.object) != null ? (_ref17 = _ref16.object) != null ? _ref17.name : void 0 : void 0 : void 0 : void 0) === 'DS' && ((right != null ? (_ref18 = right.callee) != null ? (_ref19 = _ref18.object) != null ? _ref19.property.name : void 0 : void 0 : void 0) === 'Model') && (right != null ? (_ref20 = right.callee) != null ? (_ref21 = _ref20.property) != null ? _ref21.name : void 0 : void 0 : void 0) === 'extend') {
           name = node.id.name;
-          models.addPointer(name, right);
+          models.addPointer(name, right.loc);
         }
 
         /*
@@ -143,15 +145,15 @@
           name = node.id.name;
           switch (view_type) {
             case 'Checkbox':
-              return checkbox_views.addPointer(name, node.right);
+              return checkbox_views.addPointer(name, node.right.loc);
             case 'TextField':
-              return textfield_views.addPointer(name, node.right);
+              return textfield_views.addPointer(name, node.right.loc);
             case 'TextArea':
-              return textarea_views.addPointer(name, node.right);
+              return textarea_views.addPointer(name, node.right.loc);
             case 'Select':
-              return select_views.addPointer(name, node.right);
+              return select_views.addPointer(name, node.right.loc);
             case 'View':
-              return view_views.addPointer(name, node.right);
+              return view_views.addPointer(name, node.right.loc);
           }
         }
       },
@@ -187,9 +189,9 @@
             }
           });
           if (controller_type === 'ArrayController') {
-            array_controllers.addPointer(name, node.right);
+            array_controllers.addPointer(name, node.right.loc);
           } else {
-            object_controllers.addPointer(name, node.right);
+            object_controllers.addPointer(name, node.right.loc);
           }
         }
 
@@ -203,7 +205,7 @@
               return name = node.name;
             }
           });
-          models.addPointer(name, node.right);
+          models.addPointer(name, node.right.loc);
         }
 
         /*
@@ -217,24 +219,24 @@
           });
           switch (view_type) {
             case 'Checkbox':
-              return checkbox_views.addPointer(name, node.right);
+              return checkbox_views.addPointer(name, node.right.loc);
             case 'TextField':
-              return textfield_views.addPointer(name, node.right);
+              return textfield_views.addPointer(name, node.right.loc);
             case 'TextArea':
-              return textarea_views.addPointer(name, node.right);
+              return textarea_views.addPointer(name, node.right.loc);
             case 'Select':
-              return select_views.addPointer(name, node.right);
+              return select_views.addPointer(name, node.right.loc);
             case 'View':
-              return view_views.addPointer(name, node.right);
+              return view_views.addPointer(name, node.right.loc);
           }
         }
       },
       CallExpression: function(node) {
-        var name, _ref, _ref1;
+        var name, _ref, _ref1, _ref2, _ref3;
         name = void 0;
-        if (((_ref = node.property) != null ? _ref.name : void 0) === 'map' && ((_ref1 = node.callee) != null ? _ref1.property.name : void 0) === 'Router') {
+        if (((_ref = node.callee) != null ? (_ref1 = _ref.property) != null ? _ref1.name : void 0 : void 0) === 'map' && ((_ref2 = node.callee) != null ? (_ref3 = _ref2.object) != null ? _ref3.name : void 0 : void 0) === 'Router') {
           name = node.callee.object.name;
-          return ember.addCatalog('Router', node);
+          return router.addPointer('name', node.loc);
         }
       }
     });
@@ -248,6 +250,7 @@
     ember.addCatalog('Models', models);
     ember.addCatalog('Views', views);
     ember.addCatalog('Controllers', controllers);
+    console.log(ember.getCatalog('router'));
     return ember;
   };
 

@@ -7,6 +7,7 @@ walk  = require 'acorn/util/walk'
 {q}         = require '../utils'
 astUtils    = require '../ast'
 CodeCatalog = require('../code-catalog').CodeCatalog
+MVCPattern = require('../code-catalog').MVCPattern
 nullFn = () -> null
 
 # -----------------------------------------------------------------------------
@@ -99,15 +100,15 @@ findEmberDefinitions = (ast, ember) ->
   application = ember.getCatalog('application')
   router = ember.getCatalog('router')
   controllers = ember.getCatalog('controllers')
-  array_controllers = controllers.getCatalog('array_controllers')
-  object_controllers = controllers.getCatalog('object_controllers')
+  array_controllers = controllers.addCatalog('array_controllers')
+  object_controllers = controllers.addCatalog('object_controllers')
   models = ember.getCatalog('models')
   views = ember.getCatalog('views')
-  checkbox_views = views.getCatalog('checkbox')
-  textfield_views = views.getCatalog('textfield')
-  select_views = views.getCatalog('select')
-  textarea_views = views.getCatalog('textarea')
-  view_views = views.getCatalog('view')
+  checkbox_views = views.addCatalog('checkbox')
+  textfield_views = views.addCatalog('textfield')
+  select_views = views.addCatalog('select')
+  textarea_views = views.addCatalog('textarea')
+  view_views = views.addCatalog('view')
 
   ## find the app
   astUtils.nodeWalk(ast, nullFn, {
@@ -143,9 +144,9 @@ findEmberDefinitions = (ast, ember) ->
             # we found an array or object controller
             name = node.id.name
             if controller_type == 'ArrayController'
-              array_controllers.addPointer(name, node.right)
+              array_controllers.addPointer(name, node.right.loc)
             else
-              object_controllers.addPointer(name, node.right)
+              object_controllers.addPointer(name, node.right.loc)
 
         ###
         # Check for Ember.ObjectController/ArrayController.extend
@@ -156,7 +157,7 @@ findEmberDefinitions = (ast, ember) ->
           right?.callee?.property?.name == 'extend'
             # we found an array or object controller
             name = node.id.name
-            models.addPointer(name, right)
+            models.addPointer(name, right.loc)
 
         ###
         # Check for Ember.ObjectController/ArrayController.extend
@@ -172,15 +173,15 @@ findEmberDefinitions = (ast, ember) ->
 
             switch view_type
               when 'Checkbox'
-                checkbox_views.addPointer(name, node.right)
+                checkbox_views.addPointer(name, node.right.loc)
               when 'TextField'
-                textfield_views.addPointer(name, node.right)
+                textfield_views.addPointer(name, node.right.loc)
               when 'TextArea'
-                textarea_views.addPointer(name, node.right)
+                textarea_views.addPointer(name, node.right.loc)
               when 'Select'
-                select_views.addPointer(name, node.right)
+                select_views.addPointer(name, node.right.loc)
               when 'View'
-                view_views.addPointer(name, node.right)
+                view_views.addPointer(name, node.right.loc)
 
 
       AssignmentExpression: (node) ->
@@ -210,6 +211,7 @@ findEmberDefinitions = (ast, ember) ->
             #     ember.addCatalog('Application', right)
             #   else
             application.addPointer(name, right.loc)
+
         ###
         # Check for Ember.ObjectController/ArrayController.extend
         ###
@@ -226,9 +228,9 @@ findEmberDefinitions = (ast, ember) ->
                   name = node.name
             })
             if controller_type == 'ArrayController'
-              array_controllers.addPointer(name, node.right)
+              array_controllers.addPointer(name, node.right.loc)
             else
-              object_controllers.addPointer(name, node.right)
+              object_controllers.addPointer(name, node.right.loc)
 
         ###
         # Check for Ember.ObjectController/ArrayController.extend
@@ -244,7 +246,7 @@ findEmberDefinitions = (ast, ember) ->
               Identifier: (node) ->
                   name = node.name
             })
-            models.addPointer(name, node.right)
+            models.addPointer(name, node.right.loc)
 
         ###
         # Check for Ember.ObjectController/ArrayController.extend
@@ -263,22 +265,22 @@ findEmberDefinitions = (ast, ember) ->
 
             switch view_type
               when 'Checkbox'
-                checkbox_views.addPointer(name, node.right)
+                checkbox_views.addPointer(name, node.right.loc)
               when 'TextField'
-                textfield_views.addPointer(name, node.right)
+                textfield_views.addPointer(name, node.right.loc)
               when 'TextArea'
-                textarea_views.addPointer(name, node.right)
+                textarea_views.addPointer(name, node.right.loc)
               when 'Select'
-                select_views.addPointer(name, node.right)
+                select_views.addPointer(name, node.right.loc)
               when 'View'
-                view_views.addPointer(name, node.right)
+                view_views.addPointer(name, node.right.loc)
 
       CallExpression: (node) ->
         # detect Ember Router
         name = undefined
-        if node.property?.name == 'map' and node.callee?.property.name == 'Router'
+        if node.callee?.property?.name == 'map' and node.callee?.object?.name == 'Router'
           name = node.callee.object.name
-          ember.addCatalog('Router', node)
+          router.addPointer('name', node.loc)
     })
 
   # add all controllers
@@ -293,6 +295,7 @@ findEmberDefinitions = (ast, ember) ->
   ember.addCatalog('Views', views)
   ember.addCatalog('Controllers', controllers)
 
+  console.log ember.getCatalog('router')
   return ember
 
 
