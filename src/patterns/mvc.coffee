@@ -111,6 +111,7 @@ findEmberDefinitions = (ast, emberComponents) ->
       # if its var M = Backbone.Model.extend....
       VariableDeclarator: (node) ->
         console.log 'variable declarator'
+        console.log node
         name = undefined
         ###
         # Check for Ember.Application.create
@@ -133,6 +134,24 @@ findEmberDefinitions = (ast, emberComponents) ->
                 ember_temp = new CodeCatalog()
                 ember_temp.add('Application', right)
                 emberComponents.add(name, ember_temp.toJSON())
+
+        ###
+        # Check for Ember.ObjectController/ArrayController.extend
+        ###
+
+        # console.log node.right
+        if right.callee?.object?.object?.name == 'Ember' and
+          (controller_type = right.callee?.object?.property.name) and
+          (controller_type == 'ArrayController' or controller_type == 'ObjectController') and
+          right?.callee?.property?.name == 'extend'
+            # we found an array or object controller
+            console.log 'found an ember controller'
+            name = node.id.name
+            if controller_type == 'ArrayController'
+              array_controllers.add(name, node.right)
+            else
+              object_controllers.add(name, node.right)
+
 
       AssignmentExpression: (node) ->
         console.log 'assignment expression'
