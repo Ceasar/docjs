@@ -48,13 +48,6 @@ documentPatterns = (fileName) -> (ast) ->
       .flatten()
       .value()
 
-  doc.catalogs = []
-  # doc.classes     = classes     unless _.isEmpty(classes)
-  doc.catalogs.push decorators unless _.isEmpty(decorators)
-  # doc.singletons  = singletons  unless _.isEmpty(singletons)
-  doc.catalogs = doc.catalogs.concat modules     unless _.isEmpty(modules)
-  doc.catalogs = doc.catalogs.concat mvc     unless _.isEmpty(mvc)
-
 
 # Run various pattern-matching modules on one file.
 runFileAnalysis = (fileName) ->
