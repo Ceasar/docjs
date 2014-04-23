@@ -27,33 +27,33 @@
     var backboneDefs, emberDefs, mvc;
     mvc = new MVCPattern();
     backboneDefs = mvc.backbone;
+    findBackboneDefinitions(ast, backboneDefs);
     emberDefs = mvc.ember;
     findEmberDefinitions(ast, emberDefs);
     return mvc;
   };
 
-  findBackboneDefinitions = function(ast, backboneDefs) {
+  findBackboneDefinitions = function(ast, backbone) {
     var collectionDefs, modelDefs, viewDefs;
-    modelDefs = new CodeCatalog();
-    viewDefs = new CodeCatalog();
-    collectionDefs = new CodeCatalog();
+    modelDefs = backbone.getCatalog('models');
+    viewDefs = backbone.getCatalog('views');
+    collectionDefs = backbone.getCatalog('collections');
     astUtils.nodeWalk(ast, nullFn, {
       VariableDeclarator: function(node) {
-        var callee, model, name, right, _ref;
+        var callee, name, right, _ref;
         if ((right = node.init) && right.type === 'CallExpression') {
           name = node.id.name;
           if ((((_ref = right.callee.property) != null ? _ref.name : void 0) === 'extend') && (callee = right.callee.object) && callee.type === 'MemberExpression' && callee.object.name === 'Backbone' && callee.property.type === 'Identifier') {
             switch (callee.property.name) {
               case 'Model':
-                model = new CodeCatalog();
                 console.log('found a model!');
-                return modelDefs.add(name, model);
+                return modelDefs.addPointer(name, right.loc);
               case 'View':
                 console.log('found a view!');
-                return viewDefs.add(name, right);
+                return viewDefs.addPointer(name, right.loc);
               case 'Collection':
                 console.log('found a collection!');
-                return collectionDefs.add(name, right);
+                return collectionDefs.addPointer(name, right.loc);
             }
           }
         }
@@ -71,22 +71,19 @@
             switch (callee.property.name) {
               case 'Model':
                 console.log('found a model!');
-                return modelDefs.add(name, right);
+                return modelDefs.addPointer(name, right.loc);
               case 'View':
                 console.log('found a view!');
-                return viewDefs.add(name, right);
+                return viewDefs.addPointer(name, right.loc);
               case 'Collection':
                 console.log('found a collection!');
-                return collectionDefs.add(name, right);
+                return collectionDefs.addPointer(name, right.loc);
             }
           }
         }
       }
     });
-    backboneDefs.add('models', modelDefs);
-    backboneDefs.add('views', viewDefs);
-    backboneDefs.add('collections', collectionDefs);
-    return backboneDefs;
+    return backbone;
   };
 
   findEmberDefinitions = function(ast, ember) {
@@ -250,7 +247,6 @@
     ember.addCatalog('Models', models);
     ember.addCatalog('Views', views);
     ember.addCatalog('Controllers', controllers);
-    console.log(ember.getCatalog('router'));
     return ember;
   };
 

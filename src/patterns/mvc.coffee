@@ -16,22 +16,17 @@ findMVCDefinitions = (ast) ->
   mvc = new MVCPattern()
   # generic mvc definitions
   backboneDefs = mvc.backbone
-  # findBackboneDefinitions(ast, backboneDefs)
+  findBackboneDefinitions(ast, backboneDefs)
   emberDefs = mvc.ember
   findEmberDefinitions(ast, emberDefs)
-
-
   return mvc
 
 
+findBackboneDefinitions = (ast, backbone) ->
 
-
-
-findBackboneDefinitions = (ast, backboneDefs) ->
-
-  modelDefs = new CodeCatalog()
-  viewDefs = new CodeCatalog()
-  collectionDefs = new CodeCatalog()
+  modelDefs = backbone.getCatalog('models')
+  viewDefs = backbone.getCatalog('views')
+  collectionDefs = backbone.getCatalog('collections')
 
   # First pass: Run through all function definitions, i
   astUtils.nodeWalk(ast, nullFn, {
@@ -47,16 +42,15 @@ findBackboneDefinitions = (ast, backboneDefs) ->
             callee.property.type == 'Identifier'
           switch callee.property.name
             when 'Model'
-              model = new CodeCatalog()
               # add the attributes to the model
               console.log ('found a model!')
-              modelDefs.add(name, model)
+              modelDefs.addPointer(name, right.loc)
             when 'View'
               console.log ('found a view!')
-              viewDefs.add(name, right)
+              viewDefs.addPointer(name, right.loc)
             when 'Collection'
               console.log ('found a collection!')
-              collectionDefs.add(name, right)
+              collectionDefs.addPointer(name, right.loc)
 
     # if its M = Backbonde.Model.extend... or exports.M = Backbone...
     AssignmentExpression: (node) ->
@@ -75,18 +69,15 @@ findBackboneDefinitions = (ast, backboneDefs) ->
           switch callee.property.name
             when 'Model'
               console.log ('found a model!')
-              modelDefs.add(name, right)
+              modelDefs.addPointer(name, right.loc)
             when 'View'
               console.log ('found a view!')
-              viewDefs.add(name, right)
+              viewDefs.addPointer(name, right.loc)
             when 'Collection'
               console.log ('found a collection!')
-              collectionDefs.add(name, right)
+              collectionDefs.addPointer(name, right.loc)
   })
-  backboneDefs.add('models', modelDefs)
-  backboneDefs.add('views', viewDefs)
-  backboneDefs.add('collections', collectionDefs)
-  return backboneDefs
+  return backbone
 
 
 findEmberDefinitions = (ast, ember) ->
@@ -295,11 +286,7 @@ findEmberDefinitions = (ast, ember) ->
   ember.addCatalog('Views', views)
   ember.addCatalog('Controllers', controllers)
 
-  console.log ember.getCatalog('router')
   return ember
-
-
-
 
 
 findAngularDefinitions = (ast, angularDefs) ->
