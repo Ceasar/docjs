@@ -25,10 +25,10 @@ A collection of code pointers
 @property catalogs {Array<CodeCatalog>}
 ###
 class CodeCatalog
-  constructor: (@name, @pointers=[], @catalogs=[]) ->
+  constructor: (@name, @pointers={}, @catalogs={}) ->
 
   addPointer: (loc, name) ->
-    @pointers.push(new CodePointer(loc, name))
+    @pointers[name] = new CodePointer(loc, name)
 
 # ----------------------------------------------------------------------------
 # Extensions
