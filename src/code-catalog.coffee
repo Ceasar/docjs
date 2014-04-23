@@ -28,10 +28,24 @@ class CodeCatalog
   constructor: (@name, @pointers={}, @catalogs={}) ->
 
   addPointer: (name, loc) ->
-    @pointers[name] = new CodePointer(name, loc)
+    unless @hasPointer(name)
+      @pointers[name] = new CodePointer(name, loc)
+
+  deletePointer: (name) ->
+    delete @pointers[name]
 
   hasPointer: (name) ->
     @pointers[name]?
+
+  # getter / setter
+  pointer: (name, p) ->
+    return unless name?
+    if p? then (@pointers[name] = p) else @pointers[name]
+
+  # getter / setter
+  catalog: (name, c) ->
+    return unless name?
+    if c? then (@catalogs[name] = c) else @catalogs[name]
 
 # ----------------------------------------------------------------------------
 # Extensions
@@ -41,6 +55,16 @@ The code catalog for a class
 ###
 class ClassPattern extends CodeCatalog
 
+  constructor: (@name) ->
+    @catalogs =
+      properties: new CodeCatalog 'properties'
+      methods:    new CodeCatalog 'methods'
+
+  addMethod: (name, loc) ->
+    @catalogs.methods.addPointer(name, loc)
+
+  addProperty: (name, loc) ->
+    @catalogs.properties.addPointer(name, loc)
 
 ###
 The code catalog for a module

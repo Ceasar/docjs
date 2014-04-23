@@ -11,6 +11,10 @@ findModules     = require('./patterns/module').findModules
 config          = require('./doc-gen-config')
 pprint          = require('./pprint')
 
+OUTPUT_JSON_FILE = 'view/patterns.json'
+
+# -----------------------------------------------------------------------------
+# Helpers
 
 # Returns a FUNCTION that takes a string of file contents and parses it into a
 # Mozilla Parser API-compatible AST data structure.
@@ -20,29 +24,28 @@ getAbstractSyntaxTree = (fileName) ->
     sourceFile: fileName
   })
 
-
 # -----------------------------------------------------------------------------
 
 documentation = {}
 
 
-documentPatterns = (filename) -> (ast) ->
-  # TODO: add more pattern matching
-  # classes     = findClasses(ast)
+documentPatterns = (fileName) -> (ast) ->
+  # TODO: add more patterns?
+  classes     = findClasses(ast)
   decorators  = findDecorators(ast)
-  # singletons  = findSingletons(ast)
+  singletons  = undefined # findSingletons(ast)
   modules     = findModules(ast)
 
   # Exit if no patterns were found.
-  # return if _.every([classes, decorators, singletons, modules], _.isEmpty)
+  return if _.every([classes, decorators, singletons, modules], _.isEmpty)
 
-  doc = documentation[filename] = {} unless documentation.filename?
+  doc = documentation[fileName] = {} unless documentation.fileName?
+  doc.catalogs =
+    _.chain([classes, decorators, singletons, modules])
+      .reject(_.isEmpty)
+      .flatten()
+      .value()
 
-  doc.catalogs = []
-  # doc.classes     = classes     unless _.isEmpty(classes)
-  doc.catalogs.push decorators unless _.isEmpty(decorators)
-  # doc.singletons  = singletons  unless _.isEmpty(singletons)
-  doc.catalogs = doc.catalogs.concat modules     unless _.isEmpty(modules)
 
 # Run various pattern-matching modules on one file.
 runFileAnalysis = (fileName) ->
@@ -54,7 +57,7 @@ runFileAnalysis = (fileName) ->
 # sub-folders) in one folder.
 runDirectoryAnalysis = (dirname) ->
 
-  filterFilenames = (fname) ->
+  filterfileNames = (fname) ->
     # don't look at hidden files
     return not fname.match(/^\./)
 
@@ -68,13 +71,15 @@ runDirectoryAnalysis = (dirname) ->
         runFileAnalysis(filepath)
 
   q(fs.readdir, dirname)
-    .then(_.partialRight _.filter, filterFilenames)
+    .then(_.partialRight _.filter, filterfileNames)
     .then(_.partialRight _.map, runAnalysis)
     .then(RSVP.all)
 
 # -----------------------------------------------------------------------------
-
 # Main execution
+
+writeOutputFilePromise = () ->
+  q(fs.writeFile, OUTPUT_JSON_FILE, JSON.stringify(documentation))
 
 main = () ->
   config.getPromise().then((config) ->
@@ -85,12 +90,14 @@ main = () ->
 
     RSVP.all(analyses)
 
-  ).then(() ->
+  ).then(writeOutputFilePromise)
+    .then(() -> console.log 'Completed analysis.')
+    .catch(console.error)
 
-    console.log(JSON.stringify(documentation))
+# -----------------------------------------------------------------------------
 
-  ).catch(console.error)
-
+module.exports =
+  main: main
 
 main() if module is require.main
 

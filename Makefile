@@ -10,5 +10,5 @@ test:
 	mocha --compilers coffee:coffee-script $(TESTS)
 
 build:
-	node build/doc-gen.js > view/patterns.json
+	node build/doc-gen.js
 	cd view && python build.py

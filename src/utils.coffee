@@ -1,5 +1,13 @@
 {Promise} = require 'rsvp'
 
+# Mixins / extensions
+# -----------------------------------------------------------------------------
+
+String::isCapitalized = () -> /^[A-Z]/.test(@)
+
+# Exports
+# -----------------------------------------------------------------------------
+
 ###
 # Call a Node-style async function and return a promise.
 #
@@ -18,3 +26,4 @@ exports.q = (fn, args...) -> new Promise (resolve, reject) ->
 
   args.push(cb)
   fn.apply(fn, args)
+

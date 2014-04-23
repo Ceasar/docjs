@@ -4,7 +4,17 @@ RSVP  = require 'rsvp'
 
 {q}   = require './utils'
 
+# -----------------------------------------------------------------------------
+# Globals
+
 CONFIG_FILE_NAME = './config.json'
+MISSING_CONFIG_FILE_ERROR_MSG =
+  '''
+  \n ***********
+  \n No config specified. Exiting doc-gen.
+  \n ***********
+  \n
+  '''
 
 # -----------------------------------------------------------------------------
 # Private
@@ -29,14 +39,7 @@ validateConfig = (config) ->
     resolve config
 
 onFileReject = () ->
-  console.error(
-    '''
-    \n ***********
-    \n No config specified. Exiting doc-gen.
-    \n ***********
-    \n
-    '''
-  )
+  console.error(MISSING_CONFIG_FILE_ERROR_MSG)
   return
 
 # -----------------------------------------------------------------------------

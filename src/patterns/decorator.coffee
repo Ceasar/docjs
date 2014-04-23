@@ -3,11 +3,10 @@
 Finds the decorators in a Javascript program.
 
 ###
-_           = require 'lodash'
-fs          = require 'fs'
-acorn       = require 'acorn'
-CodeCatalog = require('../code-catalog').CodeCatalog
-
+_             = require 'lodash'
+fs            = require 'fs'
+acorn         = require 'acorn'
+{CodeCatalog} = require('../code-catalog')
 
 findDecorators = (ast) ->
   decorators = new CodeCatalog("decorators")
@@ -19,7 +18,8 @@ findDecorators = (ast) ->
         name = expression.left.name
         if expression.right.arguments?
           if name in _.pluck(expression.right.arguments, 'name')
-            decorators.addPointer name, expression.loc
+            decorators.addPointer(name, expression.loc)
+
   return decorators
 
 module.exports =
