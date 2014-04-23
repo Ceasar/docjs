@@ -6,6 +6,7 @@ acorn = require 'acorn'
 walk  = require 'acorn/util/walk'
 
 CodeCatalog = require('../code-catalog').CodeCatalog
+SingletonPattern = require('../code-catalog').SingletonPattern
 {q}         = require '../utils'
 astUtils    = require '../ast'
 NODE_TYPES  = astUtils.TYPES
@@ -39,11 +40,11 @@ findSingletonInitMethod = (if_node) ->
     return {init, instance}
 
 walkTopLevelSingleton = (node, singletons) ->
-  singletonDef = new CodeCatalog()
-  privateMethods = new CodeCatalog()
-  privateProperties = new CodeCatalog()
-  publicMethods = new CodeCatalog()
-  publicProperties = new CodeCatalog()
+  singletonDef = new SingletonPattern()
+  privateMethods = singletonDef.getCatalog('Private Methods')
+  privateProperties = singletonDef.getCatalog('Private Properties')
+  publicMethods = singletonDef.getCatalog('Public Methods')
+  publicProperties = singletonDef.getCatalog('Public Properties')
   init = undefined
   instance = undefined
   # --------------------------------------------------------------------------
@@ -111,21 +112,21 @@ walkTopLevelSingleton = (node, singletons) ->
               _.map ret_node.argument.properties, (prop) ->
                 # walk the properties
                 if(prop.value.type == 'FunctionExpression')
-                  publicMethods.add(prop.key.name, prop.value)
+                  publicMethods.addPointer(prop.key.name, prop.value.loc)
 
                 else if(prop.value.type == 'Literal')
-                  publicProperties.add(prop.key.name, prop.value)
+                  publicProperties.addPointer(prop.key.name, prop.value.loc)
 
 
             FunctionDeclaration: (priv_fun_node) ->
-              if(!publicMethods.has(priv_fun_node.id?.name))
-                privateMethods.add(priv_fun_node.id.name, priv_fun_node)
+              if(!publicMethods.hasCatalog(priv_fun_node.id?.name))
+                privateMethods.addPointer(priv_fun_node.id.name, priv_fun_node.loc)
 
               # this is a private function
             VariableDeclaration: (priv_var_node) ->
               _.map priv_var_node.declarations, (decl) ->
-                if(!publicProperties.has(decl.id?.name))
-                  privateProperties.add(decl.id.name, decl.init)
+                if(!publicProperties.hasCatalog(decl.id?.name))
+                  privateProperties.addPointer(decl.id.name, decl.init.loc)
           }, 2  # only get the shallowest return node
 
       VariableDeclaration: (node) ->
@@ -139,19 +140,14 @@ walkTopLevelSingleton = (node, singletons) ->
 # public properties
 # instance, init function
 # should all be defined at this line
-  singletonDef.add('name', instance)
-  singletonDef.add('init_method', init)
-  singletonDef.add('private_methods', privateMethods.toJSON())
-  singletonDef.add('public_methods', publicMethods.toJSON())
-  singletonDef.add('private_properties', privateProperties.toJSON())
-  singletonDef.add('public_properties', publicProperties.toJSON())
-  if(instance? and !singletons.has instance)
-    singletons.add(instance, singletonDef.toJSON())
+  singletonDef.name = instance
+  if(instance? and !singletons.hasCatalog instance)
+    singletons.catalogs.push(singletonDef)
 
 
 nullFn = -> null
 findSingletonDefinitions = (ast) ->
-  singletons = new CodeCatalog()
+  singletons = new CodeCatalog('Singletons')
   astUtils.nodeWalk ast, nullFn, {
     # find a function or variable declaration
     VariableDeclaration: (node) ->
@@ -159,7 +155,7 @@ findSingletonDefinitions = (ast) ->
     FunctionDeclaration: (node) ->
       walkTopLevelSingleton(node, singletons)
   }
-  return singletons.toJSON()
+  return singletons
 
 
 module.exports =

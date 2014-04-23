@@ -106,6 +106,20 @@ class MVCPattern extends CodeCatalog
     @type = 'MVC'
 
 
+###
+The code catalog for singleton
+###
+class SingletonPattern extends CodeCatalog
+  constructor: (@name) ->
+
+    init_method = new CodeCatalog('Init Methods')
+    priv_method = new CodeCatalog('Private Methods')
+    pub_method = new CodeCatalog('Public Methods')
+    priv_prop = new CodeCatalog('Private Properties')
+    pub_prop = new CodeCatalog('Public Properties')
+
+    @catalogs = [init_method, priv_method, pub_method, priv_prop, pub_prop]
+
 # ----------------------------------------------------------------------------
 
 module.exports =
@@ -113,4 +127,5 @@ module.exports =
   ClassPattern:   ClassPattern
   ModulePattern:  ModulePattern
   MVCPattern:     MVCPattern
+  SingletonPattern:     SingletonPattern
 
