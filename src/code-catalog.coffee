@@ -64,6 +64,7 @@ class ClassPattern extends CodeCatalog
   constructor: (@name, @pointers={}, @catalogs=[]) ->
     @addCatalog('properties')
     @addCatalog('methods')
+    @type = 'Class'
 
   addMethod: (name, loc) ->
     @getCatalog('methods').addPointer(name, loc)
@@ -72,6 +73,8 @@ class ClassPattern extends CodeCatalog
     @getCatalog('properties').addPointer(name, loc)
 
 class ModulePattern extends CodeCatalog
+  constructor: (@name, @pointers={}, @catalogs=[]) ->
+    @type = 'Module'
 
 
 class MVCPattern extends CodeCatalog
@@ -100,6 +103,7 @@ class MVCPattern extends CodeCatalog
     backbone.addCatalog('Collections', new CodeCatalog())
 
     @.catalogs = [ember, backbone]
+    @type = 'MVC'
 
 
 # ----------------------------------------------------------------------------
