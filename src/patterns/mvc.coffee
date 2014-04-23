@@ -16,7 +16,7 @@ findMVCDefinitions = (ast) ->
   mvc = new MVCPattern()
   # generic mvc definitions
   backboneDefs = mvc.getCatalog('Backbone')
-  # findBackboneDefinitions(ast, backboneDefs)
+  findBackboneDefinitions(ast, backboneDefs)
   emberDefs = mvc.getCatalog('Ember')
   findEmberDefinitions(ast, emberDefs)
 
@@ -25,9 +25,9 @@ findMVCDefinitions = (ast) ->
 
 findBackboneDefinitions = (ast, backbone) ->
 
-  modelDefs = backbone.getCatalog('models')
-  viewDefs = backbone.getCatalog('views')
-  collectionDefs = backbone.getCatalog('collections')
+  modelDefs = backbone.getCatalog('Models')
+  viewDefs = backbone.getCatalog('Views')
+  collectionDefs = backbone.getCatalog('Collections')
 
   # First pass: Run through all function definitions, i
   astUtils.nodeWalk(ast, nullFn, {
@@ -84,18 +84,21 @@ findEmberDefinitions = (ast, ember) ->
   # Router
 
 
-  application = ember.getCatalog('application')
-  router = ember.getCatalog('router')
-  controllers = ember.getCatalog('controllers')
-  array_controllers = controllers.addCatalog('array_controllers')
-  object_controllers = controllers.addCatalog('object_controllers')
-  models = ember.getCatalog('models')
-  views = ember.getCatalog('views')
-  checkbox_views = views.addCatalog('checkbox')
-  textfield_views = views.addCatalog('textfield')
-  select_views = views.addCatalog('select')
-  textarea_views = views.addCatalog('textarea')
-  view_views = views.addCatalog('view')
+  application = ember.getCatalog('Application')
+  router = ember.getCatalog('Router')
+  controllers = ember.getCatalog('Controllers')
+  array_controllers = controllers.getCatalog('Array Controllers')
+  object_controllers = controllers.getCatalog('Object Controllers')
+  models = ember.getCatalog('Models')
+  views = ember.getCatalog('Views')
+  checkbox_views = views.getCatalog('Checkbox')
+  textfield_views = views.getCatalog('Textfield')
+  select_views = views.getCatalog('Select')
+  textarea_views = views.getCatalog('Textarea')
+  view_views = views.getCatalog('View')
+  # console.log 'before'
+  # application.addPointer('hi', {hi:'hi'})
+  # console.log 'after'
 
   ## find the app
   astUtils.nodeWalk(ast, nullFn, {

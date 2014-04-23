@@ -27,6 +27,7 @@
     var backboneDefs, emberDefs, mvc;
     mvc = new MVCPattern();
     backboneDefs = mvc.getCatalog('Backbone');
+    findBackboneDefinitions(ast, backboneDefs);
     emberDefs = mvc.getCatalog('Ember');
     findEmberDefinitions(ast, emberDefs);
     return mvc;
@@ -34,9 +35,9 @@
 
   findBackboneDefinitions = function(ast, backbone) {
     var collectionDefs, modelDefs, viewDefs;
-    modelDefs = backbone.getCatalog('models');
-    viewDefs = backbone.getCatalog('views');
-    collectionDefs = backbone.getCatalog('collections');
+    modelDefs = backbone.getCatalog('Models');
+    viewDefs = backbone.getCatalog('Views');
+    collectionDefs = backbone.getCatalog('Collections');
     astUtils.nodeWalk(ast, nullFn, {
       VariableDeclarator: function(node) {
         var callee, name, right, _ref;
@@ -81,18 +82,18 @@
 
   findEmberDefinitions = function(ast, ember) {
     var application, array_controllers, checkbox_views, controllers, models, object_controllers, router, select_views, textarea_views, textfield_views, view_views, views;
-    application = ember.getCatalog('application');
-    router = ember.getCatalog('router');
-    controllers = ember.getCatalog('controllers');
-    array_controllers = controllers.addCatalog('array_controllers');
-    object_controllers = controllers.addCatalog('object_controllers');
-    models = ember.getCatalog('models');
-    views = ember.getCatalog('views');
-    checkbox_views = views.addCatalog('checkbox');
-    textfield_views = views.addCatalog('textfield');
-    select_views = views.addCatalog('select');
-    textarea_views = views.addCatalog('textarea');
-    view_views = views.addCatalog('view');
+    application = ember.getCatalog('Application');
+    router = ember.getCatalog('Router');
+    controllers = ember.getCatalog('Controllers');
+    array_controllers = controllers.getCatalog('Array Controllers');
+    object_controllers = controllers.getCatalog('Object Controllers');
+    models = ember.getCatalog('Models');
+    views = ember.getCatalog('Views');
+    checkbox_views = views.getCatalog('Checkbox');
+    textfield_views = views.getCatalog('Textfield');
+    select_views = views.getCatalog('Select');
+    textarea_views = views.getCatalog('Textarea');
+    view_views = views.getCatalog('View');
     astUtils.nodeWalk(ast, nullFn, {
       VariableDeclarator: function(node) {
         var controller_type, name, right, view_type, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref22, _ref23, _ref24, _ref25, _ref26, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
