@@ -6,19 +6,10 @@ acorn = require 'acorn'
 fs    = require 'fs'
 path  = require 'path'
 
-astUtils  = require '../ast'
-{q}       = require '../utils'
+astUtils        = require '../ast'
+{ModulePattern} = require '../code-catalog'
+{q}             = require '../utils'
 
-# -----------------------------------------------------------------------------
-
-class CodePointer
-  constructor: (@name, loc) ->
-    @start = loc.start.line
-
-class Module
-  constructor: (@name, @api=[]) ->
-
-# -----------------------------------------------------------------------------
 
 getName = (node) ->
   if astUtils.isIdentifier(node)
@@ -42,7 +33,7 @@ findIdentifierLoc = (stmts, name) ->
 # TODO: documentation
 ###
 getModuleMembers = (stmts, moduleName) ->
-  module = new Module()
+  module = new ModulePattern()
 
   for stmt in stmts
     if (astUtils.isExpressionStatement(stmt) and
@@ -51,7 +42,7 @@ getModuleMembers = (stmts, moduleName) ->
         moduleName is stmt.expression.left.object.name)
       {left, right} = stmt.expression
       name = getName(left.property)
-      module.api.push(new CodePointer(name, right.loc))
+      module.addPointer(right.loc, name)
 
   return module
 
@@ -64,7 +55,7 @@ getModule = (node) ->
   returnExpr  =  _.find(body, astUtils.isReturnStatement)?.argument
   return null unless returnExpr
 
-  module = new Module()
+  module = new ModulePattern()
   if astUtils.isObjectExpression(returnExpr)
     for {key, value, kind} in returnExpr.properties
       # TODO: don't ignore getter/setters and identifiers
@@ -73,8 +64,7 @@ getModule = (node) ->
         loc = findIdentifierLoc(body, value.name)
       else
         loc = value.loc
-      codePointer = new CodePointer(name, loc)
-      module.api.push(codePointer)
+      module.addPointer(loc, name)
     return module
   else if astUtils.isIdentifier(returnExpr)
     return getModuleMembers(body, returnExpr.name)
@@ -97,13 +87,17 @@ findModuleDefinitions = (ast) ->
     modules:  []
 
   astUtils.nodeWalk ast, (node) ->
-    if astUtils.isIIFE(node)
-      docs.iifes.push(node)
-      docs.modules.push(getModule(node))
+    if astUtils.isFunctionDeclaration(node)
+      for {id, init} in node.declarations
+        module = getModule(init)
+        if module
+          module.name = id.name
+          docs.modules.push(module)
+          docs.iifes.push(init)
 
-      # TODO: remove synchronous call
-      source = fs.readFileSync(node.loc.source, 'utf8')
-      docs.srcs.push(astUtils.getNodeSrc(node, source))
+          # TODO: remove synchronous call
+          source = fs.readFileSync(node.loc.source, 'utf8')
+          docs.srcs.push(astUtils.getNodeSrc(node, source))
 
   if _.every([docs.iifes, docs.srcs, docs.modules], _.isEmpty)
     # Exit if no modules were found.
