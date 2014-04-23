@@ -7,7 +7,6 @@ walk  = require 'acorn/util/walk'
 {q}         = require '../utils'
 astUtils    = require '../ast'
 CodeCatalog = require('../code-catalog').CodeCatalog
-NODE_TYPES  = require('../types').types
 nullFn = () -> null
 
 # -----------------------------------------------------------------------------

@@ -72,10 +72,20 @@ The code catalog for a module
 class ModulePattern extends CodeCatalog
 
 
+###
+The code catalog for mvc
+###
+class MVCPattern extends CodeCatalog
+  addCatalog: (name) ->
+    @catalogs[name] = new CodeCatalog(name)
+
+
+
 # ----------------------------------------------------------------------------
 
 module.exports =
   CodeCatalog:    CodeCatalog
   ClassPattern:   ClassPattern
   ModulePattern:  ModulePattern
+  MVCPattern:     MVCPattern
 

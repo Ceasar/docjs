@@ -1,5 +1,5 @@
 (function() {
-  var CodeCatalog, NODE_TYPES, RSVP, acorn, astUtils, findAngularDefinitions, findBackboneDefinitions, findEmberDefinitions, findMVCDefinitions, fs, nullFn, q, walk, _;
+  var CodeCatalog, RSVP, acorn, astUtils, findAngularDefinitions, findBackboneDefinitions, findEmberDefinitions, findMVCDefinitions, fs, nullFn, q, walk, _;
 
   fs = require('fs');
 
@@ -16,8 +16,6 @@
   astUtils = require('../ast');
 
   CodeCatalog = require('../code-catalog').CodeCatalog;
-
-  NODE_TYPES = require('../types').types;
 
   nullFn = function() {
     return null;
