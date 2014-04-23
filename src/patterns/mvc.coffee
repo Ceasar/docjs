@@ -102,6 +102,9 @@ findEmberDefinitions = (ast, emberComponents) ->
   # DS.Model
   # Router
   #
+  controllers = new CodeCatalog()
+  array_controllers = new CodeCatalog()
+  object_controllers = new CodeCatalog()
 
   ## find the app
   astUtils.nodeWalk(ast, nullFn, {
@@ -133,6 +136,7 @@ findEmberDefinitions = (ast, emberComponents) ->
 
       AssignmentExpression: (node) ->
         console.log 'assignment expression'
+        # console.log node.right
         name = undefined
         ###
         # Check for Ember.Application.create
@@ -141,11 +145,8 @@ findEmberDefinitions = (ast, emberComponents) ->
           # grab the name of the model
           # if it's a exports.xxx, then it's a member expression
           if node.left.type == 'MemberExpression' and node.left.object.name == 'exports'
-            name = node.left.property.name
-          else if node.left.type == 'hi'
-            console.log 'hi'
+            name = node.left.property?.name
 
-          # console.log right?.callee?.object?.name
           if right?.callee?.object?.object?.name == 'Ember' and
               right?.callee?.object?.property?.name == 'Application' and
               right?.callee?.property?.name == 'create'
@@ -156,7 +157,6 @@ findEmberDefinitions = (ast, emberComponents) ->
               Identifier: (node) ->
                   name = node.name
             })
-            console.log name
 
             if name?
               # if emberComponents already contains the name, then add it to it
@@ -166,19 +166,47 @@ findEmberDefinitions = (ast, emberComponents) ->
                 ember_temp = new CodeCatalog()
                 ember_temp.add('Application', right)
                 emberComponents.add(name, ember_temp.toJSON())
+        ###
+        # Check for Ember.ObjectController/ArrayController.extend
+        ###
 
-      MemberExpression: (node) ->
-        console.log 'member expression'
-        # console.log node
-        # console.log node.object.name
+        # console.log node.right
+        if node.right.callee?.object?.object?.name == 'Ember' and
+          (controller_type = node.right.callee?.object?.property.name) and
+          (controller_type == 'ArrayController' or controller_type == 'ObjectController') and
+          node.right?.callee?.property?.name == 'extend'
+            # we found an array or object controller
+            console.log 'found an ember controller'
+            name = node.left
+            # walk the left node - for each memberExpression, if its property is a "Identifier", set name to it
+            astUtils.nodeWalk(node.left, nullFn, {
+              Identifier: (node) ->
+                  name = node.name
+            })
+            if controller_type == 'ArrayController'
+              array_controllers.add(name, node.right)
+            else
+              object_controllers.add(name, node.right)
+      # console.log node.right.callee.object
+
+
+      # MemberExpression: (node) ->
+      #   console.log 'member expression'
+      # console.log node
+      # console.log node.object.name
       CallExpression: (node) ->
-        # console.log 'call expression'
+        # detect Ember Router
+        console.log 'call expression'
         name = undefined
-        if node.property.name == 'map' and node.callee.property.name == 'Router'
+        if node.property?.name == 'map' and node.callee?.property.name == 'Router'
           name = node.callee.object.name
           emberComponents.add('Router', node)
     })
 
+  # add all controllers
+  controllers.add('ArrayControllers', array_controllers.toJSON())
+  controllers.add('ObjectControllers', object_controllers.toJSON())
+  emberComponents.add('Controllers', controllers.toJSON())
 
   return emberComponents
 

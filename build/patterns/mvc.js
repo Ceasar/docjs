@@ -97,6 +97,10 @@
   };
 
   findEmberDefinitions = function(ast, emberComponents) {
+    var array_controllers, controllers, object_controllers;
+    controllers = new CodeCatalog();
+    array_controllers = new CodeCatalog();
+    object_controllers = new CodeCatalog();
     astUtils.nodeWalk(ast, nullFn, {
       VariableDeclarator: function(node) {
         var ember_temp, name, right, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
@@ -123,7 +127,7 @@
         }
       },
       AssignmentExpression: function(node) {
-        var ember_temp, name, right, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+        var controller_type, ember_temp, name, right, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
         console.log('assignment expression');
         name = void 0;
 
@@ -132,41 +136,57 @@
          */
         if ((right = node.right) && right.type === 'CallExpression') {
           if (node.left.type === 'MemberExpression' && node.left.object.name === 'exports') {
-            name = node.left.property.name;
-          } else if (node.left.type === 'hi') {
-            console.log('hi');
+            name = (_ref = node.left.property) != null ? _ref.name : void 0;
           }
-          if ((right != null ? (_ref = right.callee) != null ? (_ref1 = _ref.object) != null ? (_ref2 = _ref1.object) != null ? _ref2.name : void 0 : void 0 : void 0 : void 0) === 'Ember' && (right != null ? (_ref3 = right.callee) != null ? (_ref4 = _ref3.object) != null ? (_ref5 = _ref4.property) != null ? _ref5.name : void 0 : void 0 : void 0 : void 0) === 'Application' && (right != null ? (_ref6 = right.callee) != null ? (_ref7 = _ref6.property) != null ? _ref7.name : void 0 : void 0 : void 0) === 'create') {
+          if ((right != null ? (_ref1 = right.callee) != null ? (_ref2 = _ref1.object) != null ? (_ref3 = _ref2.object) != null ? _ref3.name : void 0 : void 0 : void 0 : void 0) === 'Ember' && (right != null ? (_ref4 = right.callee) != null ? (_ref5 = _ref4.object) != null ? (_ref6 = _ref5.property) != null ? _ref6.name : void 0 : void 0 : void 0 : void 0) === 'Application' && (right != null ? (_ref7 = right.callee) != null ? (_ref8 = _ref7.property) != null ? _ref8.name : void 0 : void 0 : void 0) === 'create') {
             astUtils.nodeWalk(node.left, nullFn, {
               Identifier: function(node) {
                 return name = node.name;
               }
             });
-            console.log(name);
             if (name != null) {
               if (emberComponents.has(name)) {
-                return emberComponents.add('Application', right);
+                emberComponents.add('Application', right);
               } else {
                 ember_temp = new CodeCatalog();
                 ember_temp.add('Application', right);
-                return emberComponents.add(name, ember_temp.toJSON());
+                emberComponents.add(name, ember_temp.toJSON());
               }
             }
           }
         }
-      },
-      MemberExpression: function(node) {
-        return console.log('member expression');
+
+        /*
+         * Check for Ember.ObjectController/ArrayController.extend
+         */
+        if (((_ref9 = node.right.callee) != null ? (_ref10 = _ref9.object) != null ? (_ref11 = _ref10.object) != null ? _ref11.name : void 0 : void 0 : void 0) === 'Ember' && (controller_type = (_ref12 = node.right.callee) != null ? (_ref13 = _ref12.object) != null ? _ref13.property.name : void 0 : void 0) && (controller_type === 'ArrayController' || controller_type === 'ObjectController') && ((_ref14 = node.right) != null ? (_ref15 = _ref14.callee) != null ? (_ref16 = _ref15.property) != null ? _ref16.name : void 0 : void 0 : void 0) === 'extend') {
+          console.log('found an ember controller');
+          name = node.left;
+          astUtils.nodeWalk(node.left, nullFn, {
+            Identifier: function(node) {
+              return name = node.name;
+            }
+          });
+          if (controller_type === 'ArrayController') {
+            return array_controllers.add(name, node.right);
+          } else {
+            return object_controllers.add(name, node.right);
+          }
+        }
       },
       CallExpression: function(node) {
-        var name;
+        var name, _ref, _ref1;
+        console.log('call expression');
         name = void 0;
-        if (node.property.name === 'map' && node.callee.property.name === 'Router') {
+        if (((_ref = node.property) != null ? _ref.name : void 0) === 'map' && ((_ref1 = node.callee) != null ? _ref1.property.name : void 0) === 'Router') {
           name = node.callee.object.name;
           return emberComponents.add('Router', node);
         }
       }
     });
+    controllers.add('ArrayControllers', array_controllers.toJSON());
+    controllers.add('ObjectControllers', object_controllers.toJSON());
+    emberComponents.add('Controllers', controllers.toJSON());
     return emberComponents;
   };
 
