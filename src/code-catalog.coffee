@@ -1,30 +1,37 @@
-_     = require 'lodash'
-Model = require 'fishbone'
+class CodeLoc
+  constructor: (@line, @column) ->
+
+
+class CodeRange
+  constructor: (@start=null, @end=null) ->
+
 
 ###
-# A simple dictionary to keep track of code pointers in target source code.
-# Includes a simple event emitter and prevents overwriting of entries (unless
-# you remove that key first).
+A pointer to a piece of code in a codebase
+@property loc {CodeRange} The location of the code in question
+@property name {string?} Name of the symbol if applicable (may be null)
 ###
-exports.CodeCatalog = Model
+exports.CodePointer = class CodePointer
+  constructor: (@loc, @name=null) ->
 
-  init: (entries) ->
-    @[k] = v for own k, v of entries
 
-  add: (name, pointer) ->
-    return false if @has(name)
-    @trigger 'add', { name: name, pointer: pointer }
-    @[name] = pointer
-    return true
+###
+A collection of code pointers
+@property name {string?} Name of this catalog (if applicable)
+@property pointers {Array<CodePointer>}
+@property catalogs {Array<CodeCatalog>}
+###
+exports.CodeCatalog = class CodeCatalog
+  constructor: (@name, @pointers=[], @catalogs=[]) ->
 
-  remove: (name) ->
-    return false unless @has(name)
-    @trigger 'remove', { name: name }
-    delete @[name]
-    return true
 
-  has: (name) -> @[name]?
+###
+The code catalog for a class
+###
+exports.ClassPattern = class ClassPattern extends CodeCatalog
 
-  get: (name) -> @[name]
 
-  toJSON: ()  -> _.omit(@, _.isFunction)
+###
+The code catalog for a module
+###
+exports.ModulePattern = class ModulePattern extends CodeCatalog
