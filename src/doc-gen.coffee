@@ -34,7 +34,7 @@ documentPatterns = (fileName) -> (ast) ->
   # TODO: add more patterns?
   classes     = findClasses(ast)
   decorators  = findDecorators(ast)
-  singletons  = undefined # findSingletons(ast)
+  singletons  = findSingletons(ast)
   modules     = findModules(ast)
   mvc         = findMVC(ast)
 
