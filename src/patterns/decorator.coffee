@@ -10,7 +10,7 @@ CodeCatalog = require('../code-catalog').CodeCatalog
 
 
 findDecorators = (ast) ->
-  decorators = new CodeCatalog()
+  decorators = new CodeCatalog("decorators")
 
   for node in ast.body
     if node.expression?
@@ -19,8 +19,8 @@ findDecorators = (ast) ->
         name = expression.left.name
         if expression.right.arguments?
           if name in _.pluck(expression.right.arguments, 'name')
-            decorators.add name, expression
-  return decorators.toJSON()
+            decorators.addPointer name, expression.loc
+  return decorators
 
 module.exports =
   findDecorators: findDecorators

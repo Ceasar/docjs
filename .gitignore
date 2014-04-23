@@ -1,4 +1,4 @@
-build
+build/
 node_modules
 *.log
 *.swo
@@ -7,3 +7,4 @@ node_modules
 Session.vim
 .DS_Store
 view/index.html
+view/patterns.json

@@ -1,4 +1,4 @@
-.PHONY: test
+.PHONY: test build
 
 TESTS = $(shell find test -type f)
 
@@ -8,3 +8,6 @@ install:
 
 test:
 	mocha --compilers coffee:coffee-script $(TESTS)
+
+build:
+	node build/doc-gen.js > view/patterns.json

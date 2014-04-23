@@ -1,8 +1,4 @@
 
-h1, h2 {
-    text-transform: capitalize;
-}
-
 
 a {
     color: #999;
@@ -16,10 +12,6 @@ a:hover {
     position: fixed;
     top: 20px;
     width: 100%;
-}
-
-.nav-pills > li > a {
-    text-transform: capitalize;
 }
 
 .nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus {

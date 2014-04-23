@@ -10,12 +10,15 @@
     </div>
     <div class="row">
         <div class="col-md-9">
-            {% for catalog in catalogs recursive %}
+            {% for filename, catalog in filenames.iteritems() %}
+            <div id="{{ filename }}" class="page-header">
+                <h1><code>{{filename}}</code></h1>
+            </div>
+            {% for catalog in catalog.catalogs recursive %}
+            {% if catalog.pointers or catalog.catalogs %}
             <div class="catalog">
                 {% if loop.depth == 1 %}
-                <div id="{{ catalog.name }}" class="page-header">
-                    <h{{loop.depth}}>{{ catalog.name }}</h{{loop.depth}}>
-                </div>
+                <h{{loop.depth + 1}} id="{{ catalog.name }}">{{ catalog.name }}</h{{loop.depth}}>
                 {% else %}
                 <h{{loop.depth}}>{{ catalog.name }}</h{{loop.depth}}>
                 {% endif %}
@@ -32,10 +35,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for pointer in catalog.pointers %}
+                    {% for _, pointer in catalog.pointers.iteritems() %}
                         <tr>
                             <td>{{ pointer.name }}</td>
-                            <td><code>{{ pointer.location }}</code></td>
+                            <td><code>{{filename}}:{{ pointer.loc.start.line }}</code></td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -43,18 +46,20 @@
                 {% endif %}
                 {{ loop(catalog.catalogs) }}
             </div>
+            {% endif %}
+            {% endfor %}
             {% endfor %}
         </div>
         <div class="col-md-3" role="complementary">
             <div class="navbar affix-top">
                 <ul id="nav" class="nav nav-pills nav-stacked">
-                {% for catalog in catalogs %}
+                {% for filename, _ in filenames.iteritems() %}
                 {% if loop.first %}
                 <li class="active">
                 {% else %}
                 <li>
                 {% endif %}
-                <a href="#{{ catalog.name }}">{{ catalog.name }}</a></li>
+                <a href="#{{ filename }}">{{ filename }}</a></li>
                 {% endfor %}
                 </ul>
             </div>
