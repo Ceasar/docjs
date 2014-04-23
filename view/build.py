@@ -27,10 +27,7 @@ def prune(d):
 
 def get_catalogs():
     with open('patterns.json') as f:
-        x = prune(json.loads(f.read()))
-        for k, v in x.iteritems():
-            pprint(v)
-        return {'filenames': x}
+        return {'filenames': prune(json.loads(f.read()))}
 
 renderer = make_renderer(contexts=[
     ("index.html", get_catalogs),
