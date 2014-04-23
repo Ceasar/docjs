@@ -40,7 +40,7 @@ documentPatterns = (fileName) -> (ast) ->
   return if _.every([classes, decorators, singletons, modules], _.isEmpty)
 
   doc = documentation[fileName] = {} unless documentation.fileName?
-  doc.catalogs = _.filter([classes, decorators, singletons, modules], _.isEmpty)
+  doc.catalogs = _.reject([classes, decorators, singletons, modules], _.isEmpty)
 
 # Run various pattern-matching modules on one file.
 runFileAnalysis = (fileName) ->
@@ -83,7 +83,7 @@ main = () ->
 
   ).then(() ->
 
-    console.log(JSON.stringify(documentation))
+    console.log(documentation)
 
   ).catch(console.error)
 
