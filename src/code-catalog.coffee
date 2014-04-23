@@ -25,7 +25,7 @@ A collection of code pointers
 @property catalogs  {Array<CodeCatalog>}
 ###
 class CodeCatalog
-  constructor: (@name, @pointers={}, @catalogs={}) ->
+  constructor: (@name, @pointers={}, @catalogs=[]) ->
 
   addPointer: (name, loc) ->
     unless @hasPointer(name)
@@ -33,6 +33,9 @@ class CodeCatalog
 
   deletePointer: (name) ->
     delete @pointers[name]
+
+  getPointer: (name) ->
+    @pointers[name]
 
   hasPointer: (name) ->
     @pointers[name]?
@@ -46,6 +49,19 @@ class CodeCatalog
   catalog: (name, c) ->
     return unless name?
     if c? then (@catalogs[name] = c) else @catalogs[name]
+
+  addCatalog: (name) ->
+    @catalogs.push(new CodeCatalog(name))
+
+  getCatalog: (name) ->
+    for catalog in @catalogs
+      if catalog.name == name then return catalog
+
+
+
+  hasCatalog: (name) ->
+    return true for catalog in @catalogs when catalog.name is name
+    return false
 
 # ----------------------------------------------------------------------------
 # Extensions
@@ -72,10 +88,42 @@ The code catalog for a module
 class ModulePattern extends CodeCatalog
 
 
+###
+The code catalog for mvc
+###
+class MVCPattern extends CodeCatalog
+  constructor: (@name) ->
+    ember = new CodeCatalog('Ember')
+
+    ember_views = new CodeCatalog('Views')
+    ember_views.addCatalog('Checkbox')
+    ember_views.addCatalog('Textfield')
+    ember_views.addCatalog('Textarea')
+    ember_views.addCatalog('Select')
+    ember_views.addCatalog('View')
+    ember_controllers = new CodeCatalog('Controllers')
+    ember_controllers.addCatalog('Array Controllers')
+    ember_controllers.addCatalog('Object Controllers')
+
+    ember.catalogs = [ember_views, ember_controllers]
+    ember.addCatalog('Models')
+    ember.addCatalog('Router')
+    ember.addCatalog('Application')
+
+    backbone = new CodeCatalog('Backbone')
+
+    backbone.addCatalog('Models', new CodeCatalog())
+    backbone.addCatalog('Views', new CodeCatalog())
+    backbone.addCatalog('Collections', new CodeCatalog())
+
+    @.catalogs = [ember, backbone]
+
+
 # ----------------------------------------------------------------------------
 
 module.exports =
   CodeCatalog:    CodeCatalog
   ClassPattern:   ClassPattern
   ModulePattern:  ModulePattern
+  MVCPattern:     MVCPattern
 
