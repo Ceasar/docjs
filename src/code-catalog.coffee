@@ -45,19 +45,12 @@ class CodeCatalog
     return unless name?
     if p? then (@pointers[name] = p) else @pointers[name]
 
-  # getter / setter
-  catalog: (name, c) ->
-    return unless name?
-    if c? then (@catalogs[name] = c) else @catalogs[name]
-
   addCatalog: (name) ->
     @catalogs.push(new CodeCatalog(name))
 
   getCatalog: (name) ->
     for catalog in @catalogs
-      if catalog.name == name then return catalog
-
-
+      if catalog.name is name then return catalog
 
   hasCatalog: (name) ->
     return true for catalog in @catalogs when catalog.name is name
@@ -66,31 +59,21 @@ class CodeCatalog
 # ----------------------------------------------------------------------------
 # Extensions
 
-###
-The code catalog for a class
-###
 class ClassPattern extends CodeCatalog
 
-  constructor: (@name) ->
-    @catalogs =
-      properties: new CodeCatalog 'properties'
-      methods:    new CodeCatalog 'methods'
+  constructor: (@name, @pointers={}, @catalogs=[]) ->
+    @addCatalog('properties')
+    @addCatalog('methods')
 
   addMethod: (name, loc) ->
-    @catalogs.methods.addPointer(name, loc)
+    @getCatalog('methods').addPointer(name, loc)
 
   addProperty: (name, loc) ->
-    @catalogs.properties.addPointer(name, loc)
+    @getCatalog('properties').addPointer(name, loc)
 
-###
-The code catalog for a module
-###
 class ModulePattern extends CodeCatalog
 
 
-###
-The code catalog for mvc
-###
 class MVCPattern extends CodeCatalog
   constructor: (@name) ->
     ember = new CodeCatalog('Ember')

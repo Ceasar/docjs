@@ -19,9 +19,19 @@
                 {% if catalog.pointers or catalog.catalogs %}
                 <div class="catalog">
                     {% if loop.depth == 1 %}
-                    <h{{loop.depth + 1}} id="{{ catalog.name }}">{{ catalog.name }}</h{{loop.depth}}>
+                    <h{{loop.depth + 1}} id="{{ catalog.name }}">
+                      {{ catalog.name }}
+                      {% if catalog.parent %}
+                      <: {{ catalog.parent }}
+                      {% endif %}
+                    </h{{loop.depth}}>
                     {% else %}
-                    <h{{loop.depth}}>{{ catalog.name }}</h{{loop.depth}}>
+                    <h{{loop.depth}}>
+                      {{ catalog.name }}
+                      {% if catalog.parent %}
+                      <: {{ catalog.parent }}
+                      {% endif %}
+                    </h{{loop.depth}}>
                     {% endif %}
                     {% if catalog.pointers %}
                     <table class="table table-striped table-condensed">
