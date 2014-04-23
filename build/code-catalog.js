@@ -6,12 +6,12 @@
 
   Model = require('fishbone');
 
-  /*
-  # A simple dictionary to keep track of code pointers in target source code.
-  # Includes a simple event emitter and prevents overwriting of entries (unless
-  # you remove that key first).
-  */
 
+  /*
+   * A simple dictionary to keep track of code pointers in target source code.
+   * Includes a simple event emitter and prevents overwriting of entries (unless
+   * you remove that key first).
+   */
 
   exports.CodeCatalog = Model({
     init: function(entries) {
