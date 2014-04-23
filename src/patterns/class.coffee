@@ -36,9 +36,9 @@ findClassDefinitions = (ast) ->
     AssignmentExpression: (node) ->
       # 'app.MyClass = ...'
       if node.left.type is 'MemberExpression'
-        className = (node.left.property.name or node.left.property.value)
-        if className? and _.isString(className) and className.isCapitalized()
-          capitalizedVars.pointer(className, node.right.loc)
+        prop = (node.left.property.name or node.left.property.value)
+        if prop? and _.isString(prop) and prop.isCapitalized()
+          capitalizedVars.pointer(prop, node.right.loc)
 
       # 'MyClass = ...'
       else if node.left.type is 'Identifier'
@@ -118,7 +118,7 @@ findClassDefinitions = (ast) ->
 
           prop = node.left.property.name or node.left.property.value
           if prop is 'property'
-            catalogInheritance(node)
+            catalogInheritance(node, className)
 
     })
 

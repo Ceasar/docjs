@@ -3,6 +3,10 @@
 
   var Game = function (params) {
     this.name = params.name;
+
+    this.toString = function () {
+      return this.name + " (game).";
+    };
   };
 
   Game.prototype = Object.create(null);

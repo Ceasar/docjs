@@ -35,7 +35,7 @@ class CodeCatalog
     delete @pointers[name]
 
   getPointer: (name) ->
-    @pointers[name]
+    @pointers[name] if @pointers.hasOwnProperty(name)
 
   hasPointer: (name) ->
     @pointers[name]?
@@ -43,7 +43,10 @@ class CodeCatalog
   # getter / setter
   pointer: (name, p) ->
     return unless name?
-    if p? then (@pointers[name] = p) else @pointers[name]
+    if p?
+      (@pointers[name] = p)
+    else if @pointers.hasOwnProperty(name)
+      @pointers[name]
 
   addCatalog: (name) ->
     @catalogs.push(new CodeCatalog(name))
@@ -67,7 +70,7 @@ class ClassPattern extends CodeCatalog
     @type = 'Class'
 
   addMethod: (name, loc) ->
-    @getCatalog('methods').addPointer(name, loc)
+    @getCatalog('methods').addPointer("##{name}", loc)
 
   addProperty: (name, loc) ->
     @getCatalog('properties').addPointer(name, loc)
