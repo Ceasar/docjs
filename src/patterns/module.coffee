@@ -42,7 +42,7 @@ getModuleMembers = (stmts, moduleName) ->
         moduleName is stmt.expression.left.object.name)
       {left, right} = stmt.expression
       name = getName(left.property)
-      module.addPointer(right.loc, name)
+      module.addPointer(name, right.loc)
 
   return module
 
@@ -64,7 +64,7 @@ getModule = (node) ->
         loc = findIdentifierLoc(body, value.name)
       else
         loc = value.loc
-      module.addPointer(loc, name)
+      module.addPointer(name, loc)
     return module
   else if astUtils.isIdentifier(returnExpr)
     return getModuleMembers(body, returnExpr.name)
@@ -87,7 +87,7 @@ findModuleDefinitions = (ast) ->
     modules:  []
 
   astUtils.nodeWalk ast, (node) ->
-    if astUtils.isFunctionDeclaration(node)
+    if astUtils.isVariableDeclaration(node)
       for {id, init} in node.declarations
         module = getModule(init)
         if module
