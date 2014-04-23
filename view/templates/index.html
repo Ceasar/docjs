@@ -11,7 +11,7 @@
     <div class="row">
         <div class="col-md-9">
             {% for filename, catalog in filenames.iteritems() %}
-            <div id="{{ filename }}" >
+            <div id="file-{{ loop.index }}" >
                 <div class="page-header">
                     <h1><code>{{filename}}</code></h1>
                 </div>
@@ -61,7 +61,7 @@
                 {% else %}
                 <li>
                 {% endif %}
-                <a href="#{{ filename }}">{{ filename }}</a></li>
+                <a href="#file-{{ loop.index }}">{{ filename }}</a></li>
                 {% endfor %}
                 </ul>
             </div>
