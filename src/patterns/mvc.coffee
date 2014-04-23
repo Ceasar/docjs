@@ -107,12 +107,16 @@ findEmberDefinitions = (ast, emberComponents) ->
   object_controllers = new CodeCatalog()
   models = new CodeCatalog()
   views = new CodeCatalog()
+  checkbox_views = new CodeCatalog()
+  textfield_views = new CodeCatalog()
+  select_views = new CodeCatalog()
+  textarea_views = new CodeCatalog()
+  view_views = new CodeCatalog()
 
   ## find the app
   astUtils.nodeWalk(ast, nullFn, {
       # if its var M = Backbone.Model.extend....
       VariableDeclarator: (node) ->
-        console.log 'variable declarator'
         name = undefined
         ###
         # Check for Ember.Application.create
@@ -157,13 +161,35 @@ findEmberDefinitions = (ast, emberComponents) ->
           (right.callee?.object?.property.name == 'Model') and
           right?.callee?.property?.name == 'extend'
             # we found an array or object controller
-            console.log 'found an ember model'
             name = node.id.name
             models.add(name, right)
 
+        ###
+        # Check for Ember.ObjectController/ArrayController.extend
+        ###
+
+        if right.callee?.object?.object?.name == 'Ember' and
+          (view_type = right.callee?.object?.property.name) and
+          (view_type == 'Checkbox' or view_type == 'TextField' or
+           view_type == "Select" or view_type == 'TextArea' or view_type == 'View')
+            # we found a view
+            # walk the left node - for each memberExpression, if its property is a "Identifier", set name to it
+            name = node.id.name
+
+            switch view_type
+              when 'Checkbox'
+                checkbox_views.add(name, node.right)
+              when 'TextField'
+                textfield_views.add(name, node.right)
+              when 'TextArea'
+                textarea_views.add(name, node.right)
+              when 'Select'
+                select_views.add(name, node.right)
+              when 'View'
+                view_views.add(name, node.right)
+
 
       AssignmentExpression: (node) ->
-        console.log 'assignment expression'
         name = undefined
         ###
         # Check for Ember.Application.create
@@ -201,7 +227,6 @@ findEmberDefinitions = (ast, emberComponents) ->
           (controller_type == 'ArrayController' or controller_type == 'ObjectController') and
           node.right?.callee?.property?.name == 'extend'
             # we found an array or object controller
-            console.log 'found an ember controller'
             name = node.left
             # walk the left node - for each memberExpression, if its property is a "Identifier", set name to it
             astUtils.nodeWalk(node.left, nullFn, {
@@ -221,7 +246,6 @@ findEmberDefinitions = (ast, emberComponents) ->
           (node.right.callee?.object?.property.name == 'Model') and
           node.right?.callee?.property?.name == 'extend'
             # we found an array or object controller
-            console.log 'found an ember model'
             name = node.left
             # walk the left node - for each memberExpression, if its property is a "Identifier", set name to it
             astUtils.nodeWalk(node.left, nullFn, {
@@ -230,11 +254,35 @@ findEmberDefinitions = (ast, emberComponents) ->
             })
             models.add(name, node.right)
 
+        ###
+        # Check for Ember.ObjectController/ArrayController.extend
+        ###
 
+        if right.callee?.object?.object?.name == 'Ember' and
+          (view_type = right.callee?.object?.property.name) and
+          (view_type == 'Checkbox' or view_type == 'TextField' or
+           view_type == "Select" or view_type == 'TextArea' or view_type == 'View')
+            # we found a view
+            # walk the left node - for each memberExpression, if its property is a "Identifier", set name to it
+            astUtils.nodeWalk(node.left, nullFn, {
+              Identifier: (node) ->
+                  name = node.name
+            })
+
+            switch view_type
+              when 'Checkbox'
+                checkbox_views.add(name, node.right)
+              when 'TextField'
+                textfield_views.add(name, node.right)
+              when 'TextArea'
+                textarea_views.add(name, node.right)
+              when 'Select'
+                select_views.add(name, node.right)
+              when 'View'
+                view_views.add(name, node.right)
 
       CallExpression: (node) ->
         # detect Ember Router
-        console.log 'call expression'
         name = undefined
         if node.property?.name == 'map' and node.callee?.property.name == 'Router'
           name = node.callee.object.name
@@ -244,7 +292,13 @@ findEmberDefinitions = (ast, emberComponents) ->
   # add all controllers
   controllers.add('ArrayControllers', array_controllers.toJSON())
   controllers.add('ObjectControllers', object_controllers.toJSON())
+  views.add('CheckboxViews', checkbox_views.toJSON())
+  views.add('TextFieldViews', textfield_views.toJSON())
+  views.add('TextAreaView', textarea_views.toJSON())
+  views.add('SelectView', select_views.toJSON())
+  views.add('ViewViews', view_views.toJSON())
   emberComponents.add('Models', models.toJSON())
+  emberComponents.add('Views', views.toJSON())
   emberComponents.add('Controllers', controllers.toJSON())
 
   return emberComponents

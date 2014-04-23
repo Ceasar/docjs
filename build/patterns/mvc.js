@@ -97,16 +97,20 @@
   };
 
   findEmberDefinitions = function(ast, emberComponents) {
-    var array_controllers, controllers, models, object_controllers, views;
+    var array_controllers, checkbox_views, controllers, models, object_controllers, select_views, textarea_views, textfield_views, view_views, views;
     controllers = new CodeCatalog();
     array_controllers = new CodeCatalog();
     object_controllers = new CodeCatalog();
     models = new CodeCatalog();
     views = new CodeCatalog();
+    checkbox_views = new CodeCatalog();
+    textfield_views = new CodeCatalog();
+    select_views = new CodeCatalog();
+    textarea_views = new CodeCatalog();
+    view_views = new CodeCatalog();
     astUtils.nodeWalk(ast, nullFn, {
       VariableDeclarator: function(node) {
-        var controller_type, ember_temp, name, right, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
-        console.log('variable declarator');
+        var controller_type, ember_temp, name, right, view_type, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref22, _ref23, _ref24, _ref25, _ref26, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
         name = void 0;
 
         /*
@@ -143,14 +147,31 @@
          * Check for Ember.ObjectController/ArrayController.extend
          */
         if (((_ref15 = right.callee) != null ? (_ref16 = _ref15.object) != null ? (_ref17 = _ref16.object) != null ? _ref17.name : void 0 : void 0 : void 0) === 'DS' && (((_ref18 = right.callee) != null ? (_ref19 = _ref18.object) != null ? _ref19.property.name : void 0 : void 0) === 'Model') && (right != null ? (_ref20 = right.callee) != null ? (_ref21 = _ref20.property) != null ? _ref21.name : void 0 : void 0 : void 0) === 'extend') {
-          console.log('found an ember model');
           name = node.id.name;
-          return models.add(name, right);
+          models.add(name, right);
+        }
+
+        /*
+         * Check for Ember.ObjectController/ArrayController.extend
+         */
+        if (((_ref22 = right.callee) != null ? (_ref23 = _ref22.object) != null ? (_ref24 = _ref23.object) != null ? _ref24.name : void 0 : void 0 : void 0) === 'Ember' && (view_type = (_ref25 = right.callee) != null ? (_ref26 = _ref25.object) != null ? _ref26.property.name : void 0 : void 0) && (view_type === 'Checkbox' || view_type === 'TextField' || view_type === "Select" || view_type === 'TextArea' || view_type === 'View')) {
+          name = node.id.name;
+          switch (view_type) {
+            case 'Checkbox':
+              return checkbox_views.add(name, node.right);
+            case 'TextField':
+              return textfield_views.add(name, node.right);
+            case 'TextArea':
+              return textarea_views.add(name, node.right);
+            case 'Select':
+              return select_views.add(name, node.right);
+            case 'View':
+              return view_views.add(name, node.right);
+          }
         }
       },
       AssignmentExpression: function(node) {
-        var controller_type, ember_temp, name, right, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref22, _ref23, _ref24, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
-        console.log('assignment expression');
+        var controller_type, ember_temp, name, right, view_type, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref22, _ref23, _ref24, _ref25, _ref26, _ref27, _ref28, _ref29, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
         name = void 0;
 
         /*
@@ -182,7 +203,6 @@
          * Check for Ember.ObjectController/ArrayController.extend
          */
         if (((_ref9 = node.right.callee) != null ? (_ref10 = _ref9.object) != null ? (_ref11 = _ref10.object) != null ? _ref11.name : void 0 : void 0 : void 0) === 'Ember' && (controller_type = (_ref12 = node.right.callee) != null ? (_ref13 = _ref12.object) != null ? _ref13.property.name : void 0 : void 0) && (controller_type === 'ArrayController' || controller_type === 'ObjectController') && ((_ref14 = node.right) != null ? (_ref15 = _ref14.callee) != null ? (_ref16 = _ref15.property) != null ? _ref16.name : void 0 : void 0 : void 0) === 'extend') {
-          console.log('found an ember controller');
           name = node.left;
           astUtils.nodeWalk(node.left, nullFn, {
             Identifier: function(node) {
@@ -200,19 +220,40 @@
          * Check for Ember.ObjectController/ArrayController.extend
          */
         if (((_ref17 = node.right.callee) != null ? (_ref18 = _ref17.object) != null ? (_ref19 = _ref18.object) != null ? _ref19.name : void 0 : void 0 : void 0) === 'DS' && (((_ref20 = node.right.callee) != null ? (_ref21 = _ref20.object) != null ? _ref21.property.name : void 0 : void 0) === 'Model') && ((_ref22 = node.right) != null ? (_ref23 = _ref22.callee) != null ? (_ref24 = _ref23.property) != null ? _ref24.name : void 0 : void 0 : void 0) === 'extend') {
-          console.log('found an ember model');
           name = node.left;
           astUtils.nodeWalk(node.left, nullFn, {
             Identifier: function(node) {
               return name = node.name;
             }
           });
-          return models.add(name, node.right);
+          models.add(name, node.right);
+        }
+
+        /*
+         * Check for Ember.ObjectController/ArrayController.extend
+         */
+        if (((_ref25 = right.callee) != null ? (_ref26 = _ref25.object) != null ? (_ref27 = _ref26.object) != null ? _ref27.name : void 0 : void 0 : void 0) === 'Ember' && (view_type = (_ref28 = right.callee) != null ? (_ref29 = _ref28.object) != null ? _ref29.property.name : void 0 : void 0) && (view_type === 'Checkbox' || view_type === 'TextField' || view_type === "Select" || view_type === 'TextArea' || view_type === 'View')) {
+          astUtils.nodeWalk(node.left, nullFn, {
+            Identifier: function(node) {
+              return name = node.name;
+            }
+          });
+          switch (view_type) {
+            case 'Checkbox':
+              return checkbox_views.add(name, node.right);
+            case 'TextField':
+              return textfield_views.add(name, node.right);
+            case 'TextArea':
+              return textarea_views.add(name, node.right);
+            case 'Select':
+              return select_views.add(name, node.right);
+            case 'View':
+              return view_views.add(name, node.right);
+          }
         }
       },
       CallExpression: function(node) {
         var name, _ref, _ref1;
-        console.log('call expression');
         name = void 0;
         if (((_ref = node.property) != null ? _ref.name : void 0) === 'map' && ((_ref1 = node.callee) != null ? _ref1.property.name : void 0) === 'Router') {
           name = node.callee.object.name;
@@ -222,7 +263,13 @@
     });
     controllers.add('ArrayControllers', array_controllers.toJSON());
     controllers.add('ObjectControllers', object_controllers.toJSON());
+    views.add('CheckboxViews', checkbox_views.toJSON());
+    views.add('TextFieldViews', textfield_views.toJSON());
+    views.add('TextAreaView', textarea_views.toJSON());
+    views.add('SelectView', select_views.toJSON());
+    views.add('ViewViews', view_views.toJSON());
     emberComponents.add('Models', models.toJSON());
+    emberComponents.add('Views', views.toJSON());
     emberComponents.add('Controllers', controllers.toJSON());
     return emberComponents;
   };
