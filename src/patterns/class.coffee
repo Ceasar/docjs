@@ -151,7 +151,7 @@ findClassDefinitions = (ast) ->
 
   }, SEARCH_DEPTH)
 
-  return classDefinitions
+  return _.values(classDefinitions)
 
 # -----------------------------------------------------------------------------
 

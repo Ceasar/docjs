@@ -40,7 +40,11 @@ documentPatterns = (fileName) -> (ast) ->
   return if _.every([classes, decorators, singletons, modules], _.isEmpty)
 
   doc = documentation[fileName] = {} unless documentation.fileName?
-  doc.catalogs = _.reject([classes, decorators, singletons, modules], _.isEmpty)
+  doc.catalogs =
+    _.chain([classes, decorators, singletons, modules])
+      .reject(_.isEmpty)
+      .flatten()
+      .value()
 
 
 # Run various pattern-matching modules on one file.
