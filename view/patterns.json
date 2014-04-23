@@ -1,0 +1,87 @@
+[
+    {
+        "name": "classes",
+        "pointers": [],
+        "catalogs": [
+            {
+                "name": "Puzzle",
+                "pointers": [
+                    {
+                        "name": "constructor",
+                        "location": "example.js:1"
+                    }
+                ],
+                "catalogs": [
+                    {
+                        "name": "Public methods",
+                        "pointers": [
+                            {
+                                "name": "scramble",
+                                "location": "example.js:2"
+                            },
+                            {
+                                "name": "reset",
+                                "location": "example.js:13"
+                            }
+                        ],
+                        "catalogs": []
+                    },
+                    {
+                        "name": "Private methods",
+                        "pointers": [
+                            {
+                                "name": "randomize",
+                                "location": "example.js:21"
+                            },
+                            {
+                                "name": "solve",
+                                "location": "example.js:30"
+                            }
+                        ],
+                        "catalogs": []
+                    }
+                ]
+            },
+            {
+                "name": "Jigsaw",
+                "pointers": [
+                    {
+                        "name": "constructor",
+                        "location": "example.js:1"
+                    }
+                ],
+                "catalogs": [
+                    {
+                        "name": "Public methods",
+                        "pointers": [
+                            {
+                                "name": "scramble",
+                                "location": "example.js:2"
+                            },
+                            {
+                                "name": "resetOnlyInCaseOfEmergency",
+                                "location": "example.js:13"
+                            }
+                        ],
+                        "catalogs": []
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "modules",
+        "pointers": [],
+        "catalogs": []
+    },
+    {
+        "name": "decorators",
+        "pointers": [],
+        "catalogs": []
+    },
+    {
+        "name": "singletons",
+        "pointers": [],
+        "catalogs": []
+    }
+]
