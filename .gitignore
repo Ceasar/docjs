@@ -4,3 +4,4 @@ node_modules
 *.un~
 Session.vim
 .DS_Store
+view/index.html
