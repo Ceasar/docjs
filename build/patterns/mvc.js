@@ -26,9 +26,8 @@
   findMVCDefinitions = function(ast) {
     var backboneDefs, emberDefs, mvc;
     mvc = new MVCPattern();
-    backboneDefs = mvc.backbone;
-    findBackboneDefinitions(ast, backboneDefs);
-    emberDefs = mvc.ember;
+    backboneDefs = mvc.getCatalog('Backbone');
+    emberDefs = mvc.getCatalog('Ember');
     findEmberDefinitions(ast, emberDefs);
     return mvc;
   };
@@ -46,13 +45,10 @@
           if ((((_ref = right.callee.property) != null ? _ref.name : void 0) === 'extend') && (callee = right.callee.object) && callee.type === 'MemberExpression' && callee.object.name === 'Backbone' && callee.property.type === 'Identifier') {
             switch (callee.property.name) {
               case 'Model':
-                console.log('found a model!');
                 return modelDefs.addPointer(name, right.loc);
               case 'View':
-                console.log('found a view!');
                 return viewDefs.addPointer(name, right.loc);
               case 'Collection':
-                console.log('found a collection!');
                 return collectionDefs.addPointer(name, right.loc);
             }
           }
@@ -70,13 +66,10 @@
           if ((((_ref = right.callee.property) != null ? _ref.name : void 0) === 'extend') && (callee = right.callee.object) && callee.type === 'MemberExpression' && callee.object.name === 'Backbone' && callee.property.type === 'Identifier') {
             switch (callee.property.name) {
               case 'Model':
-                console.log('found a model!');
                 return modelDefs.addPointer(name, right.loc);
               case 'View':
-                console.log('found a view!');
                 return viewDefs.addPointer(name, right.loc);
               case 'Collection':
-                console.log('found a collection!');
                 return collectionDefs.addPointer(name, right.loc);
             }
           }
@@ -237,16 +230,6 @@
         }
       }
     });
-    controllers.addCatalog('ArrayControllers', array_controllers);
-    controllers.addCatalog('ObjectControllers', object_controllers);
-    views.addCatalog('CheckboxViews', checkbox_views);
-    views.addCatalog('TextFieldViews', textfield_views);
-    views.addCatalog('TextAreaView', textarea_views);
-    views.addCatalog('SelectView', select_views);
-    views.addCatalog('ViewViews', view_views);
-    ember.addCatalog('Models', models);
-    ember.addCatalog('Views', views);
-    ember.addCatalog('Controllers', controllers);
     return ember;
   };
 

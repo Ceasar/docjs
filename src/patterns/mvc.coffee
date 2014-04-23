@@ -15,10 +15,11 @@ nullFn = () -> null
 findMVCDefinitions = (ast) ->
   mvc = new MVCPattern()
   # generic mvc definitions
-  backboneDefs = mvc.backbone
-  findBackboneDefinitions(ast, backboneDefs)
-  emberDefs = mvc.ember
+  backboneDefs = mvc.getCatalog('Backbone')
+  # findBackboneDefinitions(ast, backboneDefs)
+  emberDefs = mvc.getCatalog('Ember')
   findEmberDefinitions(ast, emberDefs)
+
   return mvc
 
 
@@ -43,14 +44,12 @@ findBackboneDefinitions = (ast, backbone) ->
           switch callee.property.name
             when 'Model'
               # add the attributes to the model
-              console.log ('found a model!')
               modelDefs.addPointer(name, right.loc)
             when 'View'
-              console.log ('found a view!')
               viewDefs.addPointer(name, right.loc)
             when 'Collection'
-              console.log ('found a collection!')
               collectionDefs.addPointer(name, right.loc)
+
 
     # if its M = Backbonde.Model.extend... or exports.M = Backbone...
     AssignmentExpression: (node) ->
@@ -68,13 +67,10 @@ findBackboneDefinitions = (ast, backbone) ->
             callee.property.type == 'Identifier'
           switch callee.property.name
             when 'Model'
-              console.log ('found a model!')
               modelDefs.addPointer(name, right.loc)
             when 'View'
-              console.log ('found a view!')
               viewDefs.addPointer(name, right.loc)
             when 'Collection'
-              console.log ('found a collection!')
               collectionDefs.addPointer(name, right.loc)
   })
   return backbone
@@ -273,18 +269,6 @@ findEmberDefinitions = (ast, ember) ->
           name = node.callee.object.name
           router.addPointer('name', node.loc)
     })
-
-  # add all controllers
-  controllers.addCatalog('ArrayControllers', array_controllers)
-  controllers.addCatalog('ObjectControllers', object_controllers)
-  views.addCatalog('CheckboxViews', checkbox_views)
-  views.addCatalog('TextFieldViews', textfield_views)
-  views.addCatalog('TextAreaView', textarea_views)
-  views.addCatalog('SelectView', select_views)
-  views.addCatalog('ViewViews', view_views)
-  ember.addCatalog('Models', models)
-  ember.addCatalog('Views', views)
-  ember.addCatalog('Controllers', controllers)
 
   return ember
 

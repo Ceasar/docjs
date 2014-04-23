@@ -36,32 +36,22 @@
 
   documentPatterns = function(filename) {
     return function(ast) {
-      var classes, decorators, doc, modules, mvc, singletons;
-      classes = findClasses(ast);
+      var decorators, doc, modules, mvc;
       decorators = findDecorators(ast);
-      singletons = findSingletons(ast);
       modules = findModules(ast);
       mvc = findMVC(ast);
-      if (_.every([classes, decorators, singletons, modules, mvc], _.isEmpty)) {
-        return;
-      }
       if (documentation.filename == null) {
         doc = documentation[filename] = {};
       }
-      if (!_.isEmpty(classes)) {
-        doc.classes = classes;
-      }
+      doc.catalogs = [];
       if (!_.isEmpty(decorators)) {
-        doc.decorators = decorators;
-      }
-      if (!_.isEmpty(singletons)) {
-        doc.singletons = singletons;
+        doc.catalogs.push(decorators);
       }
       if (!_.isEmpty(modules)) {
-        doc.modules = modules;
+        doc.catalogs = doc.catalogs.concat(modules);
       }
       if (!_.isEmpty(mvc)) {
-        return doc.mvc = mvc;
+        return doc.catalogs = doc.catalogs.concat(mvc);
       }
     };
   };
@@ -113,7 +103,7 @@
       })());
       return RSVP.all(analyses);
     }).then(function() {
-      return pprint.pprint(documentation);
+      return console.log(JSON.stringify(documentation));
     })["catch"](console.error);
   };
 
