@@ -11,3 +11,4 @@ test:
 
 build:
 	node build/doc-gen.js > view/patterns.json
+	cd view && python build.py

@@ -31,7 +31,7 @@ documentPatterns = (filename) -> (ast) ->
   # classes     = findClasses(ast)
   decorators  = findDecorators(ast)
   # singletons  = findSingletons(ast)
-  # modules     = findModules(ast)
+  modules     = findModules(ast)
 
   # Exit if no patterns were found.
   # return if _.every([classes, decorators, singletons, modules], _.isEmpty)
@@ -42,7 +42,7 @@ documentPatterns = (filename) -> (ast) ->
   # doc.classes     = classes     unless _.isEmpty(classes)
   doc.catalogs.push decorators unless _.isEmpty(decorators)
   # doc.singletons  = singletons  unless _.isEmpty(singletons)
-  # doc.modules     = modules     unless _.isEmpty(modules)
+  doc.catalogs = doc.catalogs.concat modules     unless _.isEmpty(modules)
 
 # Run various pattern-matching modules on one file.
 runFileAnalysis = (fileName) ->
@@ -78,6 +78,7 @@ runDirectoryAnalysis = (dirname) ->
 
 main = () ->
   config.getPromise().then((config) ->
+
     analyses =
       (runFileAnalysis(file) for file in config.files)
         .concat(runDirectoryAnalysis(dir) for dir in config.directories)
