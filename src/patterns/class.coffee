@@ -27,13 +27,6 @@ findClassDefinitions = (ast) ->
     return classDefinitions[className] or
         (classDefinitions[className] = new ClassPattern className)
 
-  ###
-  # TODO
-  # - identify inheritance (simply by class name)
-  # - identify methods (and which ones override super methods)
-  # - identify properties
-  ###
-
   nullFn = () -> null
   SEARCH_DEPTH = 10
 
@@ -44,7 +37,7 @@ findClassDefinitions = (ast) ->
       # 'app.MyClass = ...'
       if node.left.type is 'MemberExpression'
         className = (node.left.property.name or node.left.property.value)
-        if className? and className.isCapitalized()
+        if className? and _.isString(className) and className.isCapitalized()
           capitalizedVars.pointer(className, node.right.loc)
 
       # 'MyClass = ...'
@@ -70,22 +63,48 @@ findClassDefinitions = (ast) ->
 
   # ===========================================================================
 
+  # Accepts an AssignmentExpression node, assumes this is an assignment to
+  # `.prototype`.
+  catalogInheritance = (node, className) ->
+    klass = getClassPattern(className)
+
+    r = node.right
+
+    # MyClass.prototype = Object.create(ParentClass)
+    if (r.type is 'CallExpression' and
+        r.callee.type is 'MemberExpression' and
+        r.callee.object.name is 'Object' and
+        r.callee.property.name is 'create' and
+        r.arguments.length and
+        r.arguments[0].name?)
+      klass.parent = node.right.arguments[0].name
+
+    if r.type is 'NewExpression'
+      # MyClass.prototype = new <obj>.ParentClass()
+      if r.callee.type is 'MemberExpression'
+        klass.parent = r.callee.property.name
+
+      # MyClass.prototype = new ParentClass()
+      if r.callee.type is 'Identifier'
+        klass.parent = r.callee.name
+
+  # Accepts an AssignmentExpression node
+  catalogAssignedMethodOrPattern = (node, className) ->
+    klass = getClassPattern(className)
+
+    # Check if the MemberExpression is for a class property or method.
+    prop = (node.left.property.name or node.left.property.value)
+
+    if node.right.type is 'FunctionExpression'
+      klass.addMethod(prop, node.loc)
+
+    else if prop isnt 'prototype'
+      klass.addProperty(prop, node.loc)
+
+
   # Walk the nodes in an AST subtree looking for class methods and properties.
   inspectClassConstructor = (node, className) ->
     return unless capitalizedVars.pointer(className)?
-
-    # Accepts an AssignmentExpression node
-    catalogAssignedMethodOrPattern = (node) ->
-      klass = getClassPattern(className)
-
-      # Check if the MemberExpression is for a class property or method.
-      prop = (node.left.property.name or node.left.property.value)
-
-      if node.right.type is 'FunctionExpression'
-        klass.addMethod(prop, node.loc)
-
-      else if prop isnt 'prototype'
-        klass.addProperty(prop, node.loc)
 
     # -----------------------------------------------
     # <parent-syntax> { ... }
@@ -93,26 +112,17 @@ findClassDefinitions = (ast) ->
 
       # this.foo = ...
       AssignmentExpression: (node) ->
-        if (node.left.type is 'MemberExpression' and
-            node.left.object.type is 'ThisExpresssion')
-          catalogAssignedMethodOrPattern(node)
+        if node.left.type is 'MemberExpression'
+          if node.left.object.type is 'ThisExpression'
+            catalogAssignedMethodOrPattern(node, className)
+
+          prop = node.left.property.name or node.left.property.value
+          if prop is 'property'
+            catalogInheritance(node)
 
     })
 
   # ---------------------------------------------------------------------------
-
-  # Accepts an AssignmentExpression node
-  catalogInheritance = (node, className) ->
-    klass = getClassPattern(className)
-
-    # MyClass.prototype = Object.create(ParentClass)
-    if (node.right.type is 'CallExpression' and
-        node.right.callee is 'MemberExpression' and
-        node.right.callee.object.name is 'Object' and
-        node.right.callee.property.name is 'create' and
-        node.right.arguments.length and
-        node.right.arguments[0].name?)
-      klass.parent = node.right.arguments[0].name
 
   # Second pass: verify that the capitalized names are classes by looking for
   # signs of a class-like definition.
