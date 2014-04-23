@@ -28,20 +28,21 @@ documentation = {}
 
 documentPatterns = (filename) -> (ast) ->
   # TODO: add more pattern matching
-  classes     = findClasses(ast)
+  # classes     = findClasses(ast)
   decorators  = findDecorators(ast)
-  singletons  = findSingletons(ast)
-  modules     = findModules(ast)
+  # singletons  = findSingletons(ast)
+  # modules     = findModules(ast)
 
   # Exit if no patterns were found.
-  return if _.every([classes, decorators, singletons, modules], _.isEmpty)
+  # return if _.every([classes, decorators, singletons, modules], _.isEmpty)
 
   doc = documentation[filename] = {} unless documentation.filename?
 
-  doc.classes     = classes     unless _.isEmpty(classes)
-  doc.decorators  = decorators  unless _.isEmpty(decorators)
-  doc.singletons  = singletons  unless _.isEmpty(singletons)
-  doc.modules     = modules     unless _.isEmpty(modules)
+  doc.catalogs = []
+  # doc.classes     = classes     unless _.isEmpty(classes)
+  doc.catalogs.push decorators unless _.isEmpty(decorators)
+  # doc.singletons  = singletons  unless _.isEmpty(singletons)
+  # doc.modules     = modules     unless _.isEmpty(modules)
 
 # Run various pattern-matching modules on one file.
 runFileAnalysis = (fileName) ->
@@ -85,7 +86,7 @@ main = () ->
 
   ).then(() ->
 
-    pprint.pprint(documentation)
+    console.log(JSON.stringify(documentation))
 
   ).catch(console.error)
 
