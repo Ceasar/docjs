@@ -34,6 +34,9 @@ class CodeCatalog
   deletePointer: (name) ->
     delete @pointers[name]
 
+  getPointer: (name) ->
+    @pointers[name]
+
   hasPointer: (name) ->
     @pointers[name]?
 
@@ -46,6 +49,15 @@ class CodeCatalog
   catalog: (name, c) ->
     return unless name?
     if c? then (@catalogs[name] = c) else @catalogs[name]
+
+  addCatalog: (name) ->
+    @catalogs[name] = new CodeCatalog(name)
+
+  getCatalog: (name) ->
+    @catalogs[name]
+
+  hasCatalog: (name) ->
+    @catalogs[name]?
 
 # ----------------------------------------------------------------------------
 # Extensions
@@ -99,16 +111,6 @@ class MVCPattern extends CodeCatalog
     @backbone.addCatalog('models', new CodeCatalog())
     @backbone.addCatalog('views', new CodeCatalog())
     @backbone.addCatalog('collections', new CodeCatalog())
-
-  addCatalog: (name) ->
-    @catalogs[name] = new CodeCatalog(name)
-
-  getCatalog: (name) ->
-    @catalogs[name]
-
-  hasCatalog: (name) ->
-    @catalogs[name]?
-
 
 
 # ----------------------------------------------------------------------------
