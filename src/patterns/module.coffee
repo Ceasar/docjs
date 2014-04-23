@@ -103,7 +103,7 @@ findModuleDefinitions = (ast) ->
     # Exit if no modules were found.
     return null
   else
-    return docs
+    return docs.modules
 
 module.exports =
   findModules: findModuleDefinitions

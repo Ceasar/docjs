@@ -9,4 +9,4 @@ def get_catalogs():
 renderer = make_renderer(contexts=[
     ("index.html", get_catalogs),
 ])
-renderer.run(use_reloader=True)
+renderer.run()
