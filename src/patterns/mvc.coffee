@@ -105,26 +105,25 @@ findEmberDefinitions = (ast, emberComponents) ->
   controllers = new CodeCatalog()
   array_controllers = new CodeCatalog()
   object_controllers = new CodeCatalog()
+  models = new CodeCatalog()
+  views = new CodeCatalog()
 
   ## find the app
   astUtils.nodeWalk(ast, nullFn, {
       # if its var M = Backbone.Model.extend....
       VariableDeclarator: (node) ->
         console.log 'variable declarator'
-        console.log node
         name = undefined
         ###
         # Check for Ember.Application.create
         ###
         if (right = node.init) and right.type == 'CallExpression'
 
-          # console.log right?.callee?.object?.name
           if right?.callee?.object?.object?.name == 'Ember' and
               right?.callee?.object?.property?.name == 'Application' and
               right?.callee?.property?.name == 'create'
             # this is an ember Application object. grab the name
             name = node.id.name
-            console.log name
 
             if name?
               # if emberComponents already contains the name, then add it to it
@@ -139,23 +138,32 @@ findEmberDefinitions = (ast, emberComponents) ->
         # Check for Ember.ObjectController/ArrayController.extend
         ###
 
-        # console.log node.right
         if right.callee?.object?.object?.name == 'Ember' and
           (controller_type = right.callee?.object?.property.name) and
           (controller_type == 'ArrayController' or controller_type == 'ObjectController') and
           right?.callee?.property?.name == 'extend'
             # we found an array or object controller
-            console.log 'found an ember controller'
             name = node.id.name
             if controller_type == 'ArrayController'
               array_controllers.add(name, node.right)
             else
               object_controllers.add(name, node.right)
 
+        ###
+        # Check for Ember.ObjectController/ArrayController.extend
+        ###
+
+        if right.callee?.object?.object?.name == 'DS' and
+          (right.callee?.object?.property.name == 'Model') and
+          right?.callee?.property?.name == 'extend'
+            # we found an array or object controller
+            console.log 'found an ember model'
+            name = node.id.name
+            models.add(name, right)
+
 
       AssignmentExpression: (node) ->
         console.log 'assignment expression'
-        # console.log node.right
         name = undefined
         ###
         # Check for Ember.Application.create
@@ -170,7 +178,6 @@ findEmberDefinitions = (ast, emberComponents) ->
               right?.callee?.object?.property?.name == 'Application' and
               right?.callee?.property?.name == 'create'
             # this is an ember Application object. traverse node.left for the final thingie's name
-            # console.log node.left
             # walk the left node - for each memberExpression, if its property is a "Identifier", set name to it
             astUtils.nodeWalk(node.left, nullFn, {
               Identifier: (node) ->
@@ -189,7 +196,6 @@ findEmberDefinitions = (ast, emberComponents) ->
         # Check for Ember.ObjectController/ArrayController.extend
         ###
 
-        # console.log node.right
         if node.right.callee?.object?.object?.name == 'Ember' and
           (controller_type = node.right.callee?.object?.property.name) and
           (controller_type == 'ArrayController' or controller_type == 'ObjectController') and
@@ -206,13 +212,26 @@ findEmberDefinitions = (ast, emberComponents) ->
               array_controllers.add(name, node.right)
             else
               object_controllers.add(name, node.right)
-      # console.log node.right.callee.object
+
+        ###
+        # Check for Ember.ObjectController/ArrayController.extend
+        ###
+
+        if node.right.callee?.object?.object?.name == 'DS' and
+          (node.right.callee?.object?.property.name == 'Model') and
+          node.right?.callee?.property?.name == 'extend'
+            # we found an array or object controller
+            console.log 'found an ember model'
+            name = node.left
+            # walk the left node - for each memberExpression, if its property is a "Identifier", set name to it
+            astUtils.nodeWalk(node.left, nullFn, {
+              Identifier: (node) ->
+                  name = node.name
+            })
+            models.add(name, node.right)
 
 
-      # MemberExpression: (node) ->
-      #   console.log 'member expression'
-      # console.log node
-      # console.log node.object.name
+
       CallExpression: (node) ->
         # detect Ember Router
         console.log 'call expression'
@@ -225,6 +244,7 @@ findEmberDefinitions = (ast, emberComponents) ->
   # add all controllers
   controllers.add('ArrayControllers', array_controllers.toJSON())
   controllers.add('ObjectControllers', object_controllers.toJSON())
+  emberComponents.add('Models', models.toJSON())
   emberComponents.add('Controllers', controllers.toJSON())
 
   return emberComponents
