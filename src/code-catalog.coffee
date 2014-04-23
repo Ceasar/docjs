@@ -1,30 +1,57 @@
-_     = require 'lodash'
-Model = require 'fishbone'
+# ----------------------------------------------------------------------------
+# Base classes for CodeCatalog
+
+class CodeLoc
+  constructor: (@line, @column) ->
+
+
+class CodeRange
+  constructor: (@start=null, @end=null) ->
+
 
 ###
-# A simple dictionary to keep track of code pointers in target source code.
-# Includes a simple event emitter and prevents overwriting of entries (unless
-# you remove that key first).
+A pointer to a piece of code in a codebase
+@property loc   {CodeRange} The location of the code in question
+@property name  {string}    Name of the symbol
 ###
-exports.CodeCatalog = Model
+class CodePointer
+  constructor: (@name, @loc) ->
 
-  init: (entries) ->
-    @[k] = v for own k, v of entries
 
-  add: (name, pointer) ->
-    return false if @has(name)
-    @trigger 'add', { name: name, pointer: pointer }
-    @[name] = pointer
-    return true
+###
+A collection of code pointers
+@property name      {string?} Name of this catalog (if applicable)
+@property pointers  {Array<CodePointer>}
+@property catalogs  {Array<CodeCatalog>}
+###
+class CodeCatalog
+  constructor: (@name, @pointers={}, @catalogs={}) ->
 
-  remove: (name) ->
-    return false unless @has(name)
-    @trigger 'remove', { name: name }
-    delete @[name]
-    return true
+  addPointer: (name, loc) ->
+    @pointers[name] = new CodePointer(name, loc)
 
-  has: (name) -> @[name]?
+  hasPointer: (name) ->
+    @pointers[name]?
 
-  get: (name) -> @[name]
+# ----------------------------------------------------------------------------
+# Extensions
 
-  toJSON: ()  -> _.omit(@, _.isFunction)
+###
+The code catalog for a class
+###
+class ClassPattern extends CodeCatalog
+
+
+###
+The code catalog for a module
+###
+class ModulePattern extends CodeCatalog
+
+
+# ----------------------------------------------------------------------------
+
+module.exports =
+  CodeCatalog:    CodeCatalog
+  ClassPattern:   ClassPattern
+  ModulePattern:  ModulePattern
+
