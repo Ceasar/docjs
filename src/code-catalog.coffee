@@ -11,24 +11,27 @@ class CodeRange
 
 ###
 A pointer to a piece of code in a codebase
-@property loc {CodeRange} The location of the code in question
-@property name {string?} Name of the symbol if applicable (may be null)
+@property loc   {CodeRange} The location of the code in question
+@property name  {string}    Name of the symbol
 ###
 class CodePointer
-  constructor: (@loc, @name=null) ->
+  constructor: (@name, @loc) ->
 
 
 ###
 A collection of code pointers
-@property name {string?} Name of this catalog (if applicable)
-@property pointers {Array<CodePointer>}
-@property catalogs {Array<CodeCatalog>}
+@property name      {string?} Name of this catalog (if applicable)
+@property pointers  {Array<CodePointer>}
+@property catalogs  {Array<CodeCatalog>}
 ###
 class CodeCatalog
   constructor: (@name, @pointers={}, @catalogs={}) ->
 
-  addPointer: (loc, name) ->
-    @pointers[name] = new CodePointer(loc, name)
+  addPointer: (name, loc) ->
+    @pointers[name] = new CodePointer(name, loc)
+
+  hasPointer: (name) ->
+    @pointers[name]?
 
 # ----------------------------------------------------------------------------
 # Extensions
