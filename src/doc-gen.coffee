@@ -11,6 +11,8 @@ findModules     = require('./patterns/module').findModules
 config          = require('./doc-gen-config')
 pprint          = require('./pprint')
 
+# -----------------------------------------------------------------------------
+# Helpers
 
 # Returns a FUNCTION that takes a string of file contents and parses it into a
 # Mozilla Parser API-compatible AST data structure.
@@ -20,29 +22,25 @@ getAbstractSyntaxTree = (fileName) ->
     sourceFile: fileName
   })
 
-
 # -----------------------------------------------------------------------------
 
 documentation = {}
 
 
-documentPatterns = (filename) -> (ast) ->
-  # TODO: add more pattern matching
-  # classes     = findClasses(ast)
+documentPatterns = (fileName) -> (ast) ->
+  console.info "*** Running file #{fileName} ***"
+
+  # TODO: add more patterns?
+  classes     = findClasses(ast)
   decorators  = findDecorators(ast)
-  # singletons  = findSingletons(ast)
-  # modules     = findModules(ast)
+  singletons  = undefined # findSingletons(ast)
+  modules     = undefined # findModules(ast)
 
   # Exit if no patterns were found.
-  # return if _.every([classes, decorators, singletons, modules], _.isEmpty)
+  return if _.every([classes, decorators, singletons, modules], _.isEmpty)
 
-  doc = documentation[filename] = {} unless documentation.filename?
-
-  doc.catalogs = []
-  # doc.classes     = classes     unless _.isEmpty(classes)
-  doc.catalogs.push decorators unless _.isEmpty(decorators)
-  # doc.singletons  = singletons  unless _.isEmpty(singletons)
-  # doc.modules     = modules     unless _.isEmpty(modules)
+  doc = documentation[fileName] = {} unless documentation.fileName?
+  doc.catalogs = _.filter([classes, decorators, singletons, modules], _.isEmpty)
 
 # Run various pattern-matching modules on one file.
 runFileAnalysis = (fileName) ->
@@ -54,7 +52,7 @@ runFileAnalysis = (fileName) ->
 # sub-folders) in one folder.
 runDirectoryAnalysis = (dirname) ->
 
-  filterFilenames = (fname) ->
+  filterfileNames = (fname) ->
     # don't look at hidden files
     return not fname.match(/^\./)
 
@@ -68,12 +66,11 @@ runDirectoryAnalysis = (dirname) ->
         runFileAnalysis(filepath)
 
   q(fs.readdir, dirname)
-    .then(_.partialRight _.filter, filterFilenames)
+    .then(_.partialRight _.filter, filterfileNames)
     .then(_.partialRight _.map, runAnalysis)
     .then(RSVP.all)
 
 # -----------------------------------------------------------------------------
-
 # Main execution
 
 main = () ->
@@ -90,6 +87,10 @@ main = () ->
 
   ).catch(console.error)
 
+# -----------------------------------------------------------------------------
+
+module.exports =
+  main: main
 
 main() if module is require.main
 
