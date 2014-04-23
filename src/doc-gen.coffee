@@ -9,6 +9,7 @@ findClasses     = require('./patterns/class').findClasses
 findSingletons  = require('./patterns/singleton').findSingletons
 findModules     = require('./patterns/module').findModules
 config          = require('./doc-gen-config')
+pprint          = require('./pprint')
 
 
 # Returns a FUNCTION that takes a string of file contents and parses it into a
@@ -73,7 +74,6 @@ runDirectoryAnalysis = (dirname) ->
 # -----------------------------------------------------------------------------
 
 # Main execution
-# TODO: pretty print the documentation
 
 main = () ->
   config.getPromise().then((config) ->
@@ -85,7 +85,7 @@ main = () ->
 
   ).then(() ->
 
-    console.log(documentation)
+    pprint.pprint(documentation)
 
   ).catch(console.error)
 
