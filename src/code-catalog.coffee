@@ -1,3 +1,6 @@
+# ----------------------------------------------------------------------------
+# Base classes for CodeCatalog
+
 class CodeLoc
   constructor: (@line, @column) ->
 
@@ -11,7 +14,7 @@ A pointer to a piece of code in a codebase
 @property loc {CodeRange} The location of the code in question
 @property name {string?} Name of the symbol if applicable (may be null)
 ###
-exports.CodePointer = class CodePointer
+class CodePointer
   constructor: (@loc, @name=null) ->
 
 
@@ -21,17 +24,31 @@ A collection of code pointers
 @property pointers {Array<CodePointer>}
 @property catalogs {Array<CodeCatalog>}
 ###
-exports.CodeCatalog = class CodeCatalog
+class CodeCatalog
   constructor: (@name, @pointers=[], @catalogs=[]) ->
 
+  addPointer: (loc, name) ->
+    @pointers.push(new CodePointer(loc, name))
+
+# ----------------------------------------------------------------------------
+# Extensions
 
 ###
 The code catalog for a class
 ###
-exports.ClassPattern = class ClassPattern extends CodeCatalog
+class ClassPattern extends CodeCatalog
 
 
 ###
 The code catalog for a module
 ###
-exports.ModulePattern = class ModulePattern extends CodeCatalog
+class ModulePattern extends CodeCatalog
+
+
+# ----------------------------------------------------------------------------
+
+module.exports =
+  CodeCatalog:    CodeCatalog
+  ClassPattern:   ClassPattern
+  ModulePattern:  ModulePattern
+
