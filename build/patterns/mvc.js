@@ -100,6 +100,7 @@
     astUtils.nodeWalk(ast, nullFn, {
       VariableDeclarator: function(node) {
         var ember_temp, name, right, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+        console.log('variable declarator');
         name = void 0;
 
         /*
@@ -123,6 +124,7 @@
       },
       AssignmentExpression: function(node) {
         var ember_temp, name, right, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+        console.log('assignment expression');
         name = void 0;
 
         /*
@@ -151,6 +153,17 @@
               }
             }
           }
+        }
+      },
+      MemberExpression: function(node) {
+        return console.log('member expression');
+      },
+      CallExpression: function(node) {
+        var name;
+        name = void 0;
+        if (node.property.name === 'map' && node.callee.property.name === 'Router') {
+          name = node.callee.object.name;
+          return emberComponents.add('Router', node);
         }
       }
     });

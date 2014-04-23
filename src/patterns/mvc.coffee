@@ -107,6 +107,7 @@ findEmberDefinitions = (ast, emberComponents) ->
   astUtils.nodeWalk(ast, nullFn, {
       # if its var M = Backbone.Model.extend....
       VariableDeclarator: (node) ->
+        console.log 'variable declarator'
         name = undefined
         ###
         # Check for Ember.Application.create
@@ -131,6 +132,7 @@ findEmberDefinitions = (ast, emberComponents) ->
                 emberComponents.add(name, ember_temp.toJSON())
 
       AssignmentExpression: (node) ->
+        console.log 'assignment expression'
         name = undefined
         ###
         # Check for Ember.Application.create
@@ -164,12 +166,22 @@ findEmberDefinitions = (ast, emberComponents) ->
                 ember_temp = new CodeCatalog()
                 ember_temp.add('Application', right)
                 emberComponents.add(name, ember_temp.toJSON())
+
+      MemberExpression: (node) ->
+        console.log 'member expression'
+        # console.log node
+        # console.log node.object.name
+      CallExpression: (node) ->
+        # console.log 'call expression'
+        name = undefined
+        if node.property.name == 'map' and node.callee.property.name == 'Router'
+          name = node.callee.object.name
+          emberComponents.add('Router', node)
     })
 
 
   return emberComponents
 
-  # Router
 
 
 
