@@ -1,4 +1,4 @@
-var Commander = (function () {
+var mySingleton = (function () {
 
   // Instance stores a reference to the Singleton
   var instance;
@@ -6,22 +6,22 @@ var Commander = (function () {
   function init() {
     // Singleton
     // Private methods and variables
-    function speak(){
+    function privateMethod(){
       console.log( "I am private" );
     }
 
-    var speech = "Im also private";
-    var health = Math.random();
+    var privateVariable = "Im also private";
+    var privateRandomNumber = Math.random();
 
     return {
       // Public methods and variables
-      attack: function () {
+      publicMethod: function () {
         console.log( "The public can see me!" );
       },
 
-      tag: "I am also public",
+      publicProperty: "I am also public",
 
-      getHealth: function() {
+      getRandomNumber: function() {
         return privateRandomNumber;
       }
     };

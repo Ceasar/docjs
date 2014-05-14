@@ -39,7 +39,7 @@ documentPatterns = (fileName) -> (ast) ->
   mvc         = findMVC(ast)
 
   # Exit if no patterns were found.
-  return if _.every([classes, decorators, singletons, modules], _.isEmpty)
+  return if _.every([classes, mvc, decorators, singletons, modules], _.isEmpty)
 
   doc = documentation[fileName] = {} unless documentation.fileName?
   doc.catalogs =
